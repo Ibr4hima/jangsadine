@@ -22,12 +22,12 @@ type Cours = {
 }
 
 const couleurBg: Record<string, string> = {
-  Aqeedah: '#e8f0f8', Fiqh: '#faf3dc', Hadith: '#eaf4ee',
-  Seerah: '#fdf0eb', 'Bons comportements': '#f2eefa', 'Sciences du Coran': '#e8f6f5',
+  Aqeedah: '#e8f0f8', Fiqh: '#faf3dc', Hadith: '#eaf4ee', Tafsir: '#fde8f0',
+  Seerah: '#fdf0eb', 'Bons comportements': '#f2eefa', 'Sciences du Coran': '#e8f6f5', 'Séries de cours': '#e8f8e8',
 }
 const couleurTxt: Record<string, string> = {
-  Aqeedah: '#28558b', Fiqh: '#b8911f', Hadith: '#2d7a4f',
-  Seerah: '#c05c2e', 'Bons comportements': '#6b3db5', 'Sciences du Coran': '#1a8a7a',
+  Aqeedah: '#28558b', Fiqh: '#b8911f', Hadith: '#2d7a4f', Tafsir: '#a02060',
+  Seerah: '#c05c2e', 'Bons comportements': '#6b3db5', 'Sciences du Coran': '#1a8a7a', 'Séries de cours': '#1a7a1a',
 }
 
 export default function PageLivre() {
