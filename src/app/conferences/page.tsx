@@ -27,7 +27,7 @@ export default function Conferences() {
       <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
         <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Conférences</h1>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Conférences islamiques en langue Wolof</p>
+        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Conférences Islamiques en langue Wolof</p>
         <div style={{ maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
           <input
             value={recherche}
