@@ -41,8 +41,7 @@ export default function Ebooks() {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.16)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.10)' }}
                 >
-                  <iframe src={eb.url_pdf + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'} style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none', outline: 'none', display: 'block' }} title={eb.titre} />
-                  <div style={{ position: 'absolute', inset: 0 }} />
+                  <iframe src={eb.url_pdf + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit'} style={{ width: '150%', height: '150%', border: 'none', pointerEvents: 'none', outline: 'none', display: 'block', transform: 'scale(0.667)', transformOrigin: 'top left' }} title={eb.titre} />                  <div style={{ position: 'absolute', inset: 0 }} />
                 </div>
                 <div style={{ textAlign: 'center', width: '100%' }}>
                   <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '8px', background: couleurBg[eb.categorie] || '#f0f0f0', color: couleurTxt[eb.categorie] || '#666', display: 'inline-block', marginBottom: '5px' }}>{eb.categorie}</span>
