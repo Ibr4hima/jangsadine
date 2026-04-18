@@ -121,11 +121,7 @@ export default function Accueil() {
           <h2 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--texte)', marginBottom: '32px' }}>
             Tout ce dont tu as besoin
           </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '14px',
-          }}>
+          <div className="modules-grid">
             {modules.map((mod) => (
               <Link key={mod.href} href={mod.href} style={{
                 border: '1px solid var(--bordure)',
