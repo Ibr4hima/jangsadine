@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
-import Navbar from '@/components/Navbar'
 import LecteurSticky from '@/components/LecteurSticky'
+import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 type Khoutbah = { id: string; titre: string; sheikh: string; duree: string; url_audio: string; serie: string | null; numero_serie: number | null }
 export default function Khoutbah() {
   const [khoutbahs, setKhoutbahs] = useState<Khoutbah[]>([])
@@ -28,9 +28,9 @@ export default function Khoutbah() {
       <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
         <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Khoutbah</h1>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Sermons du vendredi</p>
+        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Sermons du vendredi en langue Wolof</p>
         <div style={{ maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
-          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher par titre, sheikh ou serie..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
+          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Entrez le thème de la Khoutbah..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
           <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
         </div>
       </section>

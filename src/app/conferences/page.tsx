@@ -32,7 +32,7 @@ export default function Conferences() {
           <input
             value={recherche}
             onChange={e => setRecherche(e.target.value)}
-            placeholder="Rechercher par titre ou sheikh..."
+            placeholder="Entrez le thème de la conférence..."
             style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }}
           />
           <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
