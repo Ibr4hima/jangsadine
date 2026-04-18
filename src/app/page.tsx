@@ -257,7 +257,7 @@ export default function Accueil() {
           Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span>
         </div>
         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-          © 2026 — Tous droits réservés
+          {new Date().getFullYear()} — Tous droits réservés
         </div>
       </footer>
     </main>
