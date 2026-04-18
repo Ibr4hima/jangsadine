@@ -60,7 +60,9 @@ export default function Prieres() {
         const { latitude, longitude } = pos.coords
         const geo = await fetch('https://nominatim.openstreetmap.org/reverse?lat=' + latitude + '&lon=' + longitude + '&format=json')
         const gd = await geo.json()
-        setVille(gd.address?.city || gd.address?.town || gd.address?.village || '')
+        const nomVille = gd.address?.city || gd.address?.town || gd.address?.village || ''
+        const nomPays = gd.address?.country || ''
+        setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
         const d = new Date()
         const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()
         const res = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=2')
@@ -175,7 +177,7 @@ export default function Prieres() {
 
       <footer style={{ background: 'var(--footer-bg)', padding: '32px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '20px' }}>
         <div style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span></div>
-        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>{new Date().getFullYear()} — Tous droits réservés</div>
+        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>© {new Date().getFullYear()} — Tous droits réservés</div>
       </footer>
     </main>
   )
