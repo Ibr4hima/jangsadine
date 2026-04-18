@@ -12,7 +12,6 @@ const modules = [
   { icon: '🕌', nom: 'Khoutbah', href: '/khoutbah', couleur: '#e8f0f8' },
   { icon: '🕐', nom: 'Heures de prières', href: '/prieres', couleur: '#faf3dc' },
   { icon: '📚', nom: 'Ebooks', href: '/ebooks', couleur: '#e8f0f8' },
-  { icon: '📅', nom: 'Calendrier musulman', href: '/calendrier', couleur: '#faf3dc' },
 ]
 
 const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Seerah', 'Bons comportements', 'Sciences du Quran', 'Khoutbah', 'Conférences']
@@ -62,7 +61,7 @@ export default function Accueil() {
           }}>
             Apprends ta{' '}
             <span style={{ color: 'var(--or)' }}>religion</span>
-            <br />avec sérieux
+            <br />
           </h1>
           <p style={{
             fontSize: '16px',
@@ -70,7 +69,7 @@ export default function Accueil() {
             lineHeight: 1.7,
             marginBottom: '32px',
           }}>
-            Cours audio, Quran, invocations et rappels islamiques —<br />
+            Cours audio, khoutbah, conférences, ebooks et heures de prières —<br />
             accessible à tous gratuitement.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>

@@ -37,15 +37,11 @@ export default function Ebooks() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '28px' }}>
             {ebooks.map((eb) => (
               <a key={eb.id} href={eb.url_pdf} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '100%', borderRadius: '8px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', background: '#fff', border: 'none', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s', position: 'relative' }}
+                <div style={{ borderRadius: '10px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', aspectRatio: '4/3', background: '#fff', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s', position: 'relative', width: '100%', border: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.16)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.10)' }}
                 >
-                  <iframe
-                    src={eb.url_pdf + '#toolbar=0&navpanes=0&scrollbar=0&view=FitPage&page=1'}
-                    style={{ width: '100%', height: '160px', border: 'none', pointerEvents: 'none', outline: 'none', display: 'block' }}
-                    title={eb.titre}
-                  />
+                  <iframe src={eb.url_pdf + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'} style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none', outline: 'none', display: 'block' }} title={eb.titre} />
                   <div style={{ position: 'absolute', inset: 0 }} />
                 </div>
                 <div style={{ textAlign: 'center', width: '100%' }}>

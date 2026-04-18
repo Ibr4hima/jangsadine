@@ -9,6 +9,7 @@ type Livre = {
   id: string
   titre: string
   url_pdf: string | null
+  description: string | null
   categories: { nom: string }
 }
 
@@ -82,9 +83,14 @@ export default function PageLivre() {
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             {categorie}
           </span>
-          <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'white', marginBottom: '16px', lineHeight: 1.3 }}>
+          <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'white', marginBottom: livre.description ? '10px' : '16px', lineHeight: 1.3 }}>
             {livre.titre}
           </h1>
+          {livre.description && (
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, maxWidth: '600px', marginBottom: '16px', fontStyle: 'italic' }}>
+              {livre.description}
+            </p>
+          )}
           {livre.url_pdf && (
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <a href={livre.url_pdf} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)' }}>
