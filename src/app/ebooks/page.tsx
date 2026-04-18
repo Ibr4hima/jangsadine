@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 type Ebook = { id: string; titre: string; description: string; categorie: string; url_pdf: string; nb_pages: number }
-const couleurBg: Record<string,string> = { Aqeedah: '#e8f0f8', Fiqh: '#faf3dc' }
-const couleurTxt: Record<string,string> = { Aqeedah: '#28558b', Fiqh: '#b8911f' }
+const couleurBg: Record<string, string> = { Aqeedah: '#e8f0f8', Fiqh: '#faf3dc' }
+const couleurTxt: Record<string, string> = { Aqeedah: '#28558b', Fiqh: '#b8911f' }
 export default function Ebooks() {
   const [ebooks, setEbooks] = useState<Ebook[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,7 +22,7 @@ export default function Ebooks() {
       <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
         <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Ebooks</h1>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto' }}>Documents islamiques a lire et telecharger gratuitement</p>
+        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto' }}>Consultez, téléchargez et partagez gratuitement !</p>
       </section>
       <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
