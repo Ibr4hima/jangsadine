@@ -22,7 +22,7 @@ export default function Conferences() {
     c.sheikh.toLowerCase().includes(recherche.toLowerCase())
   )
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', paddingBottom: actif ? '100px' : '0' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', paddingBottom: actif ? '120px' : '0', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
       <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
@@ -45,7 +45,7 @@ export default function Conferences() {
         ) : filtres.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎤</div>
-            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? `Aucune conférence trouvee pour "${recherche}"` : 'Les conférences arrivent bientot'}</p>
+            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? `Aucune conférence trouvée pour "${recherche}"` : 'Les conférences arrivent bientot'}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

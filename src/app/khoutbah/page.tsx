@@ -23,7 +23,7 @@ export default function Khoutbah() {
     (k.serie && k.serie.toLowerCase().includes(recherche.toLowerCase()))
   )
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', paddingBottom: actif ? '100px' : '0' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', paddingBottom: actif ? '120px' : '0', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
       <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
@@ -41,7 +41,7 @@ export default function Khoutbah() {
         ) : filtres.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>🕌</div>
-            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune khoutbah trouvee pour "' + recherche + '"' : 'Les khoutbahs arrivent bientot'}</p>
+            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune khoutbah trouvée pour "' + recherche + '"' : 'Les khoutbahs arrivent bientot'}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -74,7 +74,7 @@ export default function Khoutbah() {
           </div>
         )}
       </div>
-      <footer style={{ background: 'var(--footer-bg)', padding: '32px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '40px' }}>
+      <footer style={{ background: 'var(--footer-bg)', padding: '32px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: 'auto' }}>
         <div style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span></div>
         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>{new Date().getFullYear()} — Tous droits réservés</div>
       </footer>
