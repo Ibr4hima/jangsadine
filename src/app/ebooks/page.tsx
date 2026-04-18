@@ -2,7 +2,7 @@
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
-type Ebook = { id: string; titre: string; description: string; categorie: string; url_pdf: string; nb_pages: number }
+type Ebook = { id: string; titre: string; description: string; categorie: string; url_pdf: string; nb_pages: number; image_couverture: string | null }
 const couleurBg: Record<string, string> = { Aqeedah: '#e8f0f8', Fiqh: '#faf3dc' }
 const couleurTxt: Record<string, string> = { Aqeedah: '#28558b', Fiqh: '#b8911f' }
 export default function Ebooks() {
@@ -41,8 +41,14 @@ export default function Ebooks() {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.16)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.10)' }}
                 >
-                  <iframe src={eb.url_pdf + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit'} style={{ width: '150%', height: '150%', border: 'none', pointerEvents: 'none', outline: 'none', display: 'block', transform: 'scale(0.667)', transformOrigin: 'top left' }} title={eb.titre} />                  <div style={{ position: 'absolute', inset: 0 }} />
-                </div>
+                  {eb.image_couverture ? (
+                    <img src={eb.image_couverture} alt={eb.titre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f6f1', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '32px' }}>📄</div>
+                      <p style={{ fontSize: '11px', color: '#bbb', textAlign: 'center', padding: '0 8px' }}>{eb.titre}</p>
+                    </div>
+                  )}                </div>
                 <div style={{ textAlign: 'center', width: '100%' }}>
                   <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '8px', background: couleurBg[eb.categorie] || '#f0f0f0', color: couleurTxt[eb.categorie] || '#666', display: 'inline-block', marginBottom: '5px' }}>{eb.categorie}</span>
                   <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--texte)', lineHeight: 1.4, textAlign: 'center' }}>{eb.titre}</p>
