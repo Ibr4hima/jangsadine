@@ -2,19 +2,28 @@
 
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
+import { BookMarked, BookOpen, Clock, Headphones, Mic } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 const modules = [
-  { icon: '🎧', nom: 'Cours audio', href: '/audio', couleur: '#e8f0f8' },
-  { icon: '🎤', nom: 'Conférences', href: '/conferences', couleur: '#faf3dc' },
-  { icon: '🕌', nom: 'Khoutbah', href: '/khoutbah', couleur: '#e8f0f8' },
-  { icon: '🕐', nom: 'Heures de prières', href: '/prieres', couleur: '#faf3dc' },
-  { icon: '📚', nom: 'Ebooks', href: '/ebooks', couleur: '#e8f0f8' },
+  { nom: 'Cours audio', href: '/audio', couleur: '#e8f0f8', iconColor: '#28558b' },
+  { nom: 'Conférences', href: '/conferences', couleur: '#faf3dc', iconColor: '#b8911f' },
+  { nom: 'Khoutbah', href: '/khoutbah', couleur: '#e8f0f8', iconColor: '#28558b' },
+  { nom: 'Heures de prières', href: '/prieres', couleur: '#faf3dc', iconColor: '#b8911f' },
+  { nom: 'Ebooks', href: '/ebooks', couleur: '#e8f0f8', iconColor: '#28558b' },
 ]
 
 const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Seerah', 'Bons comportements', 'Sciences du Quran', 'Khoutbah', 'Conférences']
+
+const icones: Record<string, React.ReactNode> = {
+  'Cours audio': <Headphones size={22} strokeWidth={1.5} />,
+  'Conférences': <Mic size={22} strokeWidth={1.5} />,
+  'Khoutbah': <BookMarked size={22} strokeWidth={1.5} />,
+  'Heures de prières': <Clock size={22} strokeWidth={1.5} />,
+  'Ebooks': <BookOpen size={22} strokeWidth={1.5} />,
+}
 
 export default function Accueil() {
   const [derniersCoursDB, setDerniersCoursDB] = useState<{ id: string; titre: string; sheikh: string; nb_episodes: number; categories: { nom: string } }[]>([])
@@ -114,7 +123,7 @@ export default function Accueil() {
           </h2>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '14px',
           }}>
             {modules.map((mod) => (
@@ -141,17 +150,17 @@ export default function Accueil() {
                 }}
               >
                 <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
                   background: mod.couleur,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '22px',
                   flexShrink: 0,
+                  color: mod.iconColor,
                 }}>
-                  {mod.icon}
+                  {icones[mod.nom]}
                 </div>
                 <div style={{
                   fontSize: '14px',
@@ -257,7 +266,7 @@ export default function Accueil() {
           Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span>
         </div>
         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-          {new Date().getFullYear()} — Tous droits réservés
+          © {new Date().getFullYear()} — Tous droits réservés
         </div>
       </footer>
     </main>
