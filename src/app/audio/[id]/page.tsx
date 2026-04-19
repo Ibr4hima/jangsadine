@@ -31,6 +31,8 @@ export default function PageCours() {
     const [loading, setLoading] = useState(true)
     const [enLecture, setEnLecture] = useState(false)
     const audioRef = useRef<HTMLAudioElement>(null)
+    const [progression, setProgression] = useState(0)
+    const [dureeTotal, setDureeTotal] = useState(0)
 
     useEffect(() => {
         async function charger() {
@@ -71,6 +73,15 @@ export default function PageCours() {
             audioRef.current.play()
         }
         setEnLecture(!enLecture)
+    }
+
+    function formaterTemps(s: number) {
+        if (!s || isNaN(s)) return '0:00'
+        const h = Math.floor(s / 3600)
+        const m = Math.floor((s % 3600) / 60)
+        const sec = Math.floor(s % 60)
+        if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
+        return m + ':' + sec.toString().padStart(2, '0')
     }
 
     if (loading) return (
@@ -123,28 +134,85 @@ export default function PageCours() {
 
                 {/* Lecteur audio */}
                 {episodeActif && (
-                    <div style={{
-                        background: 'white',
-                        border: '1px solid var(--bordure)',
-                        borderRadius: '16px',
-                        padding: '24px',
-                        marginBottom: '24px',
-                    }}>
-                        <p style={{ fontSize: '12px', color: 'var(--or)', fontWeight: 600, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                        <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             En cours d'écoute
                         </p>
-                        <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', marginBottom: '20px' }}>
-                            {episodeActif.titre}
+                        <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '16px' }}>                            {episodeActif.titre}
                         </h2>
 
-                        <audio
-                            ref={audioRef}
-                            src={episodeActif.url_audio}
-                            onPlay={() => setEnLecture(true)}
-                            onPause={() => setEnLecture(false)}
-                            style={{ width: '100%', borderRadius: '8px' }}
-                            controls
-                        />
+                        <audio ref={audioRef} src={episodeActif.url_audio} onPlay={() => setEnLecture(true)} onPause={() => setEnLecture(false)} onTimeUpdate={() => setProgression(audioRef.current ? (audioRef.current.currentTime / audioRef.current.duration) * 100 : 0)} onLoadedMetadata={() => setDureeTotal(audioRef.current?.duration || 0)} onEnded={() => setEnLecture(false)} />
+
+                        {/* Barre de progression */}
+                        <div onClick={e => {
+                            if (!audioRef.current) return
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            audioRef.current.currentTime = ((e.clientX - rect.left) / rect.width) * audioRef.current.duration
+                        }} style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', marginBottom: '6px', position: 'relative' }}>
+                            <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
+                        </div>
+
+                        {/* Temps */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '20px' }}>
+                            <span>{formaterTemps(audioRef.current?.currentTime || 0)}</span>
+                            <span>{formaterTemps(dureeTotal)}</span>
+                        </div>
+
+                        {/* Contrôles */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '16px' }}>
+                            {/* Episode précédent */}
+                            <button onClick={() => {
+                                const idx = episodes.findIndex(e => e.id === episodeActif?.id)
+                                if (idx > 0) jouerEpisode(episodes[idx - 1])
+                            }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: episodes.findIndex(e => e.id === episodeActif?.id) === 0 ? 0.3 : 1 }}>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
+                                </svg>
+                            </button>
+
+                            {/* -15s */}
+                            <button onClick={() => { if (audioRef.current) audioRef.current.currentTime -= 15 }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38" />
+                                    <text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text>
+                                </svg>
+                            </button>
+
+                            {/* Play/Pause */}
+                            <button onClick={toggleLecture} style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                {enLecture ? (
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} />
+                                        <div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} />
+                                    </div>
+                                ) : (
+                                    <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />
+                                )}
+                            </button>
+
+                            {/* +15s */}
+                            <button onClick={() => { if (audioRef.current) audioRef.current.currentTime += 15 }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
+                                    <text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text>
+                                </svg>
+                            </button>
+
+                            {/* Episode suivant */}
+                            <button onClick={() => {
+                                const idx = episodes.findIndex(e => e.id === episodeActif?.id)
+                                if (idx < episodes.length - 1) jouerEpisode(episodes[idx + 1])
+                            }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: episodes.findIndex(e => e.id === episodeActif?.id) === episodes.length - 1 ? 0.3 : 1 }}>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" />
+                                </svg>
+                            </button>
+
+                        </div>
                     </div>
                 )}
 
@@ -228,7 +296,7 @@ export default function PageCours() {
                     Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span>
                 </div>
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-                    {new Date().getFullYear()} — Tous droits réservés
+                    © {new Date().getFullYear()} — Tous droits réservés
                 </div>
             </footer>
         </main>
