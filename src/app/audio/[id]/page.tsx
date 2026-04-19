@@ -1,10 +1,12 @@
 'use client'
 
 import Navbar from '@/components/Navbar'
+import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+
 
 type Cours = {
     id: string
@@ -33,6 +35,7 @@ export default function PageCours() {
     const audioRef = useRef<HTMLAudioElement>(null)
     const [progression, setProgression] = useState(0)
     const [dureeTotal, setDureeTotal] = useState(0)
+    const { jouer, piste: pisteGlobale, enLecture: enLectureGlobale } = useAudio()
 
     useEffect(() => {
         async function charger() {
@@ -59,10 +62,15 @@ export default function PageCours() {
 
     function jouerEpisode(ep: Episode) {
         setEpisodeActif(ep)
-        setEnLecture(true)
-        setTimeout(() => {
-            audioRef.current?.play()
-        }, 100)
+        jouer({
+            id: ep.id,
+            titre: ep.titre,
+            sheikh: cours?.sheikh || '',
+            url: ep.url_audio,
+            duree: ep.duree,
+            href: `/audio/${id}`,
+
+        })
     }
 
     function toggleLecture() {
