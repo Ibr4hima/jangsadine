@@ -4,6 +4,15 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+function normaliser(texte: string): string {
+    return texte
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[ḍḏṭṯṣṡẓḥḫġ]/g, (c) => ({ ḍ: 'd', ḏ: 'd', ṭ: 't', ṯ: 't', ṣ: 's', ṡ: 's', ẓ: 'z', ḥ: 'h', ḫ: 'h', ġ: 'g' }[c] || c))
+        .replace(/[āīūôê]/g, (c) => ({ ā: 'a', ī: 'i', ū: 'u', ô: 'o', ê: 'e' }[c] || c))
+}
+
 type Categorie = { id: string; nom: string; slug: string; ordre: number }
 type Livre = { id: string; titre: string; categorie_id: string; nb_cours?: number }
 
@@ -33,14 +42,16 @@ export default function Audio() {
     const [categories, setCategories] = useState<Categorie[]>([])
     const [livres, setLivres] = useState<Livre[]>([])
     const [livresAvecNb, setLivresAvecNb] = useState<Record<string, number>>({})
+    const [coursData, setCoursData] = useState<{ livre_id: string; sheikh: string }[]>([])
     const [categorieActive, setCategorieActive] = useState<string>('toutes')
     const [loading, setLoading] = useState(true)
+    const [recherche, setRecherche] = useState('')
 
     useEffect(() => {
         async function charger() {
             const { data: cats } = await supabase.from('categories').select('*').order('ordre')
             const { data: livresList } = await supabase.from('livres').select('*').order('created_at')
-            const { data: coursList } = await supabase.from('cours').select('livre_id').not('livre_id', 'is', null)
+            const { data: coursList } = await supabase.from('cours').select('livre_id, sheikh').not('livre_id', 'is', null)
             if (cats) setCategories(cats)
             if (livresList) setLivres(livresList)
             if (coursList) {
@@ -48,17 +59,19 @@ export default function Audio() {
                 coursList.forEach(c => { if (c.livre_id) nb[c.livre_id] = (nb[c.livre_id] || 0) + 1 })
                 setLivresAvecNb(nb)
             }
+            if (coursList) setCoursData(coursList as any)
             setLoading(false)
         }
         charger()
     }, [])
 
-    const livresFiltres = categorieActive === 'toutes'
-        ? livres
-        : livres.filter(l => {
-            const cat = categories.find(c => c.id === l.categorie_id)
-            return cat?.slug === categorieActive
-        })
+    const livresFiltres = livres.filter(l => {
+        const cat = categories.find(c => c.id === l.categorie_id)
+        const matchCategorie = categorieActive === 'toutes' || cat?.slug === categorieActive
+        const matchRecherche = recherche === '' ||
+            normaliser(l.titre).includes(normaliser(recherche))
+        return matchCategorie && matchRecherche
+    })
 
     return (
         <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
@@ -67,6 +80,26 @@ export default function Audio() {
                 <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
                 <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Cours audio</h1>
                 <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto' }}>Tous les cours sont dispensés par des savants sénégalais en suivant le Coran et la Sunnah selon la compréhension des pieux prédecesseurs.</p>
+                <div style={{ maxWidth: '500px', margin: '24px auto 0', position: 'relative' }}>
+                    <input
+                        value={recherche}
+                        onChange={e => setRecherche(e.target.value)}
+                        placeholder="Rechercher un livre ou un auteur..."
+                        style={{
+                            width: '100%',
+                            padding: '12px 20px 12px 44px',
+                            borderRadius: '50px',
+                            border: 'none',
+                            fontSize: '14px',
+                            fontFamily: 'inherit',
+                            outline: 'none',
+                            background: 'rgba(255,255,255,0.15)',
+                            color: 'white',
+                            boxSizing: 'border-box',
+                        }}
+                    />
+                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
+                </div>
             </section>
             <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
             <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
