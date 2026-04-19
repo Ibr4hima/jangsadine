@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
+import { useEffect, useRef, useState } from 'react'
 
 type Khoutbah = { id: string; titre: string; sheikh: string; duree: string; url_audio: string; serie: string | null; numero_serie: number | null }
 
@@ -10,8 +10,8 @@ function formaterTemps(s: number) {
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   const sec = Math.floor(s % 60)
-  if (h > 0) return h + ':' + m.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0')
-  return m + ':' + sec.toString().padStart(2,'0')
+  if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
+  return m + ':' + sec.toString().padStart(2, '0')
 }
 
 export default function Khoutbah() {
@@ -36,7 +36,7 @@ export default function Khoutbah() {
   useEffect(() => {
     if (audioRef.current && actif) {
       audioRef.current.load()
-      audioRef.current.play().then(() => setEnLecture(true)).catch(() => {})
+      audioRef.current.play().then(() => setEnLecture(true)).catch(() => { })
       setProgression(0)
       setDureeTotal(0)
     }
@@ -66,7 +66,7 @@ export default function Khoutbah() {
         <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Khoutbah</h1>
         <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Sermons du vendredi</p>
         <div style={{ maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
-          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher par titre, sheikh ou serie..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
+          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher une Khoutbah..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
           <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
         </div>
       </section>
@@ -102,11 +102,11 @@ export default function Khoutbah() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
               <button onClick={() => precedente && setActif(precedente)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedente ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
               </button>
               <button onClick={() => { if (audioRef.current) audioRef.current.currentTime -= 15 }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/>
+                  <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38" />
                   <text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text>
                 </svg>
               </button>
@@ -118,12 +118,12 @@ export default function Khoutbah() {
               </button>
               <button onClick={() => { if (audioRef.current) audioRef.current.currentTime += 15 }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/>
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
                   <text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text>
                 </svg>
               </button>
               <button onClick={() => suivante && setActif(suivante)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivante ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
               </button>
             </div>
           </div>
