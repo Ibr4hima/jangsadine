@@ -84,7 +84,7 @@ export default function Audio() {
                     <input
                         value={recherche}
                         onChange={e => setRecherche(e.target.value)}
-                        placeholder="Rechercher un livre ou un auteur..."
+                        placeholder="Rechercher un cours audio..."
                         style={{
                             width: '100%',
                             padding: '12px 20px 12px 44px',
