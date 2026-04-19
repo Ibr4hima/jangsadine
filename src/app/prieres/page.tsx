@@ -16,6 +16,18 @@ function calculerDernierTiers(maghrib: string, fajr: string): string {
   return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0')
 }
 
+function calculerMoitieNuit(maghrib: string, fajr: string): string {
+  const [hM, mM] = maghrib.split(':').map(Number)
+  const [hF, mF] = fajr.split(':').map(Number)
+  let maghribMin = hM * 60 + mM
+  let fajrMin = hF * 60 + mF
+  if (fajrMin < maghribMin) fajrMin += 1440
+  const milieu = maghribMin + Math.floor((fajrMin - maghribMin) / 2)
+  const h = Math.floor(milieu / 60) % 24
+  const m = milieu % 60
+  return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0')
+}
+
 function enMinutes(h: string) { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm }
 function nowMin() { const n = new Date(); return n.getHours() * 60 + n.getMinutes() }
 function format24(h: string) { return h.substring(0, 5) }
@@ -77,6 +89,7 @@ export default function Prieres() {
           { nom: 'Asr', heure: t.Asr, cle: 'Asr' },
           { nom: 'Maghrib', heure: t.Maghrib, cle: 'Maghrib' },
           { nom: 'Isha', heure: t.Isha, cle: 'Isha' },
+          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(t.Maghrib, t.Fajr), cle: 'MoitieNuit' },
           { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(t.Maghrib, t.Fajr), cle: 'Tahajjud' },
         ])
         setLoading(false)
@@ -144,7 +157,7 @@ export default function Prieres() {
               {horaires.map(p => {
                 const estProchaine = prochaine?.cle === p.cle
                 const estPassee = enMinutes(p.heure) < now && !estProchaine
-                const estTahajjud = p.cle === 'Tahajjud'
+                const estTahajjud = p.cle === 'Tahajjud' || p.cle === 'MoitieNuit'
                 const estSunrise = p.cle === 'Sunrise'
                 return (
                   <div key={p.cle} style={{
@@ -162,7 +175,8 @@ export default function Prieres() {
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: estProchaine ? '#d9ac2a' : estTahajjud ? '#d9ac2a' : '#ccc', flexShrink: 0 }} />
                       <div>
                         <p style={{ fontSize: '15px', fontWeight: estProchaine ? 700 : 500, color: estProchaine ? 'white' : (estPassee && !estTahajjud) ? '#aaa' : 'var(--texte)' }}>{p.nom}</p>
-                        {estTahajjud && <p style={{ fontSize: '10px', color: '#b8911f', marginTop: '1px' }}>Tahajjud — Prière de la nuit</p>}
+                        {p.cle === 'Tahajjud' && <p style={{ fontSize: '10px', color: '#b8911f', marginTop: '1px' }}>Tahajjud — Prière de la nuit</p>}
+                        {p.cle === 'MoitieNuit' && <p style={{ fontSize: '10px', color: '#b8911f', marginTop: '1px' }}>Fin de l'heure du Isha</p>}
                       </div>
                     </div>
                     <p style={{ fontSize: '17px', fontWeight: 700, color: estProchaine ? '#d9ac2a' : (estPassee && !estTahajjud) ? '#ccc' : estTahajjud ? '#b8911f' : 'var(--bleu)', fontVariantNumeric: 'tabular-nums' }}>{format24(p.heure)}</p>
