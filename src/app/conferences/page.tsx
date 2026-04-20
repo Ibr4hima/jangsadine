@@ -103,16 +103,14 @@ export default function Conferences() {
             {filtres.map((c, index) => {
               const est = piste?.id === c.id
               return (
-                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
-                  {/* Numéro en dehors du bloc */}
                   <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
                     {index + 1}
                   </span>
 
-                  {/* Carte */}
                   <div onClick={() => jouer({ id: c.id, titre: c.titre, sheikh: c.sheikh, url: c.url_audio, duree: c.duree, href: '/conferences' })}
-                    style={{ flex: 1, background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
+                    style={{ flex: 1, minWidth: 0, overflow: 'hidden', background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
                     onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
                     onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
                   >

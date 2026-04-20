@@ -1,5 +1,4 @@
 'use client'
-import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
 import { useAudio } from '@/contexts/AudioContext'
@@ -7,7 +6,6 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
 
 type Cours = {
     id: string
@@ -33,6 +31,27 @@ function formaterTemps(s: number) {
     const sec = Math.floor(s % 60)
     if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
     return m + ':' + sec.toString().padStart(2, '0')
+}
+
+function pisteVoisins(episodes: Episode[], index: number, sheikh: string, courseId: string) {
+    return {
+        precedente: episodes[index - 1] ? {
+            id: episodes[index - 1].id,
+            titre: episodes[index - 1].titre,
+            sheikh,
+            url: episodes[index - 1].url_audio,
+            duree: episodes[index - 1].duree,
+            href: `/audio/${courseId}`
+        } : undefined,
+        suivante: episodes[index + 1] ? {
+            id: episodes[index + 1].id,
+            titre: episodes[index + 1].titre,
+            sheikh,
+            url: episodes[index + 1].url_audio,
+            duree: episodes[index + 1].duree,
+            href: `/audio/${courseId}`
+        } : undefined
+    }
 }
 
 export default function PageCours() {
@@ -88,7 +107,11 @@ export default function PageCours() {
                             <span>{formaterTemps(dureeTotal)}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '14px' }}>
-                            <button onClick={() => precedent && jouer({ id: precedent.id, titre: precedent.titre, sheikh: cours.sheikh, url: precedent.url_audio, duree: precedent.duree, href: `/audio/${id}` })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedent ? 1 : 0.3 }}>
+                            <button onClick={() => {
+                                if (!precedent) return
+                                const i = episodes.findIndex(e => e.id === precedent.id)
+                                jouer({ id: precedent.id, titre: precedent.titre, sheikh: cours.sheikh, url: precedent.url_audio, duree: precedent.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })
+                            }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedent ? 1 : 0.3 }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
                             </button>
                             <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
@@ -100,7 +123,11 @@ export default function PageCours() {
                             <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" /><text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text></svg>
                             </button>
-                            <button onClick={() => suivant && jouer({ id: suivant.id, titre: suivant.titre, sheikh: cours.sheikh, url: suivant.url_audio, duree: suivant.duree, href: `/audio/${id}` })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivant ? 1 : 0.3 }}>
+                            <button onClick={() => {
+                                if (!suivant) return
+                                const i = episodes.findIndex(e => e.id === suivant.id)
+                                jouer({ id: suivant.id, titre: suivant.titre, sheikh: cours.sheikh, url: suivant.url_audio, duree: suivant.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })
+                            }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivant ? 1 : 0.3 }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
                             </button>
                         </div>
@@ -111,17 +138,21 @@ export default function PageCours() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {episodes.map((ep, index) => {
                         const actif = piste?.id === ep.id
+                        const i = episodes.findIndex(e => e.id === ep.id)
                         return (
-                            <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
-                                {/* Numéro en dehors du bloc */}
                                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
                                     {index + 1}
                                 </span>
 
-                                {/* Carte */}
-                                <div onClick={() => jouer({ id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}` })}
-                                    style={{ flex: 1, background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', transition: 'all 0.15s' }}
+                                <div onClick={() => {
+                                    jouer({
+                                        id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}`,
+                                        ...pisteVoisins(episodes, i, cours.sheikh, id as string)
+                                    })
+                                }}
+                                    style={{ flex: 1, minWidth: 0, overflow: 'hidden', background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', transition: 'all 0.15s' }}
                                     onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
                                     onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
                                 >
@@ -144,9 +175,6 @@ export default function PageCours() {
                     })}
                 </div>
             </div>
-
-            <Footer />
-
         </main>
     )
 }

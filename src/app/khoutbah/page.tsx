@@ -101,16 +101,14 @@ export default function Khoutbah() {
             {filtres.map((k, index) => {
               const est = piste?.id === k.id
               return (
-                <div key={k.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div key={k.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
-                  {/* Numéro en dehors du bloc */}
                   <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
                     {index + 1}
                   </span>
 
-                  {/* Carte */}
                   <div onClick={() => jouer({ id: k.id, titre: k.titre, sheikh: k.sheikh, url: k.url_audio, duree: k.duree, href: '/khoutbah' })}
-                    style={{ flex: 1, background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
+                    style={{ flex: 1, minWidth: 0, overflow: 'hidden', background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
                     onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
                     onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
                   >
