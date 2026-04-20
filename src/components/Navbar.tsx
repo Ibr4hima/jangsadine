@@ -99,6 +99,7 @@ export default function Navbar() {
                                 background: 'var(--bleu)',
                                 borderRadius: '20px',
                                 padding: '6px 14px',
+                                height: '30px',
                                 transition: 'opacity 0.15s',
                                 marginLeft: '8px',
                             }}>
@@ -147,6 +148,7 @@ export default function Navbar() {
                                 background: 'var(--bleu)',
                                 borderRadius: '20px',
                                 padding: '6px 14px',
+                                height: '30px',
                                 cursor: 'pointer',
                                 transition: 'opacity 0.15s',
                             }}
