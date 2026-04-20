@@ -1,8 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
-import { supabase } from '@/lib/supabase'
+import TitreDefilant from '@/components/TitreDefilant'
 import { useAudio } from '@/contexts/AudioContext'
+import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 
 type Conference = { id: string; titre: string; sheikh: string; duree: string; url_audio: string }
 
@@ -11,8 +12,8 @@ function formaterTemps(s: number) {
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   const sec = Math.floor(s % 60)
-  if (h > 0) return h + ':' + m.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0')
-  return m + ':' + sec.toString().padStart(2,'0')
+  if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
+  return m + ':' + sec.toString().padStart(2, '0')
 }
 
 export default function Conferences() {
@@ -70,19 +71,19 @@ export default function Conferences() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
               <button onClick={() => precedente && jouer({ id: precedente.id, titre: precedente.titre, sheikh: precedente.sheikh, url: precedente.url_audio, duree: precedente.duree, href: '/conferences' })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedente ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
               </button>
               <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/><text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38" /><text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text></svg>
               </button>
               <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {enLecture ? <div style={{ display: 'flex', gap: '4px' }}><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />}
               </button>
               <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)' }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/><text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" /><text x="7.5" y="15" fontSize="6.5" fill="currentColor" stroke="none" fontWeight="700">15</text></svg>
               </button>
               <button onClick={() => suivante && jouer({ id: suivante.id, titre: suivante.titre, sheikh: suivante.sheikh, url: suivante.url_audio, duree: suivante.duree, href: '/conferences' })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivante ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
               </button>
             </div>
           </div>
@@ -109,8 +110,10 @@ export default function Conferences() {
                     {est && enLecture ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.titre}</p>
-                    <p style={{ fontSize: '12px', color: '#999' }}>{c.sheikh}</p>
+                    <TitreDefilant
+                      texte={c.titre}
+                      style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px' }}
+                    />                    <p style={{ fontSize: '12px', color: '#999' }}>{c.sheikh}</p>
                   </div>
                   {c.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{c.duree}</span>}
                 </div>
