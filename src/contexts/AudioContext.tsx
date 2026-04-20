@@ -40,6 +40,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audio.addEventListener('play', () => setEnLecture(true))
     audio.addEventListener('pause', () => setEnLecture(false))
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
+
+    // Boutons du lecteur natif iOS/Android
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => audio.play())
+      navigator.mediaSession.setActionHandler('pause', () => audio.pause())
+      navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime -= 15 })
+      navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime += 15 })
+    }
+
     return () => { audio.pause(); audio.src = '' }
   }, [])
 
@@ -54,6 +63,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setPiste(nouvellePiste)
     setProgression(0)
     setDureeTotal(0)
+
+    // Titre et sheikh sur l'écran de verrouillage
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: nouvellePiste.titre,
+        artist: nouvellePiste.sheikh,
+        //album: 'Jàng sa Diné',
+        artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
+      })
+    }
   }
 
   function toggleLecture() {
