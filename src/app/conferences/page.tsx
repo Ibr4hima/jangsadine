@@ -94,7 +94,7 @@ export default function Conferences() {
         ) : filtres.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune conference pour "' + recherche + '"' : 'Les conferences arrivent bientot'}</p>
+            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune conférence pour "' + recherche + '"' : 'Les conférences arrivent bientot'}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
