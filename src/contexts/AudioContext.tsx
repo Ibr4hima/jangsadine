@@ -8,6 +8,8 @@ type PisteAudio = {
   url: string
   duree?: string
   href?: string
+  precedente?: Omit<PisteAudio, 'precedente' | 'suivante'>
+  suivante?: Omit<PisteAudio, 'precedente' | 'suivante'>
 }
 
 type AudioContextType = {
@@ -68,10 +70,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: nouvellePiste.titre,
-        artist: nouvellePiste.sheikh,
-        //album: 'Jàng sa Diné',
-        artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
+        artist: nouvellePiste.sheikh || 'Jàng sa Diné',
+        album: 'Jàng sa Diné',
+        artwork: [{ src: window.location.origin + '/logo.png', sizes: '512x512', type: 'image/png' }]
       })
+
+      navigator.mediaSession.setActionHandler('previoustrack',
+        nouvellePiste.precedente ? () => jouer(nouvellePiste.precedente!) : null
+      )
+      navigator.mediaSession.setActionHandler('nexttrack',
+        nouvellePiste.suivante ? () => jouer(nouvellePiste.suivante!) : null
+      )
     }
   }
 
