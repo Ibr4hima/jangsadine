@@ -1,7 +1,9 @@
 'use client'
+import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
+
 type Ebook = { id: string; titre: string; description: string; categorie: string; url_pdf: string; nb_pages: number; image_couverture: string | null }
 const couleurBg: Record<string, string> = { Aqeedah: '#e8f0f8', Fiqh: '#faf3dc' }
 const couleurTxt: Record<string, string> = { Aqeedah: '#28558b', Fiqh: '#b8911f' }
@@ -59,10 +61,8 @@ export default function Ebooks() {
           </div>
         )}
       </div>
-      <footer style={{ background: 'var(--footer-bg)', padding: '32px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '60px' }}>
-        <div style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span></div>
-        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>{new Date().getFullYear()} — Tous droits réservés</div>
-      </footer>
+      <Footer />
+
     </main>
   )
 }

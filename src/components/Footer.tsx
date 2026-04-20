@@ -1,0 +1,113 @@
+import Image from 'next/image'
+import Link from 'next/link'
+
+const reseaux = [
+  {
+    nom: 'Telegram',
+    href: 'https://t.me/janggsadine',
+    couleur: '#229ED9',
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.913l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.978.646z" />
+      </svg>
+    ),
+  },
+  {
+    nom: 'Instagram',
+    href: 'https://www.instagram.com/jangsadine/',
+    couleur: '#E1306C',
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+      </svg>
+    ),
+  },
+  {
+    nom: 'YouTube',
+    href: 'https://www.youtube.com/@jangsadine',
+    couleur: '#FF0000',
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" />
+      </svg>
+    ),
+  },
+]
+
+const liens = [
+  { label: 'Cours audio', href: '/audio' },
+  { label: 'Conférences', href: '/conferences' },
+  { label: 'Khoutbah', href: '/khoutbah' },
+  { label: 'Prières', href: '/prieres' },
+  { label: 'Ebooks', href: '/ebooks' },
+]
+
+export default function Footer() {
+  return (
+    <footer style={{ background: '#1a1a2e', marginTop: 'auto' }}>
+      {/* Barre or */}
+      <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 32px' }}>
+
+        {/* Haut : logo + réseaux */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '32px', marginBottom: '40px' }}>
+
+          {/* Logo + description */}
+          <div style={{ maxWidth: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <Image src="/logo.png" alt="Jàng sa Diné" width={36} height={36} />
+              <span style={{ fontSize: '17px', fontWeight: 700, color: 'white' }}>
+                Jàng sa <span style={{ color: '#d9ac2a' }}>Diné</span>
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+              Apprends ta religion — cours audio, khoutbah, conférences et ebooks islamiques accessibles gratuitement.
+            </p>
+          </div>
+
+          {/* Liens navigation */}
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Navigation</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {liens.map(l => (
+                <Link key={l.href} href={l.href} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', transition: 'color 0.15s' }}
+                  onMouseEnter={(e: any) => e.currentTarget.style.color = 'white'}
+                  onMouseLeave={(e: any) => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                >{l.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Réseaux sociaux */}
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Nous suivre</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {reseaux.map(r => (
+                <a key={r.nom} href={r.href} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                  onMouseEnter={(e: any) => e.currentTarget.style.opacity = '0.75'}
+                  onMouseLeave={(e: any) => e.currentTarget.style.opacity = '1'}
+                >
+                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: r.couleur + '22', border: '1px solid ' + r.couleur + '44', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.couleur, flexShrink: 0 }}>
+                    {r.icone}
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{r.nom}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Séparateur */}
+        <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '24px' }} />
+
+        {/* Bas */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>© {new Date().getFullYear()} Jàng sa Diné — Tous droits réservés</p>
+        </div>
+
+      </div>
+    </footer>
+  )
+}

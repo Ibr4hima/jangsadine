@@ -1,11 +1,13 @@
 'use client'
 
+import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 import { BookMarked, BookOpen, Clock, Headphones, Mic } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+
 
 const modules = [
   { nom: 'Cours audio', href: '/audio', couleur: '#e8f0f8', iconColor: '#28558b' },
@@ -249,22 +251,8 @@ export default function Accueil() {
       </section>
 
       {/* Footer */}
-      <footer style={{
-        background: 'var(--footer-bg)',
-        padding: '32px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <div style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>
-          Jàng sa <span style={{ color: 'var(--or)' }}>Diné</span>
-        </div>
-        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-          © {new Date().getFullYear()} — Tous droits réservés
-        </div>
-      </footer>
+      <Footer />
+
     </main>
   )
 }
