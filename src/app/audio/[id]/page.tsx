@@ -109,23 +109,36 @@ export default function PageCours() {
 
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', marginBottom: '14px' }}>Tous les épisodes</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {episodes.map(ep => {
+                    {episodes.map((ep, index) => {
                         const actif = piste?.id === ep.id
                         return (
-                            <div key={ep.id} onClick={() => jouer({ id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}` })}
-                                style={{ background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', transition: 'all 0.15s' }}
-                                onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                                onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                            >
-                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: actif ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    {actif && enLecture ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                            <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                                {/* Numéro en dehors du bloc */}
+                                <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
+                                    {index + 1}
+                                </span>
+
+                                {/* Carte */}
+                                <div onClick={() => jouer({ id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}` })}
+                                    style={{ flex: 1, background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', transition: 'all 0.15s' }}
+                                    onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
+                                    onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
+                                >
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: actif ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        {actif && enLecture
+                                            ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div>
+                                            : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <TitreDefilant
+                                            texte={ep.titre}
+                                            style={{ fontSize: '14px', fontWeight: actif ? 600 : 500, color: actif ? 'var(--bleu)' : 'var(--texte)' }}
+                                        />
+                                    </div>
+                                    <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{ep.duree}</span>
                                 </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <TitreDefilant
-                                        texte={ep.titre}
-                                        style={{ fontSize: '14px', fontWeight: actif ? 600 : 500, color: actif ? 'var(--bleu)' : 'var(--texte)' }}
-                                    />                </div>
-                                <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{ep.duree}</span>
+
                             </div>
                         )
                     })}

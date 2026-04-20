@@ -100,24 +100,37 @@ export default function Conferences() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {filtres.map(c => {
+            {filtres.map((c, index) => {
               const est = piste?.id === c.id
               return (
-                <div key={c.id} onClick={() => jouer({ id: c.id, titre: c.titre, sheikh: c.sheikh, url: c.url_audio, duree: c.duree, href: '/conferences' })}
-                  style={{ background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                  onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: est ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {est && enLecture ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                  {/* Numéro en dehors du bloc */}
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
+                    {index + 1}
+                  </span>
+
+                  {/* Carte */}
+                  <div onClick={() => jouer({ id: c.id, titre: c.titre, sheikh: c.sheikh, url: c.url_audio, duree: c.duree, href: '/conferences' })}
+                    style={{ flex: 1, background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
+                    onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
+                  >
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: est ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {est && enLecture
+                        ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div>
+                        : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <TitreDefilant
+                        texte={c.titre}
+                        style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px' }}
+                      />
+                      <p style={{ fontSize: '12px', color: '#999' }}>{c.sheikh}</p>
+                    </div>
+                    {c.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{c.duree}</span>}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <TitreDefilant
-                      texte={c.titre}
-                      style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px' }}
-                    />                    <p style={{ fontSize: '12px', color: '#999' }}>{c.sheikh}</p>
-                  </div>
-                  {c.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{c.duree}</span>}
+
                 </div>
               )
             })}

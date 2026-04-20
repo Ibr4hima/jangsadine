@@ -1,7 +1,6 @@
 'use client'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
-import TitreDefilant from '@/components/TitreDefilant'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
@@ -99,27 +98,37 @@ export default function Khoutbah() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {filtres.map(k => {
+            {filtres.map((k, index) => {
               const est = piste?.id === k.id
               return (
-                <div key={k.id} onClick={() => jouer({ id: k.id, titre: k.titre, sheikh: k.sheikh, url: k.url_audio, duree: k.duree, href: '/khoutbah' })}
-                  style={{ background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                  onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: est ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {est && enLecture ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <TitreDefilant
-                      texte={k.titre}
-                      style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px' }}
-                    />                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{k.sheikh}</p>
-                      {k.serie && <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#faf3dc', color: '#b8911f' }}>{k.serie}{k.numero_serie ? ' · ' + k.numero_serie : ''}</span>}
+                <div key={k.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                  {/* Numéro en dehors du bloc */}
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
+                    {index + 1}
+                  </span>
+
+                  {/* Carte */}
+                  <div onClick={() => jouer({ id: k.id, titre: k.titre, sheikh: k.sheikh, url: k.url_audio, duree: k.duree, href: '/khoutbah' })}
+                    style={{ flex: 1, background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
+                    onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
+                  >
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: est ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {est && enLecture
+                        ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div>
+                        : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
                     </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.titre}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{k.sheikh}</p>
+                        {k.serie && <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#faf3dc', color: '#b8911f' }}>{k.serie}{k.numero_serie ? ' · ' + k.numero_serie : ''}</span>}
+                      </div>
+                    </div>
+                    {k.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{k.duree}</span>}
                   </div>
-                  {k.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{k.duree}</span>}
+
                 </div>
               )
             })}
