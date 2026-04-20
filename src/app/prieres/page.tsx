@@ -33,14 +33,15 @@ function nowMin() { const n = new Date(); return n.getHours() * 60 + n.getMinute
 function format24(h: string) { return h.substring(0, 5) }
 
 function tempsRestant(heure: string): string {
-  const now = nowMin()
-  let cible = enMinutes(heure)
-  if (cible <= now) cible += 1440
-  const diff = cible - now
-  const hh = Math.floor(diff / 60)
-  const mm = diff % 60
-  if (hh === 0) return mm + ' min'
-  return hh + 'h ' + mm + 'min'
+  const now = new Date()
+  const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()
+  let cibleSec = enMinutes(heure) * 60
+  if (cibleSec <= nowSec) cibleSec += 86400
+  const diff = cibleSec - nowSec
+  const hh = Math.floor(diff / 3600)
+  const mm = Math.floor((diff % 3600) / 60)
+  const ss = diff % 60
+  return hh.toString().padStart(2, '0') + ':' + mm.toString().padStart(2, '0') + ':' + ss.toString().padStart(2, '0')
 }
 
 function progression(heure: string): number {
@@ -61,7 +62,7 @@ export default function Prieres() {
   const [dateHijri, setDateHijri] = useState('')
 
   useEffect(() => {
-    const iv = setInterval(() => setTick(t => t + 1), 30000)
+    const iv = setInterval(() => setTick(t => t + 1), 1000)
     return () => clearInterval(iv)
   }, [])
 
