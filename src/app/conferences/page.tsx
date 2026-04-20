@@ -93,7 +93,7 @@ export default function Conferences() {
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>Chargement...</div>
         ) : filtres.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎤</div>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
             <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune conference pour "' + recherche + '"' : 'Les conferences arrivent bientot'}</p>
           </div>
         ) : (

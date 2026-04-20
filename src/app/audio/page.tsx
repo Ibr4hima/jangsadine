@@ -122,8 +122,8 @@ export default function Audio() {
                     <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa', fontSize: '15px' }}>Chargement...</div>
                 ) : livresFiltres.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '80px 0' }}>
-                        <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎧</div>
-                        <p style={{ fontSize: '16px', color: '#aaa' }}>Les cours arrivent bientot</p>
+                        <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
+                        <p style={{ fontSize: '16px', color: '#aaa' }}>Aucun résultat trouvé</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
