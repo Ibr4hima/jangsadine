@@ -1,10 +1,19 @@
+'use client'
+import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
+function arrondir(n: number): number {
+  if (n < 10) return n
+  if (n < 100) return Math.floor(n / 10) * 10
+  return Math.floor(n / 50) * 50
+}
 
 const reseaux = [
   {
     nom: 'Telegram',
-    href: 'https://t.me/janggsadine',
+    href: 'https://t.me/TON_LIEN',
     couleur: '#229ED9',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -14,7 +23,7 @@ const reseaux = [
   },
   {
     nom: 'Instagram',
-    href: 'https://www.instagram.com/jangsadine/',
+    href: 'https://instagram.com/TON_LIEN',
     couleur: '#E1306C',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -24,7 +33,7 @@ const reseaux = [
   },
   {
     nom: 'YouTube',
-    href: 'https://www.youtube.com/@jangsadine',
+    href: 'https://youtube.com/TON_LIEN',
     couleur: '#FF0000',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -43,17 +52,26 @@ const liens = [
 ]
 
 export default function Footer() {
+  const [nbEpisodes, setNbEpisodes] = useState<number | null>(null)
+  const [nbKhoutbahConf, setNbKhoutbahConf] = useState<number | null>(null)
+
+  useEffect(() => {
+    async function charger() {
+      const { count: eps } = await supabase.from('episodes').select('*', { count: 'exact', head: true })
+      const { count: confs } = await supabase.from('conferences').select('*', { count: 'exact', head: true })
+      const { count: khs } = await supabase.from('khoutbahs').select('*', { count: 'exact', head: true })
+      if (eps) setNbEpisodes(arrondir(eps))
+      if (confs !== null && khs !== null) setNbKhoutbahConf(arrondir(confs + khs))
+    }
+    charger()
+  }, [])
+
   return (
     <footer style={{ background: '#1a1a2e', marginTop: 'auto' }}>
-      {/* Barre or */}
       <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
-
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 32px' }}>
-
-        {/* Haut : logo + réseaux */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '32px', marginBottom: '40px' }}>
 
-          {/* Logo + description */}
           <div style={{ maxWidth: '280px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
               <Image src="/logo.png" alt="Jàng sa Diné" width={36} height={36} />
@@ -62,11 +80,13 @@ export default function Footer() {
               </span>
             </div>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
-              Apprends ta religion — cours audio, khoutbah, conférences et ebooks islamiques accessibles gratuitement.
+              {nbEpisodes && nbKhoutbahConf
+                ? `Plus de ${nbEpisodes} cours audio et plus de ${nbKhoutbahConf} conférences et khoutbah en wolof — le tout gratuitement.`
+                : 'Apprends ta religion — cours audio, khoutbah, conférences et ebooks islamiques accessibles gratuitement.'
+              }
             </p>
           </div>
 
-          {/* Liens navigation */}
           <div>
             <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Navigation</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -79,7 +99,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Réseaux sociaux */}
           <div>
             <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Nous suivre</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -99,14 +118,11 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Séparateur */}
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '24px' }} />
 
-        {/* Bas */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>© {new Date().getFullYear()} Jàng sa Diné — Tous droits réservés</p>
         </div>
-
       </div>
     </footer>
   )
