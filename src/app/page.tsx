@@ -17,7 +17,7 @@ const modules = [
   { nom: 'Ebooks', href: '/ebooks', couleur: '#e8f0f8', iconColor: '#28558b' },
 ]
 
-const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Seerah', 'Bons comportements', 'Sciences du Quran', 'Khoutbah', 'Conférences']
+const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Tafsir', 'Seerah', 'Bons comportements', 'Fatwas', 'Khoutbah', 'Conférences']
 
 const icones: Record<string, React.ReactNode> = {
   'Cours audio': <Headphones size={22} strokeWidth={1.5} />,
