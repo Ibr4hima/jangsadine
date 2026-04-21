@@ -2,6 +2,7 @@
 
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
+import TitreDefilant from '@/components/TitreDefilant'
 import { supabase } from '@/lib/supabase'
 import { BookMarked, BookOpen, Clock, Headphones, Mic } from 'lucide-react'
 import Image from 'next/image'
@@ -224,34 +225,30 @@ export default function Accueil() {
 
           {/* Aperçu 3 audios */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {derniersEpisodes.map((ep, index) => {
+            {derniersEpisodes.map((ep) => {
               const cours = ep.cours as any
+              const nomCat = (cours?.categories as any)?.nom
               return (
-                <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
-                    {index + 1}
-                  </span>
-                  <Link href={`/audio/${cours?.id}`} style={{
-                    flex: 1, minWidth: 0, overflow: 'hidden', background: 'white',
-                    border: '1px solid var(--bordure)', borderRadius: '12px',
-                    padding: '12px 14px', display: 'flex', alignItems: 'center',
-                    gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s'
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
-                  >
-                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #aaa', marginLeft: '2px' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ep.titre}</p>
-                      <p style={{ fontSize: '12px', color: '#999' }}>{cours?.sheikh} · {ep.duree}</p>
-                    </div>
-                    <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: couleurBg[(cours?.categories as any)?.nom] || '#f0f0f0', color: couleurTxt[(cours?.categories as any)?.nom] || '#666', flexShrink: 0 }}>
-                      {(cours?.categories as any)?.nom}
-                    </span>
-                  </Link>
-                </div>
+                <Link key={ep.id} href={`/audio/${cours?.id}`} style={{
+                  minWidth: 0, overflow: 'hidden', background: 'white',
+                  border: '1px solid var(--bordure)', borderRadius: '12px',
+                  padding: '12px 14px', display: 'flex', alignItems: 'center',
+                  gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s'
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
+                >
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #aaa', marginLeft: '2px' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <TitreDefilant
+                      texte={ep.titre}
+                      style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', marginBottom: '2px' }}
+                    />
+                    <p style={{ fontSize: '12px', color: '#999' }}>{cours?.sheikh} · {ep.duree}</p>
+                  </div>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: couleurBg[nomCat] || '#f0f0f0', border: '1px solid ' + (couleurTxt[nomCat] || '#ccc'), flexShrink: 0 }} />                </Link>
               )
             })}
           </div>
