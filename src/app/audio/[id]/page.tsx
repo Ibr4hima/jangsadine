@@ -114,14 +114,14 @@ export default function PageCours() {
                             }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedent ? 1 : 0.3 }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
                             </button>
-                            <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', display: 'flex', alignItems: 'center' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>replay_10</span>
+                            <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                <img src="/icons/replay_10.svg" width="26" height="26" />
                             </button>
                             <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {enLecture ? <div style={{ display: 'flex', gap: '4px' }}><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />}
                             </button>
-                            <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', display: 'flex', alignItems: 'center' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>forward_10</span>
+                            <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                <img src="/icons/forward_10.svg" width="26" height="26" />
                             </button>
                             <button onClick={() => {
                                 if (!suivant) return

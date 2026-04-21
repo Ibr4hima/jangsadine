@@ -108,8 +108,8 @@ export default function PageKhoutbah() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
             </button>
             <button onClick={() => { if (audioRef.current) audioRef.current.currentTime -= 10 }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', display: 'flex', alignItems: 'center' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>replay_10</span>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <img src="/icons/replay_10.svg" width="26" height="26" />
             </button>
             <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {enLecture ? (
@@ -122,8 +122,8 @@ export default function PageKhoutbah() {
               )}
             </button>
             <button onClick={() => { if (audioRef.current) audioRef.current.currentTime += 10 }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', display: 'flex', alignItems: 'center' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>forward_10</span>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <img src="/icons/forward_10.svg" width="26" height="26" />
             </button>
             <button onClick={() => suivante && router.push('/khoutbah/' + suivante.id)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivante ? 1 : 0.3 }}>

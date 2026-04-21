@@ -21,11 +21,18 @@ export default function BanniereReprise() {
   function reprendre() {
     if (!piste) return
     jouer(piste)
-    // Attendre que l'audio charge puis seek
-    setTimeout(() => {
-      const audio = document.querySelector('audio') as HTMLAudioElement
-      if (audio) audio.currentTime = position
-    }, 1000)
+    // Attendre que l'audio soit chargé avant de seek
+    const attendre = setInterval(() => {
+      const audios = document.querySelectorAll('audio')
+      audios.forEach(audio => {
+        if (audio.readyState >= 2 && position > 0) {
+          audio.currentTime = position
+          clearInterval(attendre)
+        }
+      })
+    }, 200)
+    // Sécurité — arrêter après 5 secondes
+    setTimeout(() => clearInterval(attendre), 5000)
     fermer()
   }
 
@@ -48,7 +55,7 @@ export default function BanniereReprise() {
   return (
     <div style={{
       position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
-      background: '#1a1a2e', borderRadius: '16px', padding: '14px 20px',
+      background: 'var(--bleu)', borderRadius: '16px', padding: '14px 20px',
       display: 'flex', alignItems: 'center', gap: '14px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.25)', zIndex: 150,
       maxWidth: '90vw', width: '480px', border: '1px solid rgba(217,172,42,0.3)'
@@ -58,8 +65,11 @@ export default function BanniereReprise() {
         <p style={{ fontSize: '13px', color: 'white', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{piste.titre}</p>
         <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{piste.sheikh} · {formaterTemps(position)}</p>
       </div>
-      <button onClick={reprendre} style={{ background: 'var(--bleu)', color: 'white', border: 'none', borderRadius: '10px', padding: '8px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit' }}>
-        ▶ Continuer
+      <button onClick={reprendre} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '10px', padding: '8px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        Continuer
       </button>
       <button onClick={fermer} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '18px', padding: '0', flexShrink: 0 }}>
         ✕
