@@ -15,7 +15,7 @@ function normaliser(texte: string): string {
 }
 
 type Categorie = { id: string; nom: string; slug: string; ordre: number }
-type Livre = { id: string; titre: string; categorie_id: string; nb_cours?: number }
+type Livre = { id: string; titre: string; categorie_id: string; titre_arabe?: string; nb_cours?: number }
 
 const couleurBg: Record<string, string> = {
     Aqeedah: '#e8f0f8',
@@ -70,7 +70,8 @@ export default function Audio() {
         const cat = categories.find(c => c.id === l.categorie_id)
         const matchCategorie = categorieActive === 'toutes' || cat?.slug === categorieActive
         const matchRecherche = recherche === '' ||
-            normaliser(l.titre).includes(normaliser(recherche))
+            normaliser(l.titre).includes(normaliser(recherche)) ||
+            (l.titre_arabe ? l.titre_arabe.includes(recherche) : false)
         return matchCategorie && matchRecherche
     })
 
@@ -141,9 +142,23 @@ export default function Audio() {
                                     </span>
                                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', lineHeight: 1.4, flex: 1 }}>{l.titre}</h3>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: '12px', color: '#bbb' }}>
-                                            {nbVersions > 0 ? `${nbVersions} version${nbVersions > 1 ? 's' : ''} disponible${nbVersions > 1 ? 's' : ''}` : 'Bientot disponible'}
-                                        </span>
+                                        {l.titre_arabe ? (
+                                            <span style={{
+                                                fontSize: '13px',
+                                                fontWeight: 500,
+                                                padding: '3px 10px',
+                                                borderRadius: '10px',
+                                                background: '#f0f0f0',
+                                                color: '#888',
+                                                fontFamily: "'IBM Plex Sans Arabic', sans-serif",
+                                                direction: 'rtl',
+                                                display: 'inline-block',
+                                            }}>
+                                                {l.titre_arabe}
+                                            </span>
+                                        ) : (
+                                            <span />
+                                        )}
                                         <span style={{ fontSize: '13px', color: 'var(--texte)', fontWeight: 500 }}>Voir →</span>
                                     </div>
                                 </Link>
