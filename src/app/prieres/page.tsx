@@ -83,7 +83,7 @@ export default function Prieres() {
         setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
         const d = new Date()
         const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()
-        const res = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=2')
+        const res = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=99&methodSettings=15,null,15')
         const data = await res.json()
         const t = data.data.timings
         const hijri = data.data.date.hijri
