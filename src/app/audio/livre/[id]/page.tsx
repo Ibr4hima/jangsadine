@@ -114,26 +114,22 @@ export default function PageLivre() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {versions.map(v => (
-            <div key={v.id} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', transition: 'border-color 0.15s, transform 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
+            <Link key={v.id} href={`/audio/${v.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', marginBottom: '6px' }}>{v.titre || livre.titre}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: couleurBg[categorie] || '#f0f0f0', color: couleurTxt[categorie] || '#666' }}>{v.sheikh}</span>
-                    <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{v.nb_episodes} épisode{v.nb_episodes > 1 ? 's' : ''}</span>
-                  </div>
-                  {v.description && (
-                    <p style={{ fontSize: '13px', color: '#888', lineHeight: 1.6, marginBottom: '12px' }}>{v.description}</p>
-                  )}
-                </div>
-                <Link href={`/audio/${v.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--bleu)', color: 'white', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  Écouter →
-                </Link>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--bleu)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 0, height: 0, borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '12px solid white', marginLeft: '3px' }} />
               </div>
-            </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.titre || livre.titre}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: couleurBg[categorie] || '#f0f0f0', color: couleurTxt[categorie] || '#666' }}>{v.sheikh}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{v.nb_episodes}</span>
+                </div>
+              </div>
+              <span style={{ fontSize: '13px', color: 'var(--bleu)', fontWeight: 600, flexShrink: 0 }}>→</span>
+            </Link>
           ))}
         </div>
       </div>
