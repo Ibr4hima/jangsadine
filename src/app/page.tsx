@@ -248,7 +248,7 @@ export default function Accueil() {
                     />
                     <p style={{ fontSize: '12px', color: '#999' }}>{cours?.sheikh} · {ep.duree}</p>
                   </div>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: couleurBg[nomCat] || '#f0f0f0', border: '1px solid ' + (couleurTxt[nomCat] || '#ccc'), flexShrink: 0 }} />                </Link>
+                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: couleurBg[nomCat] || '#f0f0f0', border: '0.7px solid ' + (couleurTxt[nomCat] || '#ccc'), flexShrink: 0 }} />                </Link>
               )
             })}
           </div>
