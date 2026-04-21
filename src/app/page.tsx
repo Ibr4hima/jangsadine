@@ -8,6 +8,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+const couleurBg: Record<string, string> = {
+  Aqeedah: '#e8f0f8', Fiqh: '#faf3dc', Hadith: '#eaf4ee', Tafsir: '#fde8f0',
+  Seerah: '#fdf0eb', 'Bons comportements': '#f2eefa', 'Sciences du Coran': '#e8f6f5', 'Séries de cours': '#e8f8e8',
+}
+const couleurTxt: Record<string, string> = {
+  Aqeedah: '#28558b', Fiqh: '#b8911f', Hadith: '#2d7a4f', Tafsir: '#a02060',
+  Seerah: '#c05c2e', 'Bons comportements': '#6b3db5', 'Sciences du Coran': '#1a8a7a', 'Séries de cours': '#1a7a1a',
+}
+
 
 const modules = [
   { nom: 'Cours audio', href: '/audio', couleur: '#e8f0f8', iconColor: '#28558b' },
@@ -28,16 +37,16 @@ const icones: Record<string, React.ReactNode> = {
 }
 
 export default function Accueil() {
-  const [derniersCoursDB, setDerniersCoursDB] = useState<{ id: string; titre: string; sheikh: string; nb_episodes: number; categories: { nom: string } }[]>([])
+  const [derniersEpisodes, setDerniersEpisodes] = useState<{ id: string; titre: string; duree: string; cours: { id: string; titre: string; sheikh: string; categories: { nom: string } } }[]>([])
 
   useEffect(() => {
     async function charger() {
       const { data } = await supabase
-        .from('cours')
-        .select('id, titre, sheikh, nb_episodes, categories(nom)')
+        .from('episodes')
+        .select('id, titre, duree, cours:cours_id(id, titre, sheikh, categories(nom))')
         .order('created_at', { ascending: false })
-        .limit(3)
-      if (data) setDerniersCoursDB(data as any)
+        .limit(5)
+      if (data) setDerniersEpisodes(data as any)
     }
     charger()
   }, [])
@@ -215,37 +224,36 @@ export default function Accueil() {
 
           {/* Aperçu 3 audios */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {derniersCoursDB.map((cours) => (
-              <Link key={cours.id} href={`/audio/${cours.id}`} style={{
-                background: 'white',
-                border: '1px solid var(--bordure)',
-                borderRadius: '12px',
-                padding: '14px 18px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                textDecoration: 'none',
-                transition: 'border-color 0.15s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
-              >
-                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--bleu)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <div style={{ width: 0, height: 0, borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '12px solid white', marginLeft: '3px' }} />
+            {derniersEpisodes.map((ep, index) => {
+              const cours = ep.cours as any
+              return (
+                <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
+                    {index + 1}
+                  </span>
+                  <Link href={`/audio/${cours?.id}`} style={{
+                    flex: 1, minWidth: 0, overflow: 'hidden', background: 'white',
+                    border: '1px solid var(--bordure)', borderRadius: '12px',
+                    padding: '12px 14px', display: 'flex', alignItems: 'center',
+                    gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s'
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
+                  >
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #aaa', marginLeft: '2px' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ep.titre}</p>
+                      <p style={{ fontSize: '12px', color: '#999' }}>{cours?.sheikh} · {ep.duree}</p>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: couleurBg[(cours?.categories as any)?.nom] || '#f0f0f0', color: couleurTxt[(cours?.categories as any)?.nom] || '#666', flexShrink: 0 }}>
+                      {(cours?.categories as any)?.nom}
+                    </span>
+                  </Link>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--texte)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {cours.titre}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#aaa' }}>
-                    {cours.sheikh} · {cours.nb_episodes} épisode{cours.nb_episodes > 1 ? 's' : ''}
-                  </div>
-                </div>
-                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '10px', background: '#e8f0f8', color: 'var(--bleu)', fontWeight: 500, flexShrink: 0 }}>
-                  {(cours.categories as any)?.nom}
-                </span>
-              </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
