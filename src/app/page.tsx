@@ -45,7 +45,7 @@ export default function Accueil() {
         .from('episodes')
         .select('id, titre, duree, cours:cours_id(id, titre, sheikh, categories(nom))')
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(3)
       if (data) setDerniersEpisodes(data as any)
     }
     charger()
