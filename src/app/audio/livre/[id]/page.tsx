@@ -128,7 +128,6 @@ export default function PageLivre() {
                   <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{v.nb_episodes}</span>
                 </div>
               </div>
-              <span style={{ fontSize: '13px', color: 'var(--bleu)', fontWeight: 600, flexShrink: 0 }}>→</span>
             </Link>
           ))}
         </div>
