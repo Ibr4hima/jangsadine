@@ -37,9 +37,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current = audio
     audio.addEventListener('timeupdate', () => {
       setProgression((audio.currentTime / audio.duration) * 100 || 0)
-      if (Math.floor(audio.currentTime) % 5 === 0) {
-        localStorage.setItem('derniere_position', String(Math.floor(audio.currentTime)))
-      }
     })
     audio.addEventListener('loadedmetadata', () => setDureeTotal(audio.duration))
     audio.addEventListener('play', () => setEnLecture(true))

@@ -1,19 +1,17 @@
 'use client'
 import { useAudio } from '@/contexts/AudioContext'
 import { useEffect, useState } from 'react'
+import TitreDefilant from './TitreDefilant'
 
 export default function BanniereReprise() {
   const { jouer } = useAudio()
   const [piste, setPiste] = useState<any>(null)
-  const [position, setPosition] = useState(0)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const p = localStorage.getItem('derniere_piste')
-    const pos = localStorage.getItem('derniere_position')
     if (p) {
       setPiste(JSON.parse(p))
-      setPosition(Number(pos) || 0)
       setVisible(true)
     }
   }, [])
@@ -21,36 +19,15 @@ export default function BanniereReprise() {
   function reprendre() {
     if (!piste) return
     jouer(piste)
-    // Attendre que l'audio soit chargé avant de seek
-    const attendre = setInterval(() => {
-      const audios = document.querySelectorAll('audio')
-      audios.forEach(audio => {
-        if (audio.readyState >= 2 && position > 0) {
-          audio.currentTime = position
-          clearInterval(attendre)
-        }
-      })
-    }, 200)
-    // Sécurité — arrêter après 5 secondes
-    setTimeout(() => clearInterval(attendre), 5000)
     fermer()
   }
 
   function fermer() {
     setVisible(false)
     localStorage.removeItem('derniere_piste')
-    localStorage.removeItem('derniere_position')
   }
 
   if (!visible || !piste) return null
-
-  function formaterTemps(s: number) {
-    const h = Math.floor(s / 3600)
-    const m = Math.floor((s % 3600) / 60)
-    const sec = Math.floor(s % 60)
-    if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
-    return m + ':' + sec.toString().padStart(2, '0')
-  }
 
   return (
     <div style={{
@@ -62,8 +39,8 @@ export default function BanniereReprise() {
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '1px' }}>Reprendre l'écoute</p>
-        <p style={{ fontSize: '13px', color: 'white', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{piste.titre}</p>
-        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{piste.sheikh} · {formaterTemps(position)}</p>
+        <TitreDefilant texte={piste.titre} style={{ fontSize: '13px', color: 'white', fontWeight: 600 }} />
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{piste.sheikh}</p>
       </div>
       <button onClick={reprendre} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '10px', padding: '8px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
