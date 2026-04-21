@@ -144,7 +144,7 @@ export default function Audio() {
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         {l.titre_arabe ? (
                                             <span style={{
-                                                fontSize: '11px',
+                                                fontSize: '12px',
                                                 fontWeight: 500,
                                                 padding: '3px 10px',
                                                 borderRadius: '10px',
