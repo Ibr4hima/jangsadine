@@ -35,13 +35,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = new Audio()
     audioRef.current = audio
-    audio.addEventListener('timeupdate', () => setProgression((audio.currentTime / audio.duration) * 100 || 0))
+    audio.addEventListener('timeupdate', () => {
+      setProgression((audio.currentTime / audio.duration) * 100 || 0)
+      if (Math.floor(audio.currentTime) % 5 === 0) {
+        localStorage.setItem('derniere_position', String(Math.floor(audio.currentTime)))
+      }
+    })
     audio.addEventListener('loadedmetadata', () => setDureeTotal(audio.duration))
     audio.addEventListener('play', () => setEnLecture(true))
     audio.addEventListener('pause', () => setEnLecture(false))
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
-    // Boutons du lecteur natif iOS/Android
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => audio.play())
       navigator.mediaSession.setActionHandler('pause', () => audio.pause())
@@ -61,6 +65,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current.src = nouvellePiste.url
     audioRef.current.play()
     setPiste(nouvellePiste)
+    localStorage.setItem('derniere_piste', JSON.stringify(nouvellePiste))
     setProgression(0)
     setDureeTotal(0)
 
