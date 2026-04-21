@@ -73,10 +73,13 @@ export default function Prieres() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { latitude, longitude } = pos.coords
-        const geo = await fetch('https://nominatim.openstreetmap.org/reverse?lat=' + latitude + '&lon=' + longitude + '&format=json')
+        const geo = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`
+        )
         const gd = await geo.json()
-        const nomVille = gd.address?.city || gd.address?.town || gd.address?.village || ''
-        const nomPays = gd.address?.country || ''
+        console.log(gd.countryName)
+        const nomVille = gd.city || gd.locality || gd.principalSubdivision || ''
+        const nomPays = (gd.countryName || '').replace(/\s*\(.*\)\s*/g, '').trim()
         setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
         const d = new Date()
         const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()

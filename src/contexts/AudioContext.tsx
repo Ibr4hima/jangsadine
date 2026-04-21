@@ -45,8 +45,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => audio.play())
       navigator.mediaSession.setActionHandler('pause', () => audio.pause())
-      navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime -= 15 })
-      navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime += 15 })
+      navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime -= 10 })
+      navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime += 10 })
     }
 
     return () => { audio.pause(); audio.src = '' }
@@ -86,8 +86,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current.currentTime = (pct / 100) * audioRef.current.duration
   }
 
-  function reculer() { if (audioRef.current) audioRef.current.currentTime -= 15 }
-  function avancer() { if (audioRef.current) audioRef.current.currentTime += 15 }
+  function reculer() { if (audioRef.current) audioRef.current.currentTime -= 10 }
+  function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
   function fermer() {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = '' }
     setPiste(null); setEnLecture(false); setProgression(0)
