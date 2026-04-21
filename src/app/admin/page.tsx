@@ -5,7 +5,7 @@ type Categorie = { id: string; nom: string; slug: string }
 type CoursItem = { id: string; titre: string; sheikh: string }
 export default function Admin() {
     const [categories, setCategories] = useState<Categorie[]>([])
-    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference'>('livre')
+    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa'>('livre')
     const [livresList, setLivresList] = useState<{ id: string; titre: string }[]>([])
     const [coursList, setCoursList] = useState<CoursItem[]>([])
     const [livreId, setLivreId] = useState('')
@@ -39,6 +39,14 @@ export default function Admin() {
     const [confSheikh, setConfSheikh] = useState('')
     const [confDuree, setConfDuree] = useState('')
     const [confFichier, setConfFichier] = useState<File | null>(null)
+    const [fatwaCats, setFatwaCats] = useState<{ id: string; nom: string }[]>([])
+    const [fatwaSheikhs, setFatwaSheikhs] = useState<{ id: string; nom: string }[]>([])
+    const [fatwaQuestion, setFatwaQuestion] = useState('')
+    const [fatwaSheikh, setFatwaSheikh] = useState('')
+    const [fatwaCat, setFatwaCat] = useState('')
+    const [fatwaNouveauCat, setFatwaNouveauCat] = useState('')
+    const [fatwaNouveauSheikh, setFatwaNouveauSheikh] = useState('')
+    const [fatwaFichier, setFatwaFichier] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
     useEffect(() => {
@@ -46,9 +54,13 @@ export default function Admin() {
             const { data: cats } = await supabase.from('categories').select('*').order('ordre')
             const { data: cours } = await supabase.from('cours').select('id,titre,sheikh').order('titre')
             const { data: livres } = await supabase.from('livres').select('id,titre').order('titre')
+            const { data: fCats } = await supabase.from('fatwas_categories').select('*').order('nom')
+            const { data: fSheikhs } = await supabase.from('fatwas_sheikhs').select('*').order('nom')
             if (cats) setCategories(cats)
             if (cours) setCoursList(cours)
             if (livres) setLivresList(livres)
+            if (fCats) setFatwaCats(fCats)
+            if (fSheikhs) setFatwaSheikhs(fSheikhs)
         }
         charger()
     }, [])
@@ -176,6 +188,49 @@ export default function Admin() {
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
         setUploading(false)
     }
+
+    async function ajouterFatwa(e: React.FormEvent) {
+        e.preventDefault()
+        if (!fatwaFichier) return setMessage('Selectionne un fichier audio')
+        setUploading(true); setMessage('')
+        try {
+            const urlAudio = await uploadFichier(fatwaFichier, 'fatwas')
+            const duree = await getDuree(fatwaFichier)
+
+            // Créer catégorie si nouvelle
+            let catFinale = fatwaCat
+            if (fatwaNouveauCat) {
+                await supabase.from('fatwas_categories').insert({ nom: fatwaNouveauCat })
+                catFinale = fatwaNouveauCat
+                const { data } = await supabase.from('fatwas_categories').select('*').order('nom')
+                if (data) setFatwaCats(data)
+            }
+
+            // Créer sheikh si nouveau
+            let sheikhFinal = fatwaSheikh
+            if (fatwaNouveauSheikh) {
+                await supabase.from('fatwas_sheikhs').insert({ nom: fatwaNouveauSheikh })
+                sheikhFinal = fatwaNouveauSheikh
+                const { data } = await supabase.from('fatwas_sheikhs').select('*').order('nom')
+                if (data) setFatwaSheikhs(data)
+            }
+
+            const { error } = await supabase.from('fatwas').insert({
+                question: fatwaQuestion,
+                sheikh: sheikhFinal,
+                categorie: catFinale,
+                url_audio: urlAudio,
+                duree
+            })
+            if (error) throw error
+            setMessage('Fatwa ajoutée avec succès !')
+            setFatwaQuestion(''); setFatwaSheikh(''); setFatwaCat(''); setFatwaNouveauCat(''); setFatwaNouveauSheikh(''); setFatwaFichier(null)
+            const input = document.getElementById('fatwa-input') as HTMLInputElement
+            if (input) input.value = ''
+        } catch (err) { setMessage('Erreur upload'); console.error(err) }
+        setUploading(false)
+    }
+
     const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px', fontFamily: 'inherit', outline: 'none', marginBottom: '14px' }
     const labelStyle = { fontSize: '13px', fontWeight: 600 as const, color: '#444', display: 'block' as const, marginBottom: '5px' }
     const onglets = [
@@ -185,6 +240,7 @@ export default function Admin() {
         { id: 'ebook', label: 'Ebook' },
         { id: 'khoutbah', label: 'Khoutbah' },
         { id: 'conference', label: 'Conference' },
+        { id: 'fatwa', label: 'Fatwa' },
     ]
     return (
         <main style={{ minHeight: '100vh', background: '#f8f6f1', padding: '40px 24px' }}>
@@ -358,6 +414,41 @@ export default function Admin() {
                             <input id="conf-input" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setConfFichier(e.target.files?.[0] || null)} required />
                             <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
                                 {uploading ? 'Upload en cours...' : 'Ajouter'}
+                            </button>
+                        </form>
+                    </div>
+                )}
+                {onglet === 'fatwa' && (
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvelle Fatwa</h2>
+                        <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>La durée est détectée automatiquement.</p>
+                        <form onSubmit={ajouterFatwa}>
+                            <label style={labelStyle}>Question</label>
+                            <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={fatwaQuestion} onChange={e => setFatwaQuestion(e.target.value)} placeholder="ex: Comment réparer sa prière si l'imam nous a devancé ?" required />
+
+                            <label style={labelStyle}>Sheikh</label>
+                            {fatwaSheikhs.length > 0 && (
+                                <select style={{ ...inputStyle, background: 'white' }} value={fatwaSheikh} onChange={e => setFatwaSheikh(e.target.value)}>
+                                    <option value="">Choisir un sheikh existant...</option>
+                                    {fatwaSheikhs.map(s => <option key={s.id} value={s.nom}>{s.nom}</option>)}
+                                </select>
+                            )}
+                            <input style={inputStyle} value={fatwaNouveauSheikh} onChange={e => setFatwaNouveauSheikh(e.target.value)} placeholder="Ou ajouter un nouveau sheikh..." />
+
+                            <label style={labelStyle}>Catégorie</label>
+                            {fatwaCats.length > 0 && (
+                                <select style={{ ...inputStyle, background: 'white' }} value={fatwaCat} onChange={e => setFatwaCat(e.target.value)}>
+                                    <option value="">Choisir une catégorie existante...</option>
+                                    {fatwaCats.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
+                                </select>
+                            )}
+                            <input style={inputStyle} value={fatwaNouveauCat} onChange={e => setFatwaNouveauCat(e.target.value)} placeholder="Ou créer une nouvelle catégorie..." />
+
+                            <label style={labelStyle}>Fichier audio</label>
+                            <input id="fatwa-input" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setFatwaFichier(e.target.files?.[0] || null)} required />
+
+                            <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                                {uploading ? 'Upload en cours...' : 'Ajouter la fatwa'}
                             </button>
                         </form>
                     </div>
