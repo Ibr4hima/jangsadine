@@ -18,7 +18,7 @@ function formaterTemps(s: number) {
 
 export default function Fatwas() {
   const [fatwas, setFatwas] = useState<Fatwa[]>([])
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<{ nom: string; couleur: string }[]>([])
   const [sheikhs, setSheikhs] = useState<string[]>([])
   const [categorieActive, setCategorieActive] = useState('toutes')
   const [sheikhActif, setSheikhActif] = useState('tous')
@@ -29,10 +29,10 @@ export default function Fatwas() {
   useEffect(() => {
     async function charger() {
       const { data: fatwasData } = await supabase.from('fatwas').select('*').order('categorie').order('created_at')
-      const { data: catsData } = await supabase.from('fatwas_categories').select('nom').order('nom')
+      const { data: catsData } = await supabase.from('fatwas_categories').select('nom, couleur').order('nom')
       const { data: sheikhsData } = await supabase.from('fatwas_sheikhs').select('nom').order('nom')
       if (fatwasData) setFatwas(fatwasData)
-      if (catsData) setCategories(catsData.map(c => c.nom))
+      if (catsData) setCategories(catsData)
       if (sheikhsData) setSheikhs(sheikhsData.map(s => s.nom))
       setLoading(false)
     }
@@ -79,8 +79,8 @@ export default function Fatwas() {
             Toutes
           </button>
           {categories.map(cat => (
-            <button key={cat} onClick={() => setCategorieActive(cat)} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === cat ? 'none' : '1px solid var(--bordure)', background: categorieActive === cat ? 'var(--bleu)' : 'white', color: categorieActive === cat ? 'white' : '#666', fontFamily: 'inherit' }}>
-              {cat}
+            <button key={cat.nom} onClick={() => setCategorieActive(cat.nom)} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: 'none', background: categorieActive === cat.nom ? cat.couleur + '22' : 'white', color: categorieActive === cat.nom ? cat.couleur : '#666', fontFamily: 'inherit', boxShadow: categorieActive === cat.nom ? 'none' : '0 0 0 1px var(--bordure)' }}>
+              {cat.nom}
             </button>
           ))}
         </div>
@@ -138,7 +138,7 @@ export default function Fatwas() {
                 {/* En-tête catégorie */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                   <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--or)', letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 14px', borderRadius: '20px', border: '1px solid var(--or)', background: '#faf3dc' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 14px', borderRadius: '20px', background: (categories.find(c => c.nom === categorie)?.couleur || '#f0f0f0') + '22', color: categories.find(c => c.nom === categorie)?.couleur || '#666', border: '1px solid ' + ((categories.find(c => c.nom === categorie)?.couleur || '#ccc') + '44') }}>
                     {categorie}
                   </span>
                   <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />

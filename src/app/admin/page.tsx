@@ -46,6 +46,7 @@ export default function Admin() {
     const [fatwaCat, setFatwaCat] = useState('')
     const [fatwaNouveauCat, setFatwaNouveauCat] = useState('')
     const [fatwaNouveauSheikh, setFatwaNouveauSheikh] = useState('')
+    const [fatwaNouveauCouleur, setFatwaNouveauCouleur] = useState('#b7410e')
     const [fatwaFichier, setFatwaFichier] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
@@ -205,7 +206,7 @@ export default function Admin() {
             // Créer catégorie si nouvelle
             let catFinale = fatwaCat
             if (fatwaNouveauCat) {
-                await supabase.from('fatwas_categories').insert({ nom: fatwaNouveauCat })
+                await supabase.from('fatwas_categories').insert({ nom: fatwaNouveauCat, couleur: fatwaNouveauCouleur })
                 catFinale = fatwaNouveauCat
                 const { data } = await supabase.from('fatwas_categories').select('*').order('nom')
                 if (data) setFatwaCats(data)
@@ -229,7 +230,7 @@ export default function Admin() {
             })
             if (error) throw error
             setMessage('Fatwa ajoutée avec succès !')
-            setFatwaQuestion(''); setFatwaSheikh(''); setFatwaCat(''); setFatwaNouveauCat(''); setFatwaNouveauSheikh(''); setFatwaFichier(null)
+            setFatwaQuestion(''); setFatwaSheikh(''); setFatwaCat(''); setFatwaNouveauCat(''); setFatwaNouveauSheikh(''); setFatwaNouveauCouleur('#b7410e'); setFatwaFichier(null)
             const input = document.getElementById('fatwa-input') as HTMLInputElement
             if (input) input.value = ''
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
@@ -448,7 +449,19 @@ export default function Admin() {
                                 </select>
                             )}
                             <input style={inputStyle} value={fatwaNouveauCat} onChange={e => setFatwaNouveauCat(e.target.value)} placeholder="Ou créer une nouvelle catégorie..." />
-
+                            {fatwaNouveauCat && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <label style={labelStyle}>Couleur de la catégorie</label>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {['#b7410e', '#B78F7A', '#A8C3BC', '#d3d3ff', '#bbb791', '#e491a6', '#096c6c', '#ffd3ac', '#00674f', '#E5AA70', '#e35336', '#c68346', '#CCFFCC', '#EED9C4', '#FFA800', '#7B9EA6', '#C4A882', '#8FAF8F', '#D4A5C9', '#A67B5B', '#6B8E9F', '#C9956C', '#7FA99B', '#D4B896', '#9B7FA6', '#5C8374', '#C17B5C', '#8BA5A5', '#D4C5A9', '#A89070']
+                                            .filter(c => !fatwaCats.map(cat => (cat as any).couleur).includes(c))
+                                            .map(c => (
+                                                <div key={c} onClick={() => setFatwaNouveauCouleur(c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, cursor: 'pointer', border: fatwaNouveauCouleur === c ? '3px solid #1a1a2e' : '3px solid transparent', transition: 'all 0.15s' }} />
+                                            ))}
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#aaa', marginTop: '6px' }}>Couleur sélectionnée : <span style={{ fontWeight: 600, color: fatwaNouveauCouleur }}>{fatwaNouveauCouleur}</span></p>
+                                </div>
+                            )}
                             <label style={labelStyle}>Fichier audio</label>
                             <input id="fatwa-input" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setFatwaFichier(e.target.files?.[0] || null)} required />
 
