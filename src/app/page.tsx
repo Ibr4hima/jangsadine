@@ -90,7 +90,7 @@ export default function Accueil() {
             lineHeight: 1.7,
             marginBottom: '32px',
           }}>
-            Cours audio, khoutbah, conférences, ebooks et heures de prières —<br />
+            Cours audio, khoutbah, conférences, fatwas, ebooks et heures de prières —<br />
             accessible à tous gratuitement.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
