@@ -47,6 +47,7 @@ const liens = [
   { label: 'Cours audio', href: '/audio' },
   { label: 'Conférences', href: '/conferences' },
   { label: 'Khoutbah', href: '/khoutbah' },
+  { label: 'Fatwas', href: '/fatwas' },
   { label: 'Prières', href: '/prieres' },
   { label: 'Ebooks', href: '/ebooks' },
 ]
