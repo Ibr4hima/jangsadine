@@ -9,13 +9,14 @@ type Props = {
 export default function TitreDefilant({ texte, style }: Props) {
   const conteneurRef = useRef<HTMLDivElement>(null)
   const texteRef = useRef<HTMLSpanElement>(null)
-  const [deborde, setDeborde] = useState(false)
+  const [translation, setTranslation] = useState(0)
 
   useEffect(() => {
     const conteneur = conteneurRef.current
     const texteEl = texteRef.current
     if (!conteneur || !texteEl) return
-    setDeborde(texteEl.scrollWidth > conteneur.clientWidth)
+    const depasse = texteEl.scrollWidth - conteneur.clientWidth
+    setTranslation(depasse > 0 ? depasse : 0)
   }, [texte])
 
   return (
@@ -24,8 +25,8 @@ export default function TitreDefilant({ texte, style }: Props) {
         ref={texteRef}
         style={{
           display: 'inline-block',
-          animation: deborde ? 'defilement-titre 12s linear infinite' : 'none',
-          paddingRight: deborde ? '60px' : '0',
+          animation: translation > 0 ? 'defilement-titre 10s ease-in-out infinite' : 'none',
+          ['--tx' as any]: `-${translation}px`,
         }}
       >
         {texte}
@@ -33,9 +34,11 @@ export default function TitreDefilant({ texte, style }: Props) {
       <style>{`
         @keyframes defilement-titre {
           0%   { transform: translateX(0); }
-          30%  { transform: translateX(0); }
-          80%  { transform: translateX(-100%); }
-          100% { transform: translateX(-100%); }
+          20%  { transform: translateX(0); }
+          50%  { transform: translateX(var(--tx)); }
+          70%  { transform: translateX(var(--tx)); }
+          95%  { transform: translateX(0); }
+          100% { transform: translateX(0); }
         }
       `}</style>
     </div>
