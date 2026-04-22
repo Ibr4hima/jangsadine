@@ -65,7 +65,12 @@ export default function Admin() {
         charger()
     }, [])
     async function uploadFichier(fichier: File, dossier: string) {
-        const nomFichier = `${dossier}/${Date.now()}-${fichier.name.replace(/\s/g, '-')}`
+        const nomNettoye = fichier.name
+            .replace(/\s/g, '-')
+            .replace(/[àâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[îï]/g, 'i')
+            .replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u').replace(/[ç]/g, 'c')
+            .replace(/[^a-zA-Z0-9.\-_]/g, '')
+        const nomFichier = `${dossier}/${Date.now()}-${nomNettoye}`
         const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: fichier.type }) })
         const { url } = await res.json()
         await fetch(url, { method: 'PUT', body: fichier, headers: { 'Content-Type': fichier.type } })
