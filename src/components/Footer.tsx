@@ -13,7 +13,7 @@ function arrondir(n: number): number {
 const reseaux = [
   {
     nom: 'Telegram',
-    href: 'https://t.me/TON_LIEN',
+    href: 'https://t.me/janggsadine',
     couleur: '#229ED9',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -23,7 +23,7 @@ const reseaux = [
   },
   {
     nom: 'Instagram',
-    href: 'https://instagram.com/TON_LIEN',
+    href: 'https://www.instagram.com/jangsadine',
     couleur: '#E1306C',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -33,7 +33,7 @@ const reseaux = [
   },
   {
     nom: 'YouTube',
-    href: 'https://youtube.com/TON_LIEN',
+    href: 'https://www.youtube.com/@jangsadine',
     couleur: '#FF0000',
     icone: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
