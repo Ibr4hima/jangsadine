@@ -24,6 +24,8 @@ export default function Fatwas() {
   const [sheikhActif, setSheikhActif] = useState('tous')
   const [recherche, setRecherche] = useState('')
   const [loading, setLoading] = useState(true)
+  const [sheikhsActifs, setSheikhsActifs] = useState<string[]>([])
+  const [dropdownOuvert, setDropdownOuvert] = useState(false)
   const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker } = useAudio()
 
   useEffect(() => {
@@ -39,11 +41,20 @@ export default function Fatwas() {
     charger()
   }, [])
 
+  useEffect(() => {
+    function fermerDropdown(e: MouseEvent) {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-dropdown]')) setDropdownOuvert(false)
+    }
+    document.addEventListener('click', fermerDropdown)
+    return () => document.removeEventListener('click', fermerDropdown)
+  }, [])
+
   const tempsActuel = (progression / 100) * dureeTotal
 
   const filtres = fatwas.filter(f => {
     const matchCat = categorieActive === 'toutes' || f.categorie === categorieActive
-    const matchSheikh = sheikhActif === 'tous' || f.sheikh === sheikhActif
+    const matchSheikh = sheikhsActifs.length === 0 || sheikhsActifs.includes(f.sheikh)
     const matchRecherche = recherche === '' || f.question.toLowerCase().includes(recherche.toLowerCase()) || f.sheikh.toLowerCase().includes(recherche.toLowerCase())
     return matchCat && matchSheikh && matchRecherche
   })
@@ -73,28 +84,52 @@ export default function Fatwas() {
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px', flex: 1, width: '100%' }}>
 
-        {/* Filtres catégories */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        {/* Filtres */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '32px' }}>
+
+          {/* Bouton sheikh dropdown */}
+          <div data-dropdown="" style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+              onClick={() => setDropdownOuvert(!dropdownOuvert)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: sheikhsActifs.length > 0 ? 'none' : '1px solid var(--bordure)', background: sheikhsActifs.length > 0 ? 'var(--or)' : 'white', color: sheikhsActifs.length > 0 ? 'white' : '#666', fontFamily: 'inherit' }}>
+              <img src="/icons/list.svg" width="18" height="18" />
+              {sheikhsActifs.length > 0 && (
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'white', color: 'var(--or)', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {sheikhsActifs.length}
+                </span>
+              )}
+            </button>
+            {dropdownOuvert && (
+              <div style={{ position: 'absolute', top: '110%', left: 0, background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '8px', zIndex: 50, minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                {sheikhs.map(s => (
+                  <div key={s} onClick={() => setSheikhsActifs(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', background: sheikhsActifs.includes(s) ? '#faf3dc' : 'transparent' }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '4px', border: '2px solid ' + (sheikhsActifs.includes(s) ? 'var(--or)' : '#ccc'), background: sheikhsActifs.includes(s) ? 'var(--or)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {sheikhsActifs.includes(s) && <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>}
+                    </div>
+                    <span style={{ fontSize: '13px', color: 'var(--texte)', fontWeight: sheikhsActifs.includes(s) ? 600 : 400, whiteSpace: 'nowrap' }}>{s}</span>                  </div>
+                ))}
+                {sheikhsActifs.length > 0 && (
+                  <button onClick={() => setSheikhsActifs([])} style={{ width: '100%', marginTop: '6px', padding: '6px', borderRadius: '8px', border: 'none', background: '#f0f0f0', color: '#888', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    Effacer la sélection
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Bouton Toutes */}
           <button onClick={() => setCategorieActive('toutes')} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === 'toutes' ? 'none' : '1px solid var(--bordure)', background: categorieActive === 'toutes' ? 'var(--bleu)' : 'white', color: categorieActive === 'toutes' ? 'white' : '#666', fontFamily: 'inherit' }}>
             Toutes
           </button>
+
+          {/* Catégories */}
           {categories.map(cat => (
             <button key={cat.nom} onClick={() => setCategorieActive(cat.nom)} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: 'none', background: categorieActive === cat.nom ? cat.couleur + '22' : 'white', color: categorieActive === cat.nom ? cat.couleur : '#666', fontFamily: 'inherit', boxShadow: categorieActive === cat.nom ? 'none' : '0 0 0 1px var(--bordure)' }}>
               {cat.nom}
             </button>
           ))}
-        </div>
 
-        {/* Filtres sheikhs */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
-          <button onClick={() => setSheikhActif('tous')} style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', border: sheikhActif === 'tous' ? 'none' : '1px solid var(--bordure)', background: sheikhActif === 'tous' ? 'var(--or)' : 'white', color: sheikhActif === 'tous' ? 'white' : '#666', fontFamily: 'inherit' }}>
-            Tous les sheikhs
-          </button>
-          {sheikhs.map(s => (
-            <button key={s} onClick={() => setSheikhActif(s)} style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', border: sheikhActif === s ? 'none' : '1px solid var(--bordure)', background: sheikhActif === s ? 'var(--or)' : 'white', color: sheikhActif === s ? 'white' : '#666', fontFamily: 'inherit' }}>
-              {s}
-            </button>
-          ))}
         </div>
 
         {/* Lecteur en cours */}
