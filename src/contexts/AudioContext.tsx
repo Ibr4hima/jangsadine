@@ -62,7 +62,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current.src = nouvellePiste.url
     audioRef.current.play()
     setPiste(nouvellePiste)
-    localStorage.setItem('derniere_piste', JSON.stringify(nouvellePiste))
     setProgression(0)
     setDureeTotal(0)
 

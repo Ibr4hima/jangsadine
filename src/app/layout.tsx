@@ -1,4 +1,3 @@
-import BanniereReprise from '@/components/BanniereReprise'
 import LecteurGlobal from '@/components/LecteurGlobal'
 import { AudioProvider } from '@/contexts/AudioContext'
 import type { Metadata } from 'next'
@@ -24,7 +23,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AudioProvider>
           {children}
           <LecteurGlobal />
-          <BanniereReprise />
         </AudioProvider>
       </body>
     </html>
