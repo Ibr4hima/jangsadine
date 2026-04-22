@@ -146,6 +146,12 @@ export default function Fatwas() {
               <span>{formaterTemps(dureeTotal)}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <button onClick={() => {
+                const idx = fatwas.findIndex(f => f.id === piste?.id)
+                if (idx > 0) jouer({ id: fatwas[idx - 1].id, titre: fatwas[idx - 1].question, sheikh: fatwas[idx - 1].sheikh, url: fatwas[idx - 1].url_audio, duree: fatwas[idx - 1].duree, href: '/fatwas' })
+              }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: fatwas.findIndex(f => f.id === piste?.id) > 0 ? 1 : 0.3 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
+              </button>
               <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <img src="/icons/replay_10.svg" width="26" height="26" />
               </button>
@@ -154,6 +160,12 @@ export default function Fatwas() {
               </button>
               <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <img src="/icons/forward_10.svg" width="26" height="26" />
+              </button>
+              <button onClick={() => {
+                const idx = fatwas.findIndex(f => f.id === piste?.id)
+                if (idx < fatwas.length - 1) jouer({ id: fatwas[idx + 1].id, titre: fatwas[idx + 1].question, sheikh: fatwas[idx + 1].sheikh, url: fatwas[idx + 1].url_audio, duree: fatwas[idx + 1].duree, href: '/fatwas' })
+              }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: fatwas.findIndex(f => f.id === piste?.id) < fatwas.length - 1 ? 1 : 0.3 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
               </button>
             </div>
           </div>
