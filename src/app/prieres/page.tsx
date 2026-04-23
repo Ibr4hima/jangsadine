@@ -100,7 +100,7 @@ export default function Prieres() {
         ])
         setLoading(false)
       } catch { setErreur('Impossible de recuperer les horaires'); setLoading(false) }
-    }, () => { setErreur('Position refusee — veuillez autoriser la geolocalisation'); setLoading(false) })
+    }, () => { setErreur('Position refusée — veuillez autoriser la geolocalisation'); setLoading(false) })
   }, [])
 
   const now = nowMin()
