@@ -59,6 +59,7 @@ export default function PageCours() {
     const [cours, setCours] = useState<Cours | null>(null)
     const [episodes, setEpisodes] = useState<Episode[]>([])
     const [loading, setLoading] = useState(true)
+    const [chapitresOuverts, setChapitresOuverts] = useState(false)
     const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker, markerActuel, markers } = useAudio()
 
     useEffect(() => {
@@ -99,25 +100,45 @@ export default function PageCours() {
                     <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
                         <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>En cours d'écoute</p>
                         <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '8px' }}>{piste.titre}</h2>
+
+                        {/* Marker actuel */}
                         {markerActuel && (
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#e8f0f8', borderRadius: '20px', padding: '4px 12px', marginBottom: '12px' }}>
                                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--bleu)', flexShrink: 0 }} />
                                 <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--bleu)' }}>{markerActuel.titre}</span>
                             </div>
                         )}
-                        <div onClick={e => { const rect = e.currentTarget.getBoundingClientRect(); seeker(((e.clientX - rect.left) / rect.width) * 100) }} style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', marginBottom: '6px' }}>
-                            <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
+
+                        {/* Barre de progression avec markers */}
+                        <div style={{ position: 'relative', marginBottom: '6px' }}>
+                            <div onClick={e => { const rect = e.currentTarget.getBoundingClientRect(); seeker(((e.clientX - rect.left) / rect.width) * 100) }}
+                                style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', position: 'relative' }}>
+                                <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
+                                {/* Marqueurs visuels */}
+                                {markers.length > 0 && dureeTotal > 0 && markers.map((m, i) => (
+                                    <div key={i} onClick={e => { e.stopPropagation(); seeker((m.temps_secondes / dureeTotal) * 100) }}
+                                        style={{
+                                            position: 'absolute', top: '50%', transform: 'translate(-50%, -50%)',
+                                            left: (m.temps_secondes / dureeTotal * 100) + '%',
+                                            width: '10px', height: '10px', borderRadius: '50%',
+                                            background: markerActuel?.id === m.id ? 'var(--or)' : 'white',
+                                            border: '2px solid ' + (markerActuel?.id === m.id ? 'var(--or)' : 'var(--bleu)'),
+                                            cursor: 'pointer', zIndex: 2, transition: 'all 0.2s',
+                                            boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '14px' }}>
                             <span>{formaterTemps(tempsActuel)}</span>
                             <span>{formaterTemps(dureeTotal)}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '14px' }}>
-                            <button onClick={() => {
-                                if (!precedent) return
-                                const i = episodes.findIndex(e => e.id === precedent.id)
-                                jouer({ id: precedent.id, titre: precedent.titre, sheikh: cours.sheikh, url: precedent.url_audio, duree: precedent.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })
-                            }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedent ? 1 : 0.3 }}>
+
+                        {/* Contrôles */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: markers.length > 0 ? '16px' : '0' }}>
+                            <button onClick={() => { if (!precedent) return; const i = episodes.findIndex(e => e.id === precedent.id); jouer({ id: precedent.id, titre: precedent.titre, sheikh: cours.sheikh, url: precedent.url_audio, duree: precedent.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedent ? 1 : 0.3 }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
                             </button>
                             <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -129,14 +150,42 @@ export default function PageCours() {
                             <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                 <img src="/icons/forward_10.svg" width="26" height="26" />
                             </button>
-                            <button onClick={() => {
-                                if (!suivant) return
-                                const i = episodes.findIndex(e => e.id === suivant.id)
-                                jouer({ id: suivant.id, titre: suivant.titre, sheikh: cours.sheikh, url: suivant.url_audio, duree: suivant.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })
-                            }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivant ? 1 : 0.3 }}>
+                            <button onClick={() => { if (!suivant) return; const i = episodes.findIndex(e => e.id === suivant.id); jouer({ id: suivant.id, titre: suivant.titre, sheikh: cours.sheikh, url: suivant.url_audio, duree: suivant.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivant ? 1 : 0.3 }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
                             </button>
+                            {/* Bouton chapitres */}
+                            {markers.length > 0 && (
+                                <button onClick={() => setChapitresOuverts(o => !o)} style={{ background: chapitresOuverts ? '#e8f0f8' : 'none', border: 'none', cursor: 'pointer', color: chapitresOuverts ? 'var(--bleu)' : '#aaa', display: 'flex', alignItems: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.15s' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" fill="currentColor">
+                                        <path d="M360-240h440v-80H360v80Zm0-200h440v-80H360v80Zm0-200h440v-80H360v80ZM200-240q-17 0-28.5-11.5T160-280q0-17 11.5-28.5T200-320q17 0 28.5 11.5T240-280q0 17-11.5 28.5T200-240Zm0-200q-17 0-28.5-11.5T160-480q0-17 11.5-28.5T200-520q17 0 28.5 11.5T240-480q0 17-11.5 28.5T200-440Zm0-200q-17 0-28.5-11.5T160-680q0-17 11.5-28.5T200-720q17 0 28.5 11.5T240-680q0 17-11.5 28.5T200-640Z" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
+
+                        {/* Panneau chapitres */}
+                        {markers.length > 0 && chapitresOuverts && (
+                            <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {markers.map((m, i) => {
+                                    const actif = markerActuel?.id === m.id
+                                    const h = Math.floor(m.temps_secondes / 3600)
+                                    const min = Math.floor((m.temps_secondes % 3600) / 60)
+                                    const sec = m.temps_secondes % 60
+                                    const label = h > 0 ? h + ':' + min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0') : min + ':' + sec.toString().padStart(2, '0')
+                                    return (
+                                        <div key={i} onClick={() => seeker((m.temps_secondes / dureeTotal) * 100)}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '10px', cursor: 'pointer', background: actif ? '#e8f0f8' : 'transparent', transition: 'background 0.15s' }}
+                                            onMouseEnter={e => { if (!actif) e.currentTarget.style.background = '#f8f6f1' }}
+                                            onMouseLeave={e => { if (!actif) e.currentTarget.style.background = 'transparent' }}
+                                        >
+                                            <span style={{ fontSize: '11px', fontWeight: 700, color: actif ? 'var(--or)' : '#bbb', minWidth: '38px', flexShrink: 0 }}>{label}</span>
+                                            <span style={{ fontSize: '13px', fontWeight: actif ? 700 : 400, color: actif ? 'var(--bleu)' : 'var(--texte)' }}>{m.titre}</span>
+                                            {actif && <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--bleu)', flexShrink: 0 }} />}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </div>
                 )}
 
