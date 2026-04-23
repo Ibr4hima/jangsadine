@@ -1,31 +1,10 @@
 'use client'
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
-import adhan from 'adhan';
+import * as adhan from 'adhan';
 import { useEffect, useState } from 'react';
 
-
 type PriereInfo = { nom: string; heure: string; cle: string }
-
-function getMethode(countryCode: string): adhan.CalculationParameters {
-  const amerique = ['US', 'CA', 'MX']
-  const moyen_orient = ['SA', 'AE', 'KW', 'QA', 'BH', 'OM', 'YE', 'IQ', 'SY', 'JO', 'LB', 'PS']
-  const asie_sud = ['PK', 'IN', 'BD', 'AF']
-  const egypte = ['EG']
-  const france = ['FR', 'BE', 'CH']
-
-  if (amerique.includes(countryCode)) return adhan.CalculationMethod.NorthAmerica()
-  if (moyen_orient.includes(countryCode)) return adhan.CalculationMethod.UmmAlQura()
-  if (asie_sud.includes(countryCode)) return adhan.CalculationMethod.Karachi()
-  if (egypte.includes(countryCode)) return adhan.CalculationMethod.Egyptian()
-  if (france.includes(countryCode)) {
-    const params = adhan.CalculationMethod.MuslimWorldLeague()
-    params.fajrAngle = 12
-    params.ishaAngle = 12
-    return params
-  }  // Par défaut (Afrique, reste du monde) → MWL
-  return adhan.CalculationMethod.MuslimWorldLeague()
-}
 
 function calculerDernierTiers(maghrib: string, fajr: string): string {
   const [hI, mI] = maghrib.split(':').map(Number)
@@ -72,8 +51,25 @@ function progression(heure: string): number {
   let cible = enMinutes(heure)
   if (cible <= now) cible += 1440
   const restant = cible - now
-  const total = Math.min(restant, 360)
   return Math.max(0, Math.min(100, ((360 - restant) / 360) * 100))
+}
+
+function getMethode(countryCode: string): adhan.CalculationParameters {
+  const amerique = ['US', 'CA', 'MX', 'BR', 'AR', 'CO', 'CL', 'PE', 'VE']
+  const moyen_orient = ['SA', 'AE', 'KW', 'QA', 'BH', 'OM', 'YE', 'IQ', 'SY', 'JO', 'LB', 'PS']
+  const asie_sud = ['PK', 'IN', 'BD', 'AF', 'LK', 'NP']
+  const egypte = ['EG', 'LY', 'SD']
+
+  if (amerique.includes(countryCode)) return adhan.CalculationMethod.NorthAmerica()
+  if (moyen_orient.includes(countryCode)) return adhan.CalculationMethod.UmmAlQura()
+  if (asie_sud.includes(countryCode)) return adhan.CalculationMethod.Karachi()
+  if (egypte.includes(countryCode)) return adhan.CalculationMethod.Egyptian()
+  // Par défaut : MWL — couvre Afrique, Europe, reste du monde
+  return adhan.CalculationMethod.MuslimWorldLeague()
+}
+
+function fmt(date: Date) {
+  return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
 }
 
 export default function Prieres() {
@@ -83,6 +79,7 @@ export default function Prieres() {
   const [erreur, setErreur] = useState('')
   const [tick, setTick] = useState(0)
   const [dateHijri, setDateHijri] = useState('')
+  const [methodeNom, setMethodeNom] = useState('')
 
   useEffect(() => {
     const iv = setInterval(() => setTick(t => t + 1), 1000)
@@ -94,6 +91,8 @@ export default function Prieres() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { latitude, longitude } = pos.coords
+
+        // Géolocalisation inverse
         const geo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`)
         const gd = await geo.json()
         const nomVille = (gd.city || gd.locality || gd.principalSubdivision || '').replace(/\s*\(.*\)\s*/g, '').trim()
@@ -101,7 +100,7 @@ export default function Prieres() {
         const countryCode = gd.countryCode || ''
         setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
 
-        // Date hijri
+        // Date hijri via Aladhan
         const d = new Date()
         const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()
         const resHijri = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=3')
@@ -114,23 +113,29 @@ export default function Prieres() {
         const methode = getMethode(countryCode)
         const prayerTimes = new adhan.PrayerTimes(coords, d, methode)
 
-        function fmt(date: Date) {
-          return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+        // Nom de la méthode pour affichage
+        const nomMethodes: Record<string, string> = {
+          'US': 'ISNA', 'CA': 'ISNA', 'SA': 'Umm al-Qura', 'AE': 'Umm al-Qura',
+          'PK': 'Karachi', 'IN': 'Karachi', 'EG': 'Egyptian',
         }
+        setMethodeNom(nomMethodes[countryCode] || 'Muslim World League')
+
+        const fajrFmt = fmt(prayerTimes.fajr)
+        const maghribFmt = fmt(prayerTimes.maghrib)
 
         setHoraires([
-          { nom: 'Fajr', heure: fmt(prayerTimes.fajr), cle: 'Fajr' },
+          { nom: 'Fajr', heure: fajrFmt, cle: 'Fajr' },
           { nom: 'Lever du soleil', heure: fmt(prayerTimes.sunrise), cle: 'Sunrise' },
           { nom: 'Dhuhr', heure: fmt(prayerTimes.dhuhr), cle: 'Dhuhr' },
           { nom: 'Asr', heure: fmt(prayerTimes.asr), cle: 'Asr' },
-          { nom: 'Maghrib', heure: fmt(prayerTimes.maghrib), cle: 'Maghrib' },
+          { nom: 'Maghrib', heure: maghribFmt, cle: 'Maghrib' },
           { nom: 'Isha', heure: fmt(prayerTimes.isha), cle: 'Isha' },
-          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(fmt(prayerTimes.maghrib), fmt(prayerTimes.fajr)), cle: 'MoitieNuit' },
-          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(fmt(prayerTimes.maghrib), fmt(prayerTimes.fajr)), cle: 'Tahajjud' },
+          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(maghribFmt, fajrFmt), cle: 'MoitieNuit' },
+          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(maghribFmt, fajrFmt), cle: 'Tahajjud' },
         ])
         setLoading(false)
-      } catch { setErreur('Impossible de recuperer les horaires'); setLoading(false) }
-    }, () => { setErreur('Position refusee — veuillez autoriser la geolocalisation'); setLoading(false) })
+      } catch (e) { console.error(e); setErreur('Impossible de recuperer les horaires'); setLoading(false) }
+    }, () => { setErreur('Position refusée — veuillez autoriser la geolocalisation'); setLoading(false) })
   }, [])
 
   const now = nowMin()
@@ -147,8 +152,7 @@ export default function Prieres() {
       <section style={{ background: 'var(--bleu)', padding: '32px 24px 24px', textAlign: 'center' }}>
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>Horaires</p>
         <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'white', marginBottom: '4px' }}>Heures de prières</h1>
-
-        {ville && <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', marginBottom: '8px' }}> {ville}</p>}
+        {ville && <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', marginBottom: '8px' }}>{ville}</p>}
         {dateHijri && (
           <div style={{ display: 'inline-block', background: 'rgba(217,172,42,0.15)', border: '1px solid rgba(217,172,42,0.4)', borderRadius: '20px', padding: '6px 18px', marginTop: '4px' }}>
             <p style={{ fontSize: '14px', color: '#d9ac2a', fontWeight: 500 }}>{dateHijri}</p>
@@ -160,7 +164,7 @@ export default function Prieres() {
       <div style={{ maxWidth: '520px', margin: '0 auto', padding: '32px 24px' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>🕌</div>
             <p>Récupération de votre position...</p>
           </div>
         ) : erreur ? (
@@ -194,7 +198,6 @@ export default function Prieres() {
                 const estProchaine = prochaine?.cle === p.cle
                 const estPassee = enMinutes(p.heure) < now && !estProchaine
                 const estTahajjud = p.cle === 'Tahajjud' || p.cle === 'MoitieNuit'
-                const estSunrise = p.cle === 'Sunrise'
                 return (
                   <div key={p.cle} style={{
                     background: estProchaine ? 'var(--bleu)' : 'white',
@@ -220,13 +223,12 @@ export default function Prieres() {
                 )
               })}
             </div>
-            <p style={{ textAlign: 'center', fontSize: '11px', color: '#ccc', marginTop: '20px' }}>Horaires selon votre position • Méthode ISNA</p>
+            <p style={{ textAlign: 'center', fontSize: '11px', color: '#ccc', marginTop: '20px' }}>Horaires selon votre position • {methodeNom}</p>
           </>
         )}
       </div>
 
       <Footer />
-
     </main>
   )
 }

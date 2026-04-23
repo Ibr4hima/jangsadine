@@ -1,5 +1,6 @@
 'use client'
 import { useAudio } from '@/contexts/AudioContext'
+import * as adhan from 'adhan'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -31,6 +32,22 @@ function tempsRestant(heure: string): string {
     return hh.toString().padStart(2, '0') + ':' + mm.toString().padStart(2, '0') + ':' + ss.toString().padStart(2, '0')
 }
 
+function fmt(date: Date) {
+    return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+}
+
+function getMethode(countryCode: string): adhan.CalculationParameters {
+    const amerique = ['US', 'CA', 'MX', 'BR', 'AR', 'CO', 'CL', 'PE', 'VE']
+    const moyen_orient = ['SA', 'AE', 'KW', 'QA', 'BH', 'OM', 'YE', 'IQ', 'SY', 'JO', 'LB', 'PS']
+    const asie_sud = ['PK', 'IN', 'BD', 'AF', 'LK', 'NP']
+    const egypte = ['EG', 'LY', 'SD']
+    if (amerique.includes(countryCode)) return adhan.CalculationMethod.NorthAmerica()
+    if (moyen_orient.includes(countryCode)) return adhan.CalculationMethod.UmmAlQura()
+    if (asie_sud.includes(countryCode)) return adhan.CalculationMethod.Karachi()
+    if (egypte.includes(countryCode)) return adhan.CalculationMethod.Egyptian()
+    return adhan.CalculationMethod.MuslimWorldLeague()
+}
+
 export default function Navbar() {
     const [menuOuvert, setMenuOuvert] = useState(false)
     const { piste, enLecture, toggleLecture, fermer } = useAudio()
@@ -46,17 +63,20 @@ export default function Navbar() {
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 try {
                     const { latitude, longitude } = pos.coords
-                    const d = new Date()
-                    const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()
-                    const res = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=2')
-                    const data = await res.json()
-                    const t = data.data.timings
+                    const geo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`)
+                    const gd = await geo.json()
+                    const countryCode = gd.countryCode || ''
+
+                    const coords = new adhan.Coordinates(latitude, longitude)
+                    const methode = getMethode(countryCode)
+                    const prayerTimes = new adhan.PrayerTimes(coords, new Date(), methode)
+
                     const prieres = [
-                        { nom: 'Fajr', heure: t.Fajr },
-                        { nom: 'Dhuhr', heure: t.Dhuhr },
-                        { nom: 'Asr', heure: t.Asr },
-                        { nom: 'Maghrib', heure: t.Maghrib },
-                        { nom: 'Isha', heure: t.Isha },
+                        { nom: 'Fajr', heure: fmt(prayerTimes.fajr) },
+                        { nom: 'Dhuhr', heure: fmt(prayerTimes.dhuhr) },
+                        { nom: 'Asr', heure: fmt(prayerTimes.asr) },
+                        { nom: 'Maghrib', heure: fmt(prayerTimes.maghrib) },
+                        { nom: 'Isha', heure: fmt(prayerTimes.isha) },
                     ]
                     const now = nowMin()
                     const next = prieres.find(p => enMinutes(p.heure) > now) || prieres[0]
@@ -69,7 +89,7 @@ export default function Navbar() {
         return () => clearInterval(iv)
     }, [surPagePrieres])
 
-    useEffect(() => {                             // ← ajouter ce nouveau useEffect juste après
+    useEffect(() => {
         const iv = setInterval(() => setTick(t => t + 1), 1000)
         return () => clearInterval(iv)
     }, [])
@@ -96,39 +116,16 @@ export default function Navbar() {
                         </Link>
                     ))}
 
-                    {/* Lecteur audio navbar */}
                     {piste && (
                         <Link href={piste.href || '#'} style={{ textDecoration: 'none' }}>
-                            <div style={{
-                                display: 'flex',
-                                cursor: 'pointer',
-                                alignItems: 'center',
-                                gap: '6px',
-                                background: 'var(--bleu)',
-                                borderRadius: '20px',
-                                padding: '6px 14px',
-                                height: '30px',
-                                transition: 'opacity 0.15s',
-                                marginLeft: '8px',
-                            }}>
+                            <div style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', gap: '6px', background: 'var(--bleu)', borderRadius: '20px', padding: '6px 14px', height: '30px', transition: 'opacity 0.15s', marginLeft: '8px' }}>
                                 <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '12px' }}>
                                     {[1, 2, 3].map(i => (
-                                        <div key={i} style={{
-                                            width: '2px',
-                                            background: 'var(--or)',
-                                            borderRadius: '2px',
-                                            height: enLecture ? (i === 2 ? '12px' : '7px') : '3px',
-                                            transition: 'height 0.3s ease',
-                                        }} />
+                                        <div key={i} style={{ width: '2px', background: 'var(--or)', borderRadius: '2px', height: enLecture ? (i === 2 ? '12px' : '7px') : '3px', transition: 'height 0.3s ease' }} />
                                     ))}
                                 </div>
                                 <div style={{ maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                    <span style={{
-                                        fontSize: '13px', fontWeight: 600, color: 'white',
-                                        display: 'inline-block',
-                                        animation: piste.titre.length > 18 ? 'defilement 8s linear infinite' : 'none',
-                                        paddingRight: '20px',
-                                    }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'white', display: 'inline-block', animation: piste.titre.length > 18 ? 'defilement 8s linear infinite' : 'none', paddingRight: '20px' }}>
                                         {piste.titre}
                                     </span>
                                 </div>
@@ -146,20 +143,10 @@ export default function Navbar() {
                             </div>
                         </Link>
                     )}
-                    {/* Pill prochaine prière */}
+
                     {prochaine && !surPagePrieres && (
                         <Link href="/prieres" style={{ textDecoration: 'none', marginLeft: '8px' }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                background: 'var(--bleu)',
-                                borderRadius: '20px',
-                                padding: '6px 14px',
-                                height: '30px',
-                                cursor: 'pointer',
-                                transition: 'opacity 0.15s',
-                            }}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bleu)', borderRadius: '20px', padding: '6px 14px', height: '30px', cursor: 'pointer', transition: 'opacity 0.15s' }}
                                 onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
                                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                             >
@@ -210,6 +197,7 @@ export default function Navbar() {
         @keyframes defilement {
             0% { transform: translateX(0) }
             100% { transform: translateX(-100%) }
+        }
       `}</style>
         </header>
     )
