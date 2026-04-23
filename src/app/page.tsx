@@ -198,7 +198,7 @@ export default function Accueil() {
           </p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
             <h2 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--texte)' }}>
-              Cours audio
+              Dourous
             </h2>
             <Link href="/audio" style={{ fontSize: '14px', color: 'var(--bleu)', fontWeight: 500 }}>
               Voir tout →
