@@ -168,7 +168,7 @@ export default function Accueil() {
                     <TitreDefilant texte={cours.titre} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', marginBottom: '4px' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 8px', borderRadius: '10px', background: couleurBg[nomCat] || '#f0f0f0', color: couleurTxt[nomCat] || '#666' }}>{cours.sheikh}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{cours.nb_episodes} ep.</span>
+                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{cours.nb_episodes}</span>
                     </div>
                   </div>
                 </Link>
