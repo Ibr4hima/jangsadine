@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
 import { supabase } from '@/lib/supabase'
-import { BookMarked, BookOpen, Clock, Headphones, Mic } from 'lucide-react'
+import { BookOpen, Headphones, Mic } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -31,8 +31,8 @@ const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Tafsir', 'Seerah', 'Bons compo
 const icones: Record<string, React.ReactNode> = {
   'Cours audio': <Headphones size={22} strokeWidth={1.5} />,
   'Conférences': <Mic size={22} strokeWidth={1.5} />,
-  'Khoutbah': <BookMarked size={22} strokeWidth={1.5} />,
-  'Heures de prières': <Clock size={22} strokeWidth={1.5} />,
+  'Khoutbah': <img src="/icons/mosque.svg" width={24} height={24} />,
+  'Heures de prières': <img src="/icons/prayer_times.svg" width={24} height={24} />,
   'Ebooks': <BookOpen size={22} strokeWidth={1.5} />,
 }
 
