@@ -1,4 +1,5 @@
 'use client'
+import { supabase } from '@/lib/supabase'
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react'
 
 type PisteAudio = {
@@ -8,13 +9,19 @@ type PisteAudio = {
   url: string
   duree?: string
   href?: string
+  precedente?: Omit<PisteAudio, 'precedente' | 'suivante'>
+  suivante?: Omit<PisteAudio, 'precedente' | 'suivante'>
 }
+
+type Marker = { id: string; titre: string; temps_secondes: number }
 
 type AudioContextType = {
   piste: PisteAudio | null
   enLecture: boolean
   progression: number
   dureeTotal: number
+  markers: Marker[]
+  markerActuel: Marker | null
   jouer: (piste: PisteAudio) => void
   toggleLecture: () => void
   seeker: (pct: number) => void
@@ -30,13 +37,23 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [enLecture, setEnLecture] = useState(false)
   const [progression, setProgression] = useState(0)
   const [dureeTotal, setDureeTotal] = useState(0)
+  const [markers, setMarkers] = useState<Marker[]>([])
+  const [markerActuel, setMarkerActuel] = useState<Marker | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const markersRef = useRef<Marker[]>([])
 
   useEffect(() => {
     const audio = new Audio()
     audioRef.current = audio
     audio.addEventListener('timeupdate', () => {
       setProgression((audio.currentTime / audio.duration) * 100 || 0)
+      // Détecter le marker actuel
+      if (markersRef.current.length > 0) {
+        const actuel = [...markersRef.current]
+          .reverse()
+          .find(m => m.temps_secondes <= audio.currentTime)
+        setMarkerActuel(actuel || null)
+      }
     })
     audio.addEventListener('loadedmetadata', () => setDureeTotal(audio.duration))
     audio.addEventListener('play', () => setEnLecture(true))
@@ -53,6 +70,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return () => { audio.pause(); audio.src = '' }
   }, [])
 
+  // Sync markersRef avec markers state
+  useEffect(() => {
+    markersRef.current = markers
+  }, [markers])
+
   function jouer(nouvellePiste: PisteAudio) {
     if (!audioRef.current) return
     if (piste?.id === nouvellePiste.id) {
@@ -64,8 +86,18 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setPiste(nouvellePiste)
     setProgression(0)
     setDureeTotal(0)
+    setMarkers([])
+    setMarkerActuel(null)
 
-    // Titre et sheikh sur l'écran de verrouillage
+    // Charger les markers
+    supabase.from('episode_markers')
+      .select('*')
+      .eq('episode_id', nouvellePiste.id)
+      .order('temps_secondes')
+      .then(({ data }) => {
+        if (data && data.length > 0) setMarkers(data)
+      })
+
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: nouvellePiste.titre,
@@ -73,6 +105,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         album: 'Jàng sa Diné',
         artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
       })
+
+      navigator.mediaSession.setActionHandler('previoustrack',
+        nouvellePiste.precedente ? () => jouer(nouvellePiste.precedente!) : null
+      )
+      navigator.mediaSession.setActionHandler('nexttrack',
+        nouvellePiste.suivante ? () => jouer(nouvellePiste.suivante!) : null
+      )
     }
   }
 
@@ -91,11 +130,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
   function fermer() {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = '' }
-    setPiste(null); setEnLecture(false); setProgression(0)
+    setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
   }
 
   return (
-    <AudioCtx.Provider value={{ piste, enLecture, progression, dureeTotal, jouer, toggleLecture, seeker, reculer, avancer, fermer }}>
+    <AudioCtx.Provider value={{ piste, enLecture, progression, dureeTotal, markers, markerActuel, jouer, toggleLecture, seeker, reculer, avancer, fermer }}>
       {children}
     </AudioCtx.Provider>
   )

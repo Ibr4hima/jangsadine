@@ -59,7 +59,7 @@ export default function PageCours() {
     const [cours, setCours] = useState<Cours | null>(null)
     const [episodes, setEpisodes] = useState<Episode[]>([])
     const [loading, setLoading] = useState(true)
-    const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker } = useAudio()
+    const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker, markerActuel, markers } = useAudio()
 
     useEffect(() => {
         async function charger() {
@@ -98,7 +98,13 @@ export default function PageCours() {
                 {piste && episodes.some(e => e.id === piste.id) && (
                     <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
                         <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>En cours d'écoute</p>
-                        <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '16px' }}>{piste.titre}</h2>
+                        <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '8px' }}>{piste.titre}</h2>
+                        {markerActuel && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#e8f0f8', borderRadius: '20px', padding: '4px 12px', marginBottom: '12px' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--bleu)', flexShrink: 0 }} />
+                                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--bleu)' }}>{markerActuel.titre}</span>
+                            </div>
+                        )}
                         <div onClick={e => { const rect = e.currentTarget.getBoundingClientRect(); seeker(((e.clientX - rect.left) / rect.width) * 100) }} style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', marginBottom: '6px' }}>
                             <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
                         </div>

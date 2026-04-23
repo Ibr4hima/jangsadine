@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 type Categorie = { id: string; nom: string; slug: string }
 type CoursItem = { id: string; titre: string; sheikh: string }
+type Marker = { titre: string; temps: string }
+
 export default function Admin() {
     const [categories, setCategories] = useState<Categorie[]>([])
     const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa'>('livre')
@@ -23,6 +25,9 @@ export default function Admin() {
     const [epNumero, setEpNumero] = useState('')
     const [epDuree, setEpDuree] = useState('')
     const [fichiers, setFichiers] = useState<File[]>([])
+    const [markers, setMarkers] = useState<Marker[]>([])
+    const [markerTitre, setMarkerTitre] = useState('')
+    const [markerTemps, setMarkerTemps] = useState('')
     const [ebTitre, setEbTitre] = useState('')
     const [ebDescription, setEbDescription] = useState('')
     const [ebCategorie, setEbCategorie] = useState('')
@@ -50,6 +55,7 @@ export default function Admin() {
     const [fatwaFichier, setFatwaFichier] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
+
     useEffect(() => {
         async function charger() {
             const { data: cats } = await supabase.from('categories').select('*').order('ordre')
@@ -65,6 +71,7 @@ export default function Admin() {
         }
         charger()
     }, [])
+
     async function uploadFichier(fichier: File, dossier: string) {
         const nomNettoye = fichier.name
             .replace(/\s/g, '-')
@@ -77,6 +84,7 @@ export default function Admin() {
         await fetch(url, { method: 'PUT', body: fichier, headers: { 'Content-Type': fichier.type } })
         return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
     }
+
     function getDuree(file: File): Promise<string> {
         return new Promise(resolve => {
             const audio = new Audio(URL.createObjectURL(file))
@@ -89,6 +97,21 @@ export default function Admin() {
             audio.addEventListener('error', () => resolve(''))
         })
     }
+
+    function tempsEnSecondes(temps: string): number {
+        const parts = temps.split(':').map(Number)
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
+        if (parts.length === 2) return parts[0] * 60 + parts[1]
+        return parts[0]
+    }
+
+    function ajouterMarker() {
+        if (!markerTitre || !markerTemps) return
+        setMarkers(prev => [...prev, { titre: markerTitre, temps: markerTemps }])
+        setMarkerTitre('')
+        setMarkerTemps('')
+    }
+
     async function ajouterLivre(e: React.FormEvent) {
         e.preventDefault(); setMessage(''); setUploading(true)
         try {
@@ -105,6 +128,7 @@ export default function Admin() {
         } catch (err) { setMessage('Erreur'); console.error(err) }
         setUploading(false)
     }
+
     async function ajouterCours(e: React.FormEvent) {
         e.preventDefault(); setMessage('')
         const { error } = await supabase.from('cours').insert({ titre: titre || undefined, sheikh, categorie_id: categorieId, nb_episodes: 0, description: description || null, livre_id: coursLivreId || null })
@@ -115,6 +139,7 @@ export default function Admin() {
             if (data) setCoursList(data)
         }
     }
+
     async function ajouterEpisode(e: React.FormEvent) {
         e.preventDefault()
         if (fichiers.length === 0) return setMessage('Selectionne au moins un fichier audio')
@@ -130,19 +155,32 @@ export default function Admin() {
                 const urlAudio = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
                 const duree = fichiers.length > 1 ? await getDuree(f) : epDuree
                 const titreEp = fichiers.length > 1 ? (epTitre ? epTitre + ' — ' + numero : f.name.replace(/\.[^/.]+$/, '')) : epTitre
-                const { error } = await supabase.from('episodes').insert({ cours_id: coursId, titre: titreEp, numero, duree, url_audio: urlAudio })
+                const { data: epData, error } = await supabase.from('episodes').insert({ cours_id: coursId, titre: titreEp, numero, duree, url_audio: urlAudio }).select().single()
                 if (error) throw error
+
+                // Ajouter les markers si épisode unique
+                if (fichiers.length === 1 && markers.length > 0 && epData) {
+                    for (const m of markers) {
+                        await supabase.from('episode_markers').insert({
+                            episode_id: epData.id,
+                            titre: m.titre,
+                            temps_secondes: tempsEnSecondes(m.temps)
+                        })
+                    }
+                }
+
                 setMessage('Upload ' + (i + 1) + '/' + fichiers.length + '...')
             }
             const { data: eps } = await supabase.from('episodes').select('id').eq('cours_id', coursId)
             await supabase.from('cours').update({ nb_episodes: eps?.length || 0 }).eq('id', coursId)
             setMessage('Episodes ajoutés avec succès !')
-            setEpTitre(''); setEpNumero(''); setEpDuree(''); setFichiers([])
+            setEpTitre(''); setEpNumero(''); setEpDuree(''); setFichiers([]); setMarkers([])
             const input = document.getElementById('fichier-input') as HTMLInputElement
             if (input) input.value = ''
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
         setUploading(false)
     }
+
     async function ajouterEbook(e: React.FormEvent) {
         e.preventDefault()
         if (!ebFichier) return setMessage('Selectionne un fichier PDF')
@@ -162,6 +200,7 @@ export default function Admin() {
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
         setUploading(false)
     }
+
     async function ajouterKhoutbah(e: React.FormEvent) {
         e.preventDefault()
         if (!khFichier) return setMessage('Selectionne un fichier audio')
@@ -178,6 +217,7 @@ export default function Admin() {
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
         setUploading(false)
     }
+
     async function ajouterConference(e: React.FormEvent) {
         e.preventDefault()
         if (!confFichier) return setMessage('Selectionne un fichier audio')
@@ -202,8 +242,6 @@ export default function Admin() {
         try {
             const urlAudio = await uploadFichier(fatwaFichier, 'fatwas')
             const duree = await getDuree(fatwaFichier)
-
-            // Créer catégorie si nouvelle
             let catFinale = fatwaCat
             if (fatwaNouveauCat) {
                 await supabase.from('fatwas_categories').insert({ nom: fatwaNouveauCat, couleur: fatwaNouveauCouleur })
@@ -211,8 +249,6 @@ export default function Admin() {
                 const { data } = await supabase.from('fatwas_categories').select('*').order('nom')
                 if (data) setFatwaCats(data)
             }
-
-            // Créer sheikh si nouveau
             let sheikhFinal = fatwaSheikh
             if (fatwaNouveauSheikh) {
                 await supabase.from('fatwas_sheikhs').insert({ nom: fatwaNouveauSheikh })
@@ -220,14 +256,7 @@ export default function Admin() {
                 const { data } = await supabase.from('fatwas_sheikhs').select('*').order('nom')
                 if (data) setFatwaSheikhs(data)
             }
-
-            const { error } = await supabase.from('fatwas').insert({
-                question: fatwaQuestion,
-                sheikh: sheikhFinal,
-                categorie: catFinale,
-                url_audio: urlAudio,
-                duree
-            })
+            const { error } = await supabase.from('fatwas').insert({ question: fatwaQuestion, sheikh: sheikhFinal, categorie: catFinale, url_audio: urlAudio, duree })
             if (error) throw error
             setMessage('Fatwa ajoutée avec succès !')
             setFatwaQuestion(''); setFatwaSheikh(''); setFatwaCat(''); setFatwaNouveauCat(''); setFatwaNouveauSheikh(''); setFatwaNouveauCouleur('#b7410e'); setFatwaFichier(null)
@@ -248,6 +277,7 @@ export default function Admin() {
         { id: 'conference', label: 'Conference' },
         { id: 'fatwa', label: 'Fatwa' },
     ]
+
     return (
         <main style={{ minHeight: '100vh', background: '#f8f6f1', padding: '40px 24px' }}>
             <div style={{ maxWidth: '640px', margin: '0 auto' }}>
@@ -267,6 +297,7 @@ export default function Admin() {
                         {message}
                     </div>
                 )}
+
                 {onglet === 'livre' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouveau livre</h2>
@@ -289,6 +320,7 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
                 {onglet === 'cours' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouveau cours</h2>
@@ -316,6 +348,7 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
                 {onglet === 'episode' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvel episode</h2>
@@ -350,12 +383,54 @@ export default function Admin() {
                                     {fichiers.length} fichiers sélectionnés — durée détectée automatiquement pour chacun
                                 </div>
                             )}
+
+                            {/* Section markers — uniquement pour épisode unique */}
+                            {fichiers.length <= 1 && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <div style={{ height: '1px', background: '#eee', margin: '8px 0 20px' }} />
+                                    <label style={{ ...labelStyle, marginBottom: '12px' }}>Chapitres / Markers (optionnel)</label>
+
+                                    {/* Liste des markers ajoutés */}
+                                    {markers.length > 0 && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                                            {markers.map((m, i) => (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: '#f8f6f1', borderRadius: '8px' }}>
+                                                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#28558b', flexShrink: 0 }}>{m.temps}</span>
+                                                    <span style={{ fontSize: '13px', color: '#444', flex: 1 }}>{m.titre}</span>
+                                                    <button type="button" onClick={() => setMarkers(prev => prev.filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#e00', cursor: 'pointer', fontSize: '18px', padding: '0', flexShrink: 0 }}>×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Ajouter un marker */}
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                                        <input
+                                            style={{ ...inputStyle, marginBottom: 0, width: '110px', flexShrink: 0 }}
+                                            value={markerTemps}
+                                            onChange={e => setMarkerTemps(e.target.value)}
+                                            placeholder="00:05:31"
+                                        />
+                                        <input
+                                            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+                                            value={markerTitre}
+                                            onChange={e => setMarkerTitre(e.target.value)}
+                                            placeholder="Titre du chapitre..."
+                                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); ajouterMarker() } }}
+                                        />
+                                        <button type="button" onClick={ajouterMarker} style={{ padding: '10px 14px', background: '#e8f0f8', color: '#28558b', border: 'none', borderRadius: '8px', fontSize: '20px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>+</button>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#bbb', marginTop: '6px' }}>Format : MM:SS ou HH:MM:SS — Appuie sur Entrée ou + pour ajouter</p>
+                                </div>
+                            )}
+
                             <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
                                 {uploading ? message || 'Upload en cours...' : fichiers.length > 1 ? 'Uploader ' + fichiers.length + ' episodes' : 'Ajouter'}
                             </button>
                         </form>
                     </div>
                 )}
+
                 {onglet === 'ebook' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '22px' }}>Nouvel ebook</h2>
@@ -382,6 +457,7 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
                 {onglet === 'khoutbah' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvelle khoutbah</h2>
@@ -405,6 +481,7 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
                 {onglet === 'conference' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvelle conference</h2>
@@ -424,6 +501,7 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
                 {onglet === 'fatwa' && (
                     <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
                         <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvelle Fatwa</h2>
@@ -431,7 +509,6 @@ export default function Admin() {
                         <form onSubmit={ajouterFatwa}>
                             <label style={labelStyle}>Question</label>
                             <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={fatwaQuestion} onChange={e => setFatwaQuestion(e.target.value)} placeholder="ex: Comment réparer sa prière si l'imam nous a devancé ?" required />
-
                             <label style={labelStyle}>Sheikh</label>
                             {fatwaSheikhs.length > 0 && (
                                 <select style={{ ...inputStyle, background: 'white' }} value={fatwaSheikh} onChange={e => setFatwaSheikh(e.target.value)}>
@@ -440,7 +517,6 @@ export default function Admin() {
                                 </select>
                             )}
                             <input style={inputStyle} value={fatwaNouveauSheikh} onChange={e => setFatwaNouveauSheikh(e.target.value)} placeholder="Ou ajouter un nouveau sheikh..." />
-
                             <label style={labelStyle}>Catégorie</label>
                             {fatwaCats.length > 0 && (
                                 <select style={{ ...inputStyle, background: 'white' }} value={fatwaCat} onChange={e => setFatwaCat(e.target.value)}>
@@ -464,7 +540,6 @@ export default function Admin() {
                             )}
                             <label style={labelStyle}>Fichier audio</label>
                             <input id="fatwa-input" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setFatwaFichier(e.target.files?.[0] || null)} required />
-
                             <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
                                 {uploading ? 'Upload en cours...' : 'Ajouter la fatwa'}
                             </button>
