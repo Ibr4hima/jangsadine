@@ -1,10 +1,31 @@
 'use client'
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
+import adhan from 'adhan';
 import { useEffect, useState } from 'react';
 
 
 type PriereInfo = { nom: string; heure: string; cle: string }
+
+function getMethode(countryCode: string): adhan.CalculationParameters {
+  const amerique = ['US', 'CA', 'MX']
+  const moyen_orient = ['SA', 'AE', 'KW', 'QA', 'BH', 'OM', 'YE', 'IQ', 'SY', 'JO', 'LB', 'PS']
+  const asie_sud = ['PK', 'IN', 'BD', 'AF']
+  const egypte = ['EG']
+  const france = ['FR', 'BE', 'CH']
+
+  if (amerique.includes(countryCode)) return adhan.CalculationMethod.NorthAmerica()
+  if (moyen_orient.includes(countryCode)) return adhan.CalculationMethod.UmmAlQura()
+  if (asie_sud.includes(countryCode)) return adhan.CalculationMethod.Karachi()
+  if (egypte.includes(countryCode)) return adhan.CalculationMethod.Egyptian()
+  if (france.includes(countryCode)) {
+    const params = adhan.CalculationMethod.MuslimWorldLeague()
+    params.fajrAngle = 12
+    params.ishaAngle = 12
+    return params
+  }  // Par défaut (Afrique, reste du monde) → MWL
+  return adhan.CalculationMethod.MuslimWorldLeague()
+}
 
 function calculerDernierTiers(maghrib: string, fajr: string): string {
   const [hI, mI] = maghrib.split(':').map(Number)
@@ -73,34 +94,43 @@ export default function Prieres() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { latitude, longitude } = pos.coords
-        const geo = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`
-        )
+        const geo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`)
         const gd = await geo.json()
-        console.log(gd.countryName)
-        const nomVille = gd.city || gd.locality || gd.principalSubdivision || ''
+        const nomVille = (gd.city || gd.locality || gd.principalSubdivision || '').replace(/\s*\(.*\)\s*/g, '').trim()
         const nomPays = (gd.countryName || '').replace(/\s*\(.*\)\s*/g, '').trim()
+        const countryCode = gd.countryCode || ''
         setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
+
+        // Date hijri
         const d = new Date()
         const ds = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear()
-        const res = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=99&methodSettings=15,null,15')
-        const data = await res.json()
-        const t = data.data.timings
-        const hijri = data.data.date.hijri
+        const resHijri = await fetch('https://api.aladhan.com/v1/timings/' + ds + '?latitude=' + latitude + '&longitude=' + longitude + '&method=3')
+        const dataHijri = await resHijri.json()
+        const hijri = dataHijri.data.date.hijri
         setDateHijri(hijri.day + ' ' + hijri.month.en + ' ' + hijri.year + ' H')
+
+        // Calcul des heures avec Adhan-js
+        const coords = new adhan.Coordinates(latitude, longitude)
+        const methode = getMethode(countryCode)
+        const prayerTimes = new adhan.PrayerTimes(coords, d, methode)
+
+        function fmt(date: Date) {
+          return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+        }
+
         setHoraires([
-          { nom: 'Fajr', heure: t.Fajr, cle: 'Fajr' },
-          { nom: 'Lever du soleil', heure: t.Sunrise, cle: 'Sunrise' },
-          { nom: 'Dhuhr', heure: t.Dhuhr, cle: 'Dhuhr' },
-          { nom: 'Asr', heure: t.Asr, cle: 'Asr' },
-          { nom: 'Maghrib', heure: t.Maghrib, cle: 'Maghrib' },
-          { nom: 'Isha', heure: t.Isha, cle: 'Isha' },
-          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(t.Maghrib, t.Fajr), cle: 'MoitieNuit' },
-          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(t.Maghrib, t.Fajr), cle: 'Tahajjud' },
+          { nom: 'Fajr', heure: fmt(prayerTimes.fajr), cle: 'Fajr' },
+          { nom: 'Lever du soleil', heure: fmt(prayerTimes.sunrise), cle: 'Sunrise' },
+          { nom: 'Dhuhr', heure: fmt(prayerTimes.dhuhr), cle: 'Dhuhr' },
+          { nom: 'Asr', heure: fmt(prayerTimes.asr), cle: 'Asr' },
+          { nom: 'Maghrib', heure: fmt(prayerTimes.maghrib), cle: 'Maghrib' },
+          { nom: 'Isha', heure: fmt(prayerTimes.isha), cle: 'Isha' },
+          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(fmt(prayerTimes.maghrib), fmt(prayerTimes.fajr)), cle: 'MoitieNuit' },
+          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(fmt(prayerTimes.maghrib), fmt(prayerTimes.fajr)), cle: 'Tahajjud' },
         ])
         setLoading(false)
       } catch { setErreur('Impossible de recuperer les horaires'); setLoading(false) }
-    }, () => { setErreur('Position refusée — veuillez autoriser la geolocalisation'); setLoading(false) })
+    }, () => { setErreur('Position refusee — veuillez autoriser la geolocalisation'); setLoading(false) })
   }, [])
 
   const now = nowMin()
