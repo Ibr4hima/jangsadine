@@ -12,6 +12,7 @@ type Livre = {
   titre: string
   url_pdf: string | null
   description: string | null
+  type: string
   categories: { nom: string }
 }
 
@@ -21,6 +22,13 @@ type Cours = {
   sheikh: string
   nb_episodes: number
   description: string | null
+}
+
+type Chapitre = {
+  id: string
+  titre: string
+  numero: number
+  url_pdf: string | null
 }
 
 const couleurBg: Record<string, string> = {
@@ -36,6 +44,7 @@ export default function PageLivre() {
   const { id } = useParams()
   const [livre, setLivre] = useState<Livre | null>(null)
   const [versions, setVersions] = useState<Cours[]>([])
+  const [chapitres, setChapitres] = useState<Chapitre[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,13 +54,24 @@ export default function PageLivre() {
         .select('*, categories(nom)')
         .eq('id', id)
         .single()
-      const { data: coursData } = await supabase
-        .from('cours')
-        .select('id, titre, sheikh, nb_episodes, description')
-        .eq('livre_id', id)
-        .order('created_at')
-      if (livreData) setLivre(livreData)
-      if (coursData) setVersions(coursData)
+      if (livreData) {
+        setLivre(livreData)
+        if (livreData.type === 'chapitres') {
+          const { data: chapsData } = await supabase
+            .from('chapitres_livre')
+            .select('id, titre, numero, url_pdf')
+            .eq('livre_id', id)
+            .order('numero')
+          if (chapsData) setChapitres(chapsData)
+        } else {
+          const { data: coursData } = await supabase
+            .from('cours')
+            .select('id, titre, sheikh, nb_episodes, description')
+            .eq('livre_id', id)
+            .order('created_at')
+          if (coursData) setVersions(coursData)
+        }
+      }
       setLoading(false)
     }
     charger()
@@ -94,11 +114,9 @@ export default function PageLivre() {
             </p>
           )}
           {livre.url_pdf && (
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <a href={livre.url_pdf} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)' }}>
-                📖 Consulter le livre
-              </a>
-            </div>
+            <a href={livre.url_pdf} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)' }}>
+              📖 Consulter le livre
+            </a>
           )}
         </div>
       </section>
@@ -106,39 +124,86 @@ export default function PageLivre() {
       <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '36px 24px' }}>
-        <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>
-          Versions disponibles
-        </p>
-        <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--texte)', marginBottom: '24px' }}>
-          {versions.length} version{versions.length > 1 ? 's' : ''} de ce cours
-        </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {versions.map(v => (
-            <Link key={v.id} href={`/audio/${v.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
-            >
-              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--bleu)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <div style={{ width: 0, height: 0, borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '12px solid white', marginLeft: '3px' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <TitreDefilant
-                  texte={v.titre || livre.titre}
-                  style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '4px' }}
-                />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: couleurBg[categorie] || '#f0f0f0', color: couleurTxt[categorie] || '#666' }}>{v.sheikh}</span>
-                  <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{v.nb_episodes}</span>
+        {/* MODE CHAPITRES */}
+        {livre.type === 'chapitres' && (
+          <>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>
+              Table des matières
+            </p>
+            <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--texte)', marginBottom: '24px' }}>
+              {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {chapitres.map(chap => (
+                <div key={chap.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#bbb', width: '24px', textAlign: 'right', flexShrink: 0 }}>
+                    {chap.numero}
+                  </span>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Link href={`/audio/livre/${id}/chapitre/${chap.id}`} style={{
+                      flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
+                      padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+                      textDecoration: 'none', transition: 'border-color 0.15s'
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
+                    >
+                      <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: couleurBg[categorie] || '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (couleurTxt[categorie] || '#aaa'), marginLeft: '2px' }} />
+                      </div>
+                      <TitreDefilant texte={chap.titre} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', flex: 1 }} />
+                    </Link>
+                    {chap.url_pdf && (
+                      <a href={chap.url_pdf} target="_blank" rel="noopener noreferrer"
+                        title="Consulter ce chapitre"
+                        style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#faf3dc', border: '1px solid #e8d9a0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none', fontSize: '16px', transition: 'all 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f0e4a0'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#faf3dc'}
+                      >
+                        📖
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* MODE STANDARD */}
+        {livre.type !== 'chapitres' && (
+          <>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>
+              Versions disponibles
+            </p>
+            <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--texte)', marginBottom: '24px' }}>
+              {versions.length} version{versions.length > 1 ? 's' : ''} de ce cours
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {versions.map(v => (
+                <Link key={v.id} href={`/audio/${v.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
+                >
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--bleu)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 0, height: 0, borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '12px solid white', marginLeft: '3px' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <TitreDefilant texte={v.titre || livre.titre} style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '4px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: couleurBg[categorie] || '#f0f0f0', color: couleurTxt[categorie] || '#666' }}>{v.sheikh}</span>
+                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 10px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{v.nb_episodes}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <Footer />
-
     </main>
   )
 }

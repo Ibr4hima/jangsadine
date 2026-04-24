@@ -7,11 +7,12 @@ type Marker = { titre: string; temps: string }
 
 export default function Admin() {
     const [categories, setCategories] = useState<Categorie[]>([])
-    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa'>('livre')
+    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa' | 'chapitre' | 'episode_chapitre'>('livre')
     const [livresList, setLivresList] = useState<{ id: string; titre: string }[]>([])
     const [coursList, setCoursList] = useState<CoursItem[]>([])
     const [livreId, setLivreId] = useState('')
     const [lTitre, setLTitre] = useState('')
+    const [lType, setLType] = useState('standard')
     const [lTitreArabe, setLTitreArabe] = useState('')
     const [lCategorie, setLCategorie] = useState('')
     const [lFichier, setLFichier] = useState<File | null>(null)
@@ -50,6 +51,18 @@ export default function Admin() {
     const [fatwaQuestion, setFatwaQuestion] = useState('')
     const [fatwaSheikh, setFatwaSheikh] = useState('')
     const [fatwaCat, setFatwaCat] = useState('')
+    const [chapLivreId, setChapLivreId] = useState('')
+    const [chapTitre, setChapTitre] = useState('')
+    const [chapNumero, setChapNumero] = useState('')
+    const [chapUrlPdf, setChapUrlPdf] = useState('')
+    const [chapFichierPdf, setChapFichierPdf] = useState<File | null>(null)
+    const [chapitresList, setChapitresList] = useState<{ id: string; titre: string; livre_id: string }[]>([])
+    const [epChapId, setEpChapId] = useState('')
+    const [epChapTitre, setEpChapTitre] = useState('')
+    const [epChapNumero, setEpChapNumero] = useState('')
+    const [epChapDuree, setEpChapDuree] = useState('')
+    const [epChapDescription, setEpChapDescription] = useState('')
+    const [epChapFichiers, setEpChapFichiers] = useState<File[]>([])
     const [fatwaNouveauCat, setFatwaNouveauCat] = useState('')
     const [fatwaNouveauSheikh, setFatwaNouveauSheikh] = useState('')
     const [fatwaNouveauCouleur, setFatwaNouveauCouleur] = useState('#b7410e')
@@ -64,6 +77,8 @@ export default function Admin() {
             const { data: livres } = await supabase.from('livres').select('id,titre').order('titre')
             const { data: fCats } = await supabase.from('fatwas_categories').select('*').order('nom')
             const { data: fSheikhs } = await supabase.from('fatwas_sheikhs').select('*').order('nom')
+            const { data: chaps } = await supabase.from('chapitres_livre').select('id, titre, livre_id').order('numero')
+            if (chaps) setChapitresList(chaps)
             if (cats) setCategories(cats)
             if (cours) setCoursList(cours)
             if (livres) setLivresList(livres)
@@ -118,10 +133,10 @@ export default function Admin() {
         try {
             let urlPdf = null
             if (lFichier) urlPdf = await uploadFichier(lFichier, 'livres')
-            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null })
+            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null, type: lType })
             if (error) throw error
             setMessage('Livre ajouté avec succès !')
-            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null)
+            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null); setLType('standard')
             const input = document.getElementById('livre-pdf') as HTMLInputElement
             if (input) input.value = ''
             const { data } = await supabase.from('livres').select('id,titre').order('titre')
@@ -267,6 +282,59 @@ export default function Admin() {
         setUploading(false)
     }
 
+    async function ajouterChapitre(e: React.FormEvent) {
+        e.preventDefault()
+        setUploading(true); setMessage('')
+        try {
+            let urlPdf = null
+            if (chapFichierPdf) urlPdf = await uploadFichier(chapFichierPdf, 'chapitres')
+            const { error } = await supabase.from('chapitres_livre').insert({
+                livre_id: chapLivreId,
+                titre: chapTitre,
+                numero: parseInt(chapNumero),
+                url_pdf: urlPdf
+            })
+            if (error) throw error
+            setMessage('Chapitre ajouté avec succès !')
+            setChapTitre(''); setChapNumero(''); setChapFichierPdf(null)
+            const { data } = await supabase.from('chapitres_livre').select('id, titre, livre_id').order('numero')
+            if (data) setChapitresList(data)
+            const input = document.getElementById('chap-pdf') as HTMLInputElement
+            if (input) input.value = ''
+        } catch { setMessage('Erreur') }
+        setUploading(false)
+    }
+
+    async function ajouterEpisodeChapitre(e: React.FormEvent) {
+        e.preventDefault()
+        if (epChapFichiers.length === 0) return setMessage('Selectionne au moins un fichier')
+        setUploading(true); setMessage('')
+        try {
+            for (let i = 0; i < epChapFichiers.length; i++) {
+                const f = epChapFichiers[i]
+                const numero = parseInt(epChapNumero) + i
+                const urlAudio = await uploadFichier(f, 'episodes_chapitre')
+                const duree = epChapFichiers.length > 1 ? await getDuree(f) : epChapDuree
+                const titreEp = epChapFichiers.length > 1 ? (epChapTitre ? epChapTitre + ' — ' + numero : f.name.replace(/\.[^/.]+$/, '')) : epChapTitre
+                const { error } = await supabase.from('episodes_chapitre').insert({
+                    chapitre_id: epChapId,
+                    titre: titreEp,
+                    numero,
+                    duree,
+                    url_audio: urlAudio,
+                    description: epChapDescription || null
+                })
+                if (error) throw error
+                setMessage('Upload ' + (i + 1) + '/' + epChapFichiers.length + '...')
+            }
+            setMessage('Episodes ajoutés !')
+            setEpChapTitre(''); setEpChapNumero(''); setEpChapDuree(''); setEpChapDescription(''); setEpChapFichiers([])
+            const input = document.getElementById('ep-chap-input') as HTMLInputElement
+            if (input) input.value = ''
+        } catch { setMessage('Erreur upload') }
+        setUploading(false)
+    }
+
     const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px', fontFamily: 'inherit', outline: 'none', marginBottom: '14px' }
     const labelStyle = { fontSize: '13px', fontWeight: 600 as const, color: '#444', display: 'block' as const, marginBottom: '5px' }
     const onglets = [
@@ -277,6 +345,8 @@ export default function Admin() {
         { id: 'khoutbah', label: 'Khoutbah' },
         { id: 'conference', label: 'Conference' },
         { id: 'fatwa', label: 'Fatwa' },
+        { id: 'chapitre', label: 'Chapitre' },
+        { id: 'episode_chapitre', label: 'Ep. Chapitre' },
     ]
 
     return (
@@ -312,6 +382,11 @@ export default function Admin() {
                             <select style={{ ...inputStyle, background: 'white' }} value={lCategorie} onChange={e => setLCategorie(e.target.value)} required>
                                 <option value="">Selectionner</option>
                                 {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.nom}</option>)}
+                            </select>
+                            <label style={labelStyle}>Type de livre</label>
+                            <select style={{ ...inputStyle, background: 'white' }} value={lType} onChange={e => setLType(e.target.value)}>
+                                <option value="standard">Standard (versions par sheikh)</option>
+                                <option value="chapitres">Chapitres (Sahih al-Bukhary...)</option>
                             </select>
                             <label style={labelStyle}>PDF du livre (optionnel)</label>
                             <input id="livre-pdf" style={{ ...inputStyle, padding: '8px' }} type="file" accept=".pdf" onChange={e => setLFichier(e.target.files?.[0] || null)} />
@@ -549,6 +624,73 @@ export default function Admin() {
                         </form>
                     </div>
                 )}
+
+                {onglet === 'chapitre' && (
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouveau chapitre</h2>
+                        <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>Ajoute un chapitre à un livre de type "Chapitres"</p>
+                        <form onSubmit={ajouterChapitre}>
+                            <label style={labelStyle}>Livre</label>
+                            <select style={{ ...inputStyle, background: 'white' }} value={chapLivreId} onChange={e => setChapLivreId(e.target.value)} required>
+                                <option value="">Sélectionner un livre...</option>
+                                {livresList.map(l => <option key={l.id} value={l.id}>{l.titre}</option>)}
+                            </select>
+                            <label style={labelStyle}>Numéro du chapitre</label>
+                            <input style={inputStyle} type="number" value={chapNumero} onChange={e => setChapNumero(e.target.value)} placeholder="1" required />
+                            <label style={labelStyle}>Titre du chapitre</label>
+                            <input style={inputStyle} value={chapTitre} onChange={e => setChapTitre(e.target.value)} placeholder="ex: Le livre de la purification" required />
+                            <label style={labelStyle}>PDF du chapitre (optionnel)</label>
+                            <input id="chap-pdf" style={{ ...inputStyle, padding: '8px' }} type="file" accept=".pdf" onChange={e => setChapFichierPdf(e.target.files?.[0] || null)} />
+                            <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                                {uploading ? 'En cours...' : 'Ajouter le chapitre'}
+                            </button>
+                        </form>
+                    </div>
+                )}
+
+                {onglet === 'episode_chapitre' && (
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Nouvel épisode de chapitre</h2>
+                        <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>La durée est détectée automatiquement. Upload multiple possible.</p>
+                        <form onSubmit={ajouterEpisodeChapitre}>
+                            <label style={labelStyle}>Chapitre</label>
+                            <select style={{ ...inputStyle, background: 'white' }} value={epChapId} onChange={e => setEpChapId(e.target.value)} required>
+                                <option value="">Sélectionner un chapitre...</option>
+                                {chapitresList.map(c => <option key={c.id} value={c.id}>{c.titre}</option>)}
+                            </select>
+                            <label style={labelStyle}>Titre de base</label>
+                            <input style={inputStyle} value={epChapTitre} onChange={e => setEpChapTitre(e.target.value)} placeholder="ex: Hadith 1" />
+                            <label style={labelStyle}>Numéro de départ</label>
+                            <input style={inputStyle} type="number" value={epChapNumero} onChange={e => setEpChapNumero(e.target.value)} placeholder="1" required />
+                            <label style={labelStyle}>Description (optionnel)</label>
+                            <textarea style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} value={epChapDescription} onChange={e => setEpChapDescription(e.target.value)} placeholder="ex: Ce cours traite de..." />
+                            {epChapFichiers.length === 1 && (
+                                <>
+                                    <label style={labelStyle}>Durée (détectée automatiquement)</label>
+                                    <input style={inputStyle} value={epChapDuree} onChange={e => setEpChapDuree(e.target.value)} placeholder="Détection auto..." />
+                                </>
+                            )}
+                            <label style={labelStyle}>Fichiers audio</label>
+                            <input id="ep-chap-input" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" multiple onChange={async e => {
+                                const files = Array.from(e.target.files || [])
+                                setEpChapFichiers(files)
+                                if (files.length === 1) {
+                                    const duree = await getDuree(files[0])
+                                    setEpChapDuree(duree)
+                                }
+                            }} required />
+                            {epChapFichiers.length > 1 && (
+                                <div style={{ background: '#f0f8ff', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: '#28558b' }}>
+                                    {epChapFichiers.length} fichiers sélectionnés
+                                </div>
+                            )}
+                            <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                                {uploading ? message || 'Upload en cours...' : epChapFichiers.length > 1 ? 'Uploader ' + epChapFichiers.length + ' épisodes' : 'Ajouter'}
+                            </button>
+                        </form>
+                    </div>
+                )}
+
             </div>
         </main>
     )
