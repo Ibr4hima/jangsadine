@@ -154,16 +154,6 @@ export default function PageLivre() {
                       </div>
                       <TitreDefilant texte={chap.titre} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', flex: 1 }} />
                     </Link>
-                    {chap.url_pdf && (
-                      <a href={chap.url_pdf} target="_blank" rel="noopener noreferrer"
-                        title="Consulter ce chapitre"
-                        style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#faf3dc', border: '1px solid #e8d9a0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, textDecoration: 'none', fontSize: '16px', transition: 'all 0.15s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f0e4a0'}
-                        onMouseLeave={e => e.currentTarget.style.background = '#faf3dc'}
-                      >
-                        📖
-                      </a>
-                    )}
                   </div>
                 </div>
               ))}
