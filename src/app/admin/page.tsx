@@ -31,6 +31,7 @@ export default function Admin() {
     const [ebTitre, setEbTitre] = useState('')
     const [ebDescription, setEbDescription] = useState('')
     const [ebCategorie, setEbCategorie] = useState('')
+    const [epDescription, setEpDescription] = useState('')
     const [ebPages, setEbPages] = useState('')
     const [ebFichier, setEbFichier] = useState<File | null>(null)
     const [ebCover, setEbCover] = useState<File | null>(null)
@@ -155,7 +156,7 @@ export default function Admin() {
                 const urlAudio = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
                 const duree = fichiers.length > 1 ? await getDuree(f) : epDuree
                 const titreEp = fichiers.length > 1 ? (epTitre ? epTitre + ' — ' + numero : f.name.replace(/\.[^/.]+$/, '')) : epTitre
-                const { data: epData, error } = await supabase.from('episodes').insert({ cours_id: coursId, titre: titreEp, numero, duree, url_audio: urlAudio }).select().single()
+                const { data: epData, error } = await supabase.from('episodes').insert({ cours_id: coursId, titre: titreEp, numero, description: epDescription || null, duree, url_audio: urlAudio }).select().single()
                 if (error) throw error
 
                 // Ajouter les markers si épisode unique
@@ -174,7 +175,7 @@ export default function Admin() {
             const { data: eps } = await supabase.from('episodes').select('id').eq('cours_id', coursId)
             await supabase.from('cours').update({ nb_episodes: eps?.length || 0 }).eq('id', coursId)
             setMessage('Episodes ajoutés avec succès !')
-            setEpTitre(''); setEpNumero(''); setEpDuree(''); setFichiers([]); setMarkers([])
+            setEpTitre(''); setEpNumero(''); setEpDuree(''); setEpDescription(''); setFichiers([]); setMarkers([])
             const input = document.getElementById('fichier-input') as HTMLInputElement
             if (input) input.value = ''
         } catch (err) { setMessage('Erreur upload'); console.error(err) }
@@ -361,6 +362,8 @@ export default function Admin() {
                             </select>
                             <label style={labelStyle}>Titre de base</label>
                             <input style={inputStyle} value={epTitre} onChange={e => setEpTitre(e.target.value)} placeholder="ex: Les trois principes (numerote auto si multiple)" />
+                            <label style={labelStyle}>Description (optionnel)</label>
+                            <textarea style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} value={epDescription} onChange={e => setEpDescription(e.target.value)} placeholder="ex: Ce cours traite du Hadith Sahih, Hasan et Daif..." />
                             <label style={labelStyle}>Numero de depart</label>
                             <input style={inputStyle} type="number" value={epNumero} onChange={e => setEpNumero(e.target.value)} placeholder="1" required />
                             {fichiers.length === 1 && (
