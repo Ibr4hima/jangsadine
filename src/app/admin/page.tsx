@@ -32,6 +32,7 @@ export default function Admin() {
     const [ebTitre, setEbTitre] = useState('')
     const [ebDescription, setEbDescription] = useState('')
     const [ebCategorie, setEbCategorie] = useState('')
+    const [lSheikh, setLSheikh] = useState('')
     const [epDescription, setEpDescription] = useState('')
     const [ebPages, setEbPages] = useState('')
     const [ebFichier, setEbFichier] = useState<File | null>(null)
@@ -133,10 +134,10 @@ export default function Admin() {
         try {
             let urlPdf = null
             if (lFichier) urlPdf = await uploadFichier(lFichier, 'livres')
-            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null, type: lType })
+            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null, type: lType, sheikh: lSheikh || null })
             if (error) throw error
             setMessage('Livre ajouté avec succès !')
-            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null); setLType('standard')
+            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null); setLType('standard'); setLSheikh('')
             const input = document.getElementById('livre-pdf') as HTMLInputElement
             if (input) input.value = ''
             const { data } = await supabase.from('livres').select('id,titre').order('titre')
@@ -376,6 +377,8 @@ export default function Admin() {
                         <form onSubmit={ajouterLivre}>
                             <label style={labelStyle}>Titre du livre</label>
                             <input style={inputStyle} value={lTitre} onChange={e => setLTitre(e.target.value)} placeholder="ex: Les trois principes fondamentaux" required />
+                            <label style={labelStyle}>Sheikh (optionnel)</label>
+                            <input style={inputStyle} value={lSheikh} onChange={e => setLSheikh(e.target.value)} placeholder="ex: Imam Hassan Sarr" />
                             <label style={labelStyle}>Titre en arabe (optionnel)</label>
                             <input style={inputStyle} value={lTitreArabe} onChange={e => setLTitreArabe(e.target.value)} placeholder="ex: الأصول الثلاثة" dir="rtl" />
                             <label style={labelStyle}>Categorie</label>
