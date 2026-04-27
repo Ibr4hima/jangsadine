@@ -89,11 +89,11 @@ export default function PageChapitre() {
 
     const couleurBg: Record<string, string> = {
         Aqeedah: '#e8f0f8', Fiqh: '#faf3dc', Hadith: '#eaf4ee', 'Tafsir & Sciences du Coran': '#fde8f0',
-        Seerah: '#fdf0eb', 'Bons comportements': '#f2eefa',
+        Seerah: '#fdf0eb', 'Éthique & Bons comportements': '#f2eefa',
     }
     const couleurTxt: Record<string, string> = {
         Aqeedah: '#28558b', Fiqh: '#b8911f', Hadith: '#2d7a4f', 'Tafsir & Sciences du Coran': '#a02060',
-        Seerah: '#c05c2e', 'Bons comportements': '#6b3db5',
+        Seerah: '#c05c2e', 'Éthique & Bons comportements': '#6b3db5',
     }
 
     if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Chargement...</div></main>

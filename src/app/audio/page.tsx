@@ -23,7 +23,7 @@ const couleurBg: Record<string, string> = {
     Hadith: '#eaf4ee',
     'Tafsir & Sciences du Coran': '#fde8f0',
     Seerah: '#fdf0eb',
-    'Bons comportements': '#f2eefa',
+    'Éthique & Bons comportements': '#f2eefa',
     'Séries de cours': '#e8f8e8',
 }
 
@@ -33,7 +33,7 @@ const couleurTxt: Record<string, string> = {
     Hadith: '#2d7a4f',
     'Tafsir & Sciences du Coran': '#a02060',
     Seerah: '#c05c2e',
-    'Bons comportements': '#6b3db5',
+    'Éthique & Bons comportements': '#6b3db5',
     'Séries de cours': '#1a7a1a',
 }
 
