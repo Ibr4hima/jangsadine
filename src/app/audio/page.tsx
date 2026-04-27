@@ -24,7 +24,7 @@ const couleurBg: Record<string, string> = {
     'Tafsir & Sciences du Coran': '#fde8f0',
     Seerah: '#fdf0eb',
     'Éthique & Bons comportements': '#f2eefa',
-    'Séries de cours': '#e8f8e8',
+    'Séries de cours': '#e8f4fa',
 }
 
 const couleurTxt: Record<string, string> = {
@@ -34,7 +34,7 @@ const couleurTxt: Record<string, string> = {
     'Tafsir & Sciences du Coran': '#a02060',
     Seerah: '#c05c2e',
     'Éthique & Bons comportements': '#6b3db5',
-    'Séries de cours': '#1a7a1a',
+    'Séries de cours': '#345766',
 }
 
 export default function Audio() {

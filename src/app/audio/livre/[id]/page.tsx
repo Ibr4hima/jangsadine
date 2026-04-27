@@ -34,11 +34,11 @@ type Chapitre = {
 
 const couleurBg: Record<string, string> = {
   Aqeedah: '#e8f0f8', Fiqh: '#faf3dc', Hadith: '#eaf4ee', 'Tafsir & Sciences du Coran': '#fde8f0',
-  Seerah: '#fdf0eb', 'Éthique & Bons comportements': '#f2eefa', 'Séries de cours': '#e8f8e8',
+  Seerah: '#fdf0eb', 'Éthique & Bons comportements': '#f2eefa', 'Séries de cours': '#e8f4fa',
 }
 const couleurTxt: Record<string, string> = {
   Aqeedah: '#28558b', Fiqh: '#b8911f', Hadith: '#2d7a4f', 'Tafsir & Sciences du Coran': '#a02060',
-  Seerah: '#c05c2e', 'Éthique & Bons comportements': '#6b3db5', 'Séries de cours': '#1a7a1a',
+  Seerah: '#c05c2e', 'Éthique & Bons comportements': '#6b3db5', 'Séries de cours': '#345766',
 }
 
 export default function PageLivre() {
