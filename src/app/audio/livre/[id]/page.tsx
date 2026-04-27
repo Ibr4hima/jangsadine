@@ -106,14 +106,15 @@ export default function PageLivre() {
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             {categorie}
           </span>
-          <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'white', marginBottom: livre.description ? '10px' : '16px', lineHeight: 1.3 }}>
+          <h1 style={{ fontSize: '30px', fontWeight: 700, color: 'white', marginBottom: '6px', lineHeight: 1.3 }}>
             {livre.titre}
           </h1>
-          {livre.sheikh && (
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
-              {livre.sheikh}
-            </p>
-          )}
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginBottom: livre.description ? '10px' : '0' }}>
+            {livre.type === 'chapitres'
+              ? `${livre.sheikh ? livre.sheikh + ' · ' : ''}${chapitres.length} chapitre${chapitres.length > 1 ? 's' : ''}`
+              : livre.sheikh || ''
+            }
+          </p>
           {livre.description && (
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, maxWidth: '600px', marginBottom: '16px', fontStyle: 'italic' }}>
               {livre.description}
