@@ -110,7 +110,7 @@ export default function Audio() {
             <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '40px', justifyContent: 'center' }}>
                     <button onClick={() => setCategorieActive('toutes')} style={{ padding: '8px 18px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === 'toutes' ? 'none' : '1px solid var(--bordure)', background: categorieActive === 'toutes' ? 'var(--bleu)' : 'white', color: categorieActive === 'toutes' ? 'white' : '#666', transition: 'all 0.15s', fontFamily: 'inherit' }}>
-                        Toutes
+                        Tous
                     </button>
                     {categories.map(cat => (
                         <button key={cat.id} onClick={() => setCategorieActive(cat.slug)}
