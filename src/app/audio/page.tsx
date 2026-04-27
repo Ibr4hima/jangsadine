@@ -45,12 +45,13 @@ export default function Audio() {
     const [categorieActive, setCategorieActive] = useState<string>('toutes')
     const [loading, setLoading] = useState(true)
     const [recherche, setRecherche] = useState('')
+    const [coursSerieUniqueMap, setCoursSerieUniqueMap] = useState<Record<string, string>>({})
 
     useEffect(() => {
         async function charger() {
             const { data: cats } = await supabase.from('categories').select('*').order('ordre')
             const { data: livresList } = await supabase.from('livres').select('*').order('created_at')
-            const { data: coursList } = await supabase.from('cours').select('livre_id, sheikh').not('livre_id', 'is', null)
+            const { data: coursList } = await supabase.from('cours').select('livre_id, sheikh, serie_unique').not('livre_id', 'is', null)
             if (cats) setCategories(cats)
             if (livresList) setLivres(livresList)
             if (coursList) {
@@ -59,6 +60,10 @@ export default function Audio() {
                 setLivresAvecNb(nb)
             }
             if (coursList) setCoursData(coursList as any)
+            const serieMap: Record<string, string> = {}
+            const { data: coursAvecId } = await supabase.from('cours').select('id, livre_id, serie_unique').eq('serie_unique', true)
+            if (coursAvecId) coursAvecId.forEach(c => { if (c.livre_id) serieMap[c.livre_id] = c.id })
+            setCoursSerieUniqueMap(serieMap)
             setLoading(false)
         }
         charger()
@@ -131,7 +136,7 @@ export default function Audio() {
                             const cat = categories.find(c => c.id === l.categorie_id)
                             const nbVersions = livresAvecNb[l.id] || 0
                             return (
-                                <Link key={l.id} href={`/audio/livre/${l.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none', transition: 'border-color 0.15s, transform 0.15s' }}
+                                <Link key={l.id} href={coursSerieUniqueMap[l.id] ? `/audio/${coursSerieUniqueMap[l.id]}` : `/audio/livre/${l.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none', transition: 'border-color 0.15s, transform 0.15s' }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
                                 >

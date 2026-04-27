@@ -16,6 +16,7 @@ export default function Admin() {
     const [lTitreArabe, setLTitreArabe] = useState('')
     const [lCategorie, setLCategorie] = useState('')
     const [lFichier, setLFichier] = useState<File | null>(null)
+    const [coursSerieUnique, setCoursSerieUnique] = useState(false)
     const [titre, setTitre] = useState('')
     const [sheikh, setSheikh] = useState('')
     const [categorieId, setCategorieId] = useState('')
@@ -148,10 +149,10 @@ export default function Admin() {
 
     async function ajouterCours(e: React.FormEvent) {
         e.preventDefault(); setMessage('')
-        const { error } = await supabase.from('cours').insert({ titre: titre || undefined, sheikh, categorie_id: categorieId, nb_episodes: 0, description: description || null, livre_id: coursLivreId || null })
+        const { error } = await supabase.from('cours').insert({ titre: titre || undefined, sheikh, categorie_id: categorieId, nb_episodes: 0, description: description || null, livre_id: coursLivreId || null, serie_unique: coursSerieUnique })
         if (error) { setMessage('Erreur : ' + error.message) } else {
             setMessage('Cours ajouté avec succès !')
-            setTitre(''); setSheikh(''); setCategorieId(''); setDescription(''); setCoursLivreId('')
+            setTitre(''); setSheikh(''); setCategorieId(''); setDescription(''); setCoursLivreId(''); setCoursSerieUnique(false)
             const { data } = await supabase.from('cours').select('id,titre,sheikh').order('titre')
             if (data) setCoursList(data)
         }
@@ -421,6 +422,10 @@ export default function Admin() {
                             </select>
                             <label style={labelStyle}>Description (optionnel)</label>
                             <textarea style={{ ...inputStyle, height: '80px', resize: 'vertical' } as any} value={description} onChange={e => setDescription(e.target.value)} placeholder="ex: Ce cours traite des fondements de la croyance..." />
+                            <label style={labelStyle}>Type de cours</label>
+                            <select style={{ ...inputStyle, background: 'white' }} value={coursSerieUnique ? 'true' : 'false'} onChange={e => setCoursSerieUnique(e.target.value === 'true')}>                                <option value="false">Standard (plusieurs versions possibles)</option>
+                                <option value="true">Série unique (une seule version)</option>
+                            </select>
                             <button type="submit" style={{ width: '100%', padding: '12px', background: '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                                 Ajouter le cours
                             </button>
