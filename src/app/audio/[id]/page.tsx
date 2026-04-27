@@ -193,7 +193,7 @@ export default function PageCours() {
                         const descOuverte = descOuverteId === ep.id
                         return (
                             <div key={ep.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0, paddingTop: '14px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0, paddingTop: '18px' }}>
                                     {index + 1}
                                 </span>
                                 <div style={{ flex: 1, minWidth: 0 }}>
