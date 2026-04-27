@@ -115,3 +115,40 @@ img {
     font-size: 16px !important;
   }
 }
+
+.scroll-top-btn {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bleu);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(40, 85, 139, 0.3);
+  transition: all 0.3s ease;
+  z-index: 90;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.scroll-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.scroll-top-btn:hover {
+  background: #1e4070;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 85, 139, 0.4);
+}
+
+html {
+  scroll-behavior: auto;
+}

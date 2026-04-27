@@ -1,4 +1,6 @@
 import LecteurGlobal from '@/components/LecteurGlobal'
+import ScrollRestore from '@/components/ScrollRestore'
+import ScrollTop from '@/components/ScrollTop'
 import { AudioProvider } from '@/contexts/AudioContext'
 import type { Metadata } from 'next'
 import './globals.css'
@@ -34,6 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AudioProvider>
           {children}
           <LecteurGlobal />
+          <ScrollTop />
+          <ScrollRestore />
         </AudioProvider>
       </body>
     </html>
