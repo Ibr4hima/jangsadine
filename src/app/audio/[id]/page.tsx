@@ -13,7 +13,9 @@ type Cours = {
     sheikh: string
     nb_episodes: number
     description: string | null
+    livre_id: string | null
     categories: { nom: string }
+    livres: { url_pdf: string | null } | null
 }
 
 type Episode = {
@@ -66,7 +68,7 @@ export default function PageCours() {
 
     useEffect(() => {
         async function charger() {
-            const { data: coursData } = await supabase.from('cours').select('*, categories(nom)').eq('id', id).single()
+            const { data: coursData } = await supabase.from('cours').select('*, categories(nom), livres(url_pdf)').eq('id', id).single()
             const { data: epsData } = await supabase.from('episodes').select('id, titre, numero, duree, url_audio, description').eq('cours_id', id).order('numero')
             if (coursData) setCours(coursData)
             if (epsData) setEpisodes(epsData)
@@ -93,6 +95,12 @@ export default function PageCours() {
                     <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', marginBottom: '6px', lineHeight: 1.3 }}>{cours.titre}</h1>
                     <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginBottom: cours.description ? '10px' : '0' }}>{cours.sheikh} · {cours.nb_episodes} épisode{cours.nb_episodes > 1 ? 's' : ''}</p>
                     {cours.description && <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, maxWidth: '600px', fontStyle: 'italic' }}>{cours.description}</p>}
+                    {(cours.livres as any)?.url_pdf && (
+                        <a href={(cours.livres as any).url_pdf} target="_blank" rel="noopener noreferrer"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)', marginTop: '10px' }}>
+                            📖 Consulter le livre
+                        </a>
+                    )}
                 </div>
             </section>
             <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
