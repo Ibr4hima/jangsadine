@@ -97,7 +97,7 @@ export default function Admin() {
             .replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u').replace(/[ç]/g, 'c')
             .replace(/[^a-zA-Z0-9.\-_]/g, '')
         const nomFichier = `${dossier}/${Date.now()}-${nomNettoye}`
-        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-secret': process.env.NEXT_PUBLIC_ADMIN_SECRET! }, body: JSON.stringify({ nom: nomFichier, type: fichier.type }) })
+        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: fichier.type }) })
         const { url } = await res.json()
         await fetch(url, { method: 'PUT', body: fichier, headers: { 'Content-Type': fichier.type } })
         return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
