@@ -140,7 +140,7 @@ export default function PageCours() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '14px' }}>
                             <span>{formaterTemps(tempsActuel)}</span>
-                            <span>{formaterTemps(dureeTotal)}</span>
+                            <span>{piste?.duree || formaterTemps(dureeTotal)}</span>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: markers.length > 0 ? '16px' : '0' }}>
