@@ -107,9 +107,10 @@ export default function Admin() {
         return new Promise(resolve => {
             const audio = new Audio(URL.createObjectURL(file))
             audio.addEventListener('loadedmetadata', () => {
-                const h = Math.floor(audio.duration / 3600)
-                const m = Math.floor((audio.duration % 3600) / 60)
-                const s = Math.floor(audio.duration % 60)
+                const totalSecondes = Math.round(audio.duration)
+                const h = Math.floor(totalSecondes / 3600)
+                const m = Math.floor((totalSecondes % 3600) / 60)
+                const s = totalSecondes % 60
                 resolve(h > 0 ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') : m + ':' + s.toString().padStart(2, '0'))
             })
             audio.addEventListener('error', () => resolve(''))
