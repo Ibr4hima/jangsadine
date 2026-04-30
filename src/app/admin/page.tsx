@@ -105,15 +105,34 @@ export default function Admin() {
 
     function getDuree(file: File): Promise<string> {
         return new Promise(resolve => {
-            const audio = new Audio(URL.createObjectURL(file))
+            const audio = new Audio()
+            audio.preload = 'metadata'
+
+            const url = URL.createObjectURL(file)
+
             audio.addEventListener('loadedmetadata', () => {
-                const totalSecondes = Math.round(audio.duration)
-                const h = Math.floor(totalSecondes / 3600)
-                const m = Math.floor((totalSecondes % 3600) / 60)
-                const s = totalSecondes % 60
-                resolve(h > 0 ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') : m + ':' + s.toString().padStart(2, '0'))
+                // Pour les MP3 VBR, seekons à la fin pour forcer le calcul exact
+                if (audio.duration === Infinity || isNaN(audio.duration)) {
+                    audio.currentTime = 1e101 // force le navigateur à calculer la vraie durée
+                }
             })
-            audio.addEventListener('error', () => resolve(''))
+
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration !== Infinity && !isNaN(audio.duration) && audio.duration > 0) {
+                    const totalSecondes = Math.round(audio.duration)
+                    const h = Math.floor(totalSecondes / 3600)
+                    const m = Math.floor((totalSecondes % 3600) / 60)
+                    const s = totalSecondes % 60
+                    const result = h > 0
+                        ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0')
+                        : m + ':' + s.toString().padStart(2, '0')
+                    URL.revokeObjectURL(url)
+                    resolve(result)
+                }
+            })
+
+            audio.addEventListener('error', () => { URL.revokeObjectURL(url); resolve('') })
+            audio.src = url
         })
     }
 
