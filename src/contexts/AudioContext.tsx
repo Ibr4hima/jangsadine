@@ -45,17 +45,33 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = new Audio()
     audioRef.current = audio
+
     audio.addEventListener('timeupdate', () => {
       setProgression((audio.currentTime / audio.duration) * 100 || 0)
-      // Détecter le marker actuel
       if (markersRef.current.length > 0) {
-        const actuel = [...markersRef.current]
-          .reverse()
-          .find(m => m.temps_secondes <= audio.currentTime)
+        const actuel = [...markersRef.current].reverse().find(m => m.temps_secondes <= audio.currentTime)
         setMarkerActuel(actuel || null)
       }
+      if ('mediaSession' in navigator && audio.duration) {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate,
+          position: audio.currentTime,
+        })
+      }
     })
-    audio.addEventListener('loadedmetadata', () => setDureeTotal(audio.duration))
+
+    audio.addEventListener('loadedmetadata', () => {
+      setDureeTotal(audio.duration)
+      const h = Math.floor(audio.duration / 3600)
+      const m = Math.floor((audio.duration % 3600) / 60)
+      const s = Math.floor(audio.duration % 60)
+      const dureeReelle = h > 0
+        ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0')
+        : m + ':' + s.toString().padStart(2, '0')
+      setPiste(prev => prev ? { ...prev, duree: dureeReelle } : prev)
+    })
+
     audio.addEventListener('play', () => setEnLecture(true))
     audio.addEventListener('pause', () => setEnLecture(false))
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
@@ -63,33 +79,36 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => audio.play())
       navigator.mediaSession.setActionHandler('pause', () => audio.pause())
-      navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime -= 10 })
-      navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime += 10 })
+      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+        audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
+      })
+      navigator.mediaSession.setActionHandler('seekforward', (details) => {
+        audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
+      })
     }
 
     return () => { audio.pause(); audio.src = '' }
   }, [])
 
-  // Sync markersRef avec markers state
   useEffect(() => {
     markersRef.current = markers
   }, [markers])
 
   function jouer(nouvellePiste: PisteAudio) {
-    if (!audioRef.current) return
+    const audio = audioRef.current
+    if (!audio) return
     if (piste?.id === nouvellePiste.id) {
       toggleLecture()
       return
     }
-    audioRef.current.src = nouvellePiste.url
-    audioRef.current.play()
+    audio.src = nouvellePiste.url
+    audio.play()
     setPiste(nouvellePiste)
     setProgression(0)
     setDureeTotal(0)
     setMarkers([])
     setMarkerActuel(null)
 
-    // Charger les markers
     supabase.from('episode_markers')
       .select('*')
       .eq('episode_id', nouvellePiste.id)
@@ -105,13 +124,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         album: 'Jàng sa Diné',
         artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
       })
-
-      navigator.mediaSession.setActionHandler('previoustrack',
-        nouvellePiste.precedente ? () => jouer(nouvellePiste.precedente!) : null
-      )
-      navigator.mediaSession.setActionHandler('nexttrack',
-        nouvellePiste.suivante ? () => jouer(nouvellePiste.suivante!) : null
-      )
     }
   }
 
