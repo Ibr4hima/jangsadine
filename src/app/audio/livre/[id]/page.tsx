@@ -160,17 +160,17 @@ export default function PageLivre() {
                   <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '14px' }}>
                     {[1, 2, 3, 4].map(i => (
                       <div key={i} style={{
-                        width: '3px', borderRadius: '2px', background: 'var(--or)',
+                        width: '2px', borderRadius: '2px', background: 'var(--or)',
                         height: i % 2 === 0 ? '14px' : '8px',
-                        animation: 'pulse-bar 0.8s ease-in-out infinite alternate',
-                        animationDelay: `${i * 0.15}s`
+                        animation: 'pulse-bar 0.4s ease-in-out infinite alternate',
+                        animationDelay: `${i * 0.1}s`
                       }} />
                     ))}
                   </div>
                 ) : (
                   <span style={{ fontSize: '16px' }}>🎧</span>
                 )}
-                {enLectureAudio ? 'En écoute...' : 'Écouter le livre'}
+                {enLectureAudio ? '' : 'Écouter le livre'}
                 {/* Barre de progression */}
                 {enLectureAudio && (
                   <div style={{ width: '60px', height: '3px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', overflow: 'hidden' }}>

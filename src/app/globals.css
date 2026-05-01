@@ -162,3 +162,13 @@ html {
     transform: scaleY(1);
   }
 }
+
+@keyframes pulse-bar {
+  from {
+    transform: scaleY(0.5);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
