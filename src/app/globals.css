@@ -61,7 +61,7 @@
 }
 
 html {
-  font-family: 'Google Sans', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 16px;
   color: var(--texte);
   background-color: var(--fond-creme);
@@ -151,10 +151,4 @@ img {
 
 html {
   scroll-behavior: auto;
-}
-
-@font-face {
-  font-family: 'Google Sans';
-  src: url('https://fonts.gstatic.com/s/ibmplexsansarabic/v13/Qw3MZRtWGQH2YgjQjakjnGA1O6Kf5GCqJA.woff2') format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
