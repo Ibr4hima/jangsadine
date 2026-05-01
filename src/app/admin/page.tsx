@@ -7,7 +7,7 @@ type Marker = { titre: string; temps: string }
 
 export default function Admin() {
     const [categories, setCategories] = useState<Categorie[]>([])
-    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa' | 'chapitre' | 'episode_chapitre'>('livre')
+    const [onglet, setOnglet] = useState<'livre' | 'cours' | 'episode' | 'ebook' | 'khoutbah' | 'conference' | 'fatwa' | 'chapitre' | 'episode_chapitre' | 'modifier'>('livre')
     const [livresList, setLivresList] = useState<{ id: string; titre: string }[]>([])
     const [coursList, setCoursList] = useState<CoursItem[]>([])
     const [livreId, setLivreId] = useState('')
@@ -33,6 +33,7 @@ export default function Admin() {
     const [ebTitre, setEbTitre] = useState('')
     const [ebDescription, setEbDescription] = useState('')
     const [ebCategorie, setEbCategorie] = useState('')
+    const [lAudio, setLAudio] = useState<File | null>(null)
     const [lSheikh, setLSheikh] = useState('')
     const [epDescription, setEpDescription] = useState('')
     const [ebPages, setEbPages] = useState('')
@@ -52,6 +53,8 @@ export default function Admin() {
     const [fatwaSheikhs, setFatwaSheikhs] = useState<{ id: string; nom: string }[]>([])
     const [fatwaQuestion, setFatwaQuestion] = useState('')
     const [fatwaSheikh, setFatwaSheikh] = useState('')
+    const [modifLivreAudioId, setModifLivreAudioId] = useState('')
+    const [modifLivreAudioFichier, setModifLivreAudioFichier] = useState<File | null>(null)
     const [fatwaCat, setFatwaCat] = useState('')
     const [chapLivreId, setChapLivreId] = useState('')
     const [chapTitre, setChapTitre] = useState('')
@@ -69,6 +72,10 @@ export default function Admin() {
     const [fatwaNouveauSheikh, setFatwaNouveauSheikh] = useState('')
     const [fatwaNouveauCouleur, setFatwaNouveauCouleur] = useState('#b7410e')
     const [fatwaFichier, setFatwaFichier] = useState<File | null>(null)
+    const [modifLivreId, setModifLivreId] = useState('')
+    const [modifLivrePdf, setModifLivrePdf] = useState<File | null>(null)
+    const [modifCoursId, setModifCoursId] = useState('')
+    const [modifCoursLivreId, setModifCoursLivreId] = useState('')
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
 
@@ -155,10 +162,10 @@ export default function Admin() {
         try {
             let urlPdf = null
             if (lFichier) urlPdf = await uploadFichier(lFichier, 'livres')
-            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null, type: lType, sheikh: lSheikh || null })
+            const { error } = await supabase.from('livres').insert({ titre: lTitre, categorie_id: lCategorie, url_pdf: urlPdf, titre_arabe: lTitreArabe || null, type: lType, sheikh: lSheikh || null, url_audio: lAudio ? await uploadFichier(lAudio, 'livres_audio') : null })
             if (error) throw error
             setMessage('Livre ajouté avec succès !')
-            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null); setLType('standard'); setLSheikh('')
+            setLTitre(''); setLCategorie(''); setLTitreArabe(''); setLFichier(null); setLType('standard'); setLSheikh(''); setLAudio(null)
             const input = document.getElementById('livre-pdf') as HTMLInputElement
             if (input) input.value = ''
             const { data } = await supabase.from('livres').select('id,titre').order('titre')
@@ -357,6 +364,48 @@ export default function Admin() {
         setUploading(false)
     }
 
+    async function remplacerPdfLivre(e: React.FormEvent) {
+        e.preventDefault()
+        if (!modifLivrePdf) return setMessage('Selectionne un fichier PDF')
+        setUploading(true); setMessage('')
+        try {
+            const urlPdf = await uploadFichier(modifLivrePdf, 'livres')
+            const { error } = await supabase.from('livres').update({ url_pdf: urlPdf }).eq('id', modifLivreId)
+            if (error) throw error
+            setMessage('PDF mis à jour avec succès !')
+            setModifLivreId(''); setModifLivrePdf(null)
+            const input = document.getElementById('modif-pdf') as HTMLInputElement
+            if (input) input.value = ''
+        } catch { setMessage('Erreur') }
+        setUploading(false)
+    }
+
+    async function remplacerLivreCours(e: React.FormEvent) {
+        e.preventDefault()
+        setMessage('')
+        const { error } = await supabase.from('cours').update({ livre_id: modifCoursLivreId || null }).eq('id', modifCoursId)
+        if (error) { setMessage('Erreur : ' + error.message) } else {
+            setMessage('Livre du cours mis à jour !')
+            setModifCoursId(''); setModifCoursLivreId('')
+        }
+    }
+
+    async function ajouterAudioLivre(e: React.FormEvent) {
+        e.preventDefault()
+        if (!modifLivreAudioFichier) return setMessage('Selectionne un fichier audio')
+        setUploading(true); setMessage('')
+        try {
+            const urlAudio = await uploadFichier(modifLivreAudioFichier, 'livres_audio')
+            const { error } = await supabase.from('livres').update({ url_audio: urlAudio }).eq('id', modifLivreAudioId)
+            if (error) throw error
+            setMessage('Audio du livre ajouté avec succès !')
+            setModifLivreAudioId(''); setModifLivreAudioFichier(null)
+            const input = document.getElementById('modif-audio-livre') as HTMLInputElement
+            if (input) input.value = ''
+        } catch { setMessage('Erreur') }
+        setUploading(false)
+    }
+
     const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px', fontFamily: 'inherit', outline: 'none', marginBottom: '14px' }
     const labelStyle = { fontSize: '13px', fontWeight: 600 as const, color: '#444', display: 'block' as const, marginBottom: '5px' }
     const onglets = [
@@ -369,6 +418,7 @@ export default function Admin() {
         { id: 'fatwa', label: 'Fatwa' },
         { id: 'chapitre', label: 'Chapitre' },
         { id: 'episode_chapitre', label: 'Ep. Chapitre' },
+        { id: 'modifier', label: 'Modifier' },
     ]
 
     return (
@@ -414,6 +464,8 @@ export default function Admin() {
                             </select>
                             <label style={labelStyle}>PDF du livre (optionnel)</label>
                             <input id="livre-pdf" style={{ ...inputStyle, padding: '8px' }} type="file" accept=".pdf" onChange={e => setLFichier(e.target.files?.[0] || null)} />
+                            <label style={labelStyle}>Audio du livre (optionnel)</label>
+                            <input id="livre-audio" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setLAudio(e.target.files?.[0] || null)} />
                             <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
                                 {uploading ? 'Upload en cours...' : 'Ajouter le livre'}
                             </button>
@@ -716,6 +768,69 @@ export default function Admin() {
                                 {uploading ? message || 'Upload en cours...' : epChapFichiers.length > 1 ? 'Uploader ' + epChapFichiers.length + ' épisodes' : 'Ajouter'}
                             </button>
                         </form>
+                    </div>
+                )}
+
+                {onglet === 'modifier' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                        {/* Remplacer le PDF d'un livre */}
+                        <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                            <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Remplacer le PDF d'un livre</h2>
+                            <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>Remplace le PDF existant par une nouvelle version ou ajoute-en un si absent.</p>
+                            <form onSubmit={remplacerPdfLivre}>
+                                <label style={labelStyle}>Livre</label>
+                                <select style={{ ...inputStyle, background: 'white' }} value={modifLivreId} onChange={e => setModifLivreId(e.target.value)} required>
+                                    <option value="">Sélectionner un livre...</option>
+                                    {livresList.map(l => <option key={l.id} value={l.id}>{l.titre}</option>)}
+                                </select>
+                                <label style={labelStyle}>Nouveau PDF</label>
+                                <input id="modif-pdf" style={{ ...inputStyle, padding: '8px' }} type="file" accept=".pdf" onChange={e => setModifLivrePdf(e.target.files?.[0] || null)} required />
+                                <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                                    {uploading ? 'Upload en cours...' : 'Mettre à jour le PDF'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Changer le livre associé à un cours */}
+                        <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                            <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Changer le livre d'un cours</h2>
+                            <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>Associe un cours à un autre livre ou retire le livre associé.</p>
+                            <form onSubmit={remplacerLivreCours}>
+                                <label style={labelStyle}>Cours</label>
+                                <select style={{ ...inputStyle, background: 'white' }} value={modifCoursId} onChange={e => setModifCoursId(e.target.value)} required>
+                                    <option value="">Sélectionner un cours...</option>
+                                    {coursList.map(c => <option key={c.id} value={c.id}>{c.titre} — {c.sheikh}</option>)}
+                                </select>
+                                <label style={labelStyle}>Nouveau livre associé</label>
+                                <select style={{ ...inputStyle, background: 'white' }} value={modifCoursLivreId} onChange={e => setModifCoursLivreId(e.target.value)}>
+                                    <option value="">Aucun livre</option>
+                                    {livresList.map(l => <option key={l.id} value={l.id}>{l.titre}</option>)}
+                                </select>
+                                <button type="submit" style={{ width: '100%', padding: '12px', background: '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                                    Mettre à jour
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Ajouter un audio à un livre */}
+                        <div style={{ background: 'white', borderRadius: '12px', padding: '28px', border: '1px solid #e8e4da' }}>
+                            <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a2e', marginBottom: '6px' }}>Ajouter un audio à un livre</h2>
+                            <p style={{ fontSize: '13px', color: '#999', marginBottom: '22px' }}>Upload un audiobook pour un livre existant.</p>
+                            <form onSubmit={ajouterAudioLivre}>
+                                <label style={labelStyle}>Livre</label>
+                                <select style={{ ...inputStyle, background: 'white' }} value={modifLivreAudioId} onChange={e => setModifLivreAudioId(e.target.value)} required>
+                                    <option value="">Sélectionner un livre...</option>
+                                    {livresList.map(l => <option key={l.id} value={l.id}>{l.titre}</option>)}
+                                </select>
+                                <label style={labelStyle}>Fichier audio</label>
+                                <input id="modif-audio-livre" style={{ ...inputStyle, padding: '8px' }} type="file" accept="audio/*" onChange={e => setModifLivreAudioFichier(e.target.files?.[0] || null)} required />
+                                <button type="submit" disabled={uploading} style={{ width: '100%', padding: '12px', background: uploading ? '#aaa' : '#28558b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                                    {uploading ? 'Upload en cours...' : 'Ajouter l\'audio'}
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
                 )}
 

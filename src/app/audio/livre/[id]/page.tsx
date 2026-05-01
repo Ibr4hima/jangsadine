@@ -11,6 +11,7 @@ type Livre = {
   id: string
   titre: string
   url_pdf: string | null
+  url_audio: string | null
   description: string | null
   type: string
   sheikh: string | null
@@ -47,6 +48,9 @@ export default function PageLivre() {
   const [versions, setVersions] = useState<Cours[]>([])
   const [chapitres, setChapitres] = useState<Chapitre[]>([])
   const [loading, setLoading] = useState(true)
+  const [audioLivre, setAudioLivre] = useState<HTMLAudioElement | null>(null)
+  const [enLectureAudio, setEnLectureAudio] = useState(false)
+  const [progressionAudio, setProgressionAudio] = useState(0)
 
   useEffect(() => {
     async function charger() {
@@ -77,6 +81,19 @@ export default function PageLivre() {
     }
     charger()
   }, [id])
+
+  useEffect(() => {
+    if (!livre?.url_audio) return
+    const audio = new Audio(livre.url_audio)
+    audio.addEventListener('timeupdate', () => {
+      setProgressionAudio((audio.currentTime / audio.duration) * 100 || 0)
+    })
+    audio.addEventListener('play', () => setEnLectureAudio(true))
+    audio.addEventListener('pause', () => setEnLectureAudio(false))
+    audio.addEventListener('ended', () => { setEnLectureAudio(false); setProgressionAudio(0) })
+    setAudioLivre(audio)
+    return () => { audio.pause(); audio.src = '' }
+  }, [livre?.url_audio])
 
   const categorie = (livre?.categories as any)?.nom || ''
 
@@ -120,11 +137,49 @@ export default function PageLivre() {
               {livre.description}
             </p>
           )}
-          {livre.url_pdf && (
-            <a href={livre.url_pdf} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)' }}>
-              📖 Consulter le livre
-            </a>
-          )}
+          {/* Boutons PDF + Audio */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '4px' }}>
+            {livre.url_pdf && (
+              <a href={livre.url_pdf} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)' }}>
+                📖 Consulter le livre
+              </a>
+            )}
+            {livre.url_audio && (
+              <button
+                onClick={() => { if (!audioLivre) return; enLectureAudio ? audioLivre.pause() : audioLivre.play() }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: enLectureAudio ? 'rgba(217,172,42,0.3)' : 'rgba(255,255,255,0.15)',
+                  color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px',
+                  fontWeight: 500, border: enLectureAudio ? '1px solid rgba(217,172,42,0.6)' : '1px solid rgba(255,255,255,0.25)',
+                  cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
+                }}>
+                {/* Icône animée */}
+                {enLectureAudio ? (
+                  <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '14px' }}>
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} style={{
+                        width: '3px', borderRadius: '2px', background: 'var(--or)',
+                        height: i % 2 === 0 ? '14px' : '8px',
+                        animation: 'pulse-bar 0.8s ease-in-out infinite alternate',
+                        animationDelay: `${i * 0.15}s`
+                      }} />
+                    ))}
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '16px' }}>🎧</span>
+                )}
+                {enLectureAudio ? 'En écoute...' : 'Écouter le livre'}
+                {/* Barre de progression */}
+                {enLectureAudio && (
+                  <div style={{ width: '60px', height: '3px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: progressionAudio + '%', height: '100%', background: 'var(--or)', borderRadius: '2px', transition: 'width 0.5s' }} />
+                  </div>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
