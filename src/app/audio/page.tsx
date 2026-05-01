@@ -140,14 +140,14 @@ export default function Audio() {
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
                                 >
-                                    <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '10px', background: couleurBg[cat?.nom || ''] || '#f0f0f0', color: couleurTxt[cat?.nom || ''] || '#666', display: 'inline-block', alignSelf: 'flex-start' }}>
+                                    <span style={{ fontSize: '11.1px', fontWeight: 600, padding: '3px 10px', borderRadius: '10px', background: couleurBg[cat?.nom || ''] || '#f0f0f0', color: couleurTxt[cat?.nom || ''] || '#666', display: 'inline-block', alignSelf: 'flex-start' }}>
                                         {cat?.nom}
                                     </span>
                                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', lineHeight: 1.4, flex: 1 }}>{l.titre}</h3>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         {l.titre_arabe ? (
                                             <span style={{
-                                                fontSize: '11px',
+                                                fontSize: '11.1px',
                                                 fontWeight: 500,
                                                 padding: '3px 10px',
                                                 borderRadius: '10px',
