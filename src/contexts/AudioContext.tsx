@@ -122,7 +122,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
-    navigator.mediaSession.setActionHandler('play', () => { audio.play() })
+    navigator.mediaSession.setActionHandler('play', () => {
+      audio.play().catch(() => {
+        // Sur iOS, forcer le rechargement à la position actuelle
+        const currentTime = audio.currentTime
+        audio.load()
+        audio.currentTime = currentTime
+        audio.play()
+      })
+    })
     navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
     navigator.mediaSession.setActionHandler('seekbackward', (details) => {
       audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
