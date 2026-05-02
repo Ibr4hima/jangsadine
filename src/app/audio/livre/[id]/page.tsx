@@ -81,6 +81,19 @@ export default function PageLivre() {
     charger()
   }, [id])
 
+  useEffect(() => {
+    if (!loading) {
+      const saved = sessionStorage.getItem(`scroll:/audio/livre/${id}`)
+      console.log('RESTORE - valeur sauvegardée:', saved)
+      if (saved && parseInt(saved) > 0) {
+        setTimeout(() => {
+          console.log('RESTORE - scroll vers:', parseInt(saved))
+          window.scrollTo({ top: parseInt(saved), behavior: 'instant' })
+        }, 100)
+      }
+    }
+  }, [loading])
+
   const categorie = (livre?.categories as any)?.nom || ''
 
   if (loading) return (
@@ -103,7 +116,9 @@ export default function PageLivre() {
 
       <section style={{ background: 'var(--bleu)', padding: '40px 24px 36px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <Link href="/audio" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>
+          <Link href="/audio"
+            onClick={() => sessionStorage.setItem('scroll:/audio', String(0))}
+            style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>
             ← Retour aux cours
           </Link>
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
@@ -196,11 +211,13 @@ export default function PageLivre() {
                     {chap.numero}
                   </span>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Link href={`/audio/livre/${id}/chapitre/${chap.id}`} style={{
-                      flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
-                      padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
-                      textDecoration: 'none', transition: 'border-color 0.15s'
-                    }}
+                    <Link href={`/audio/livre/${id}/chapitre/${chap.id}`}
+                      onClick={() => sessionStorage.setItem(`scroll:/audio/livre/${id}`, String(window.scrollY))}
+                      style={{
+                        flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
+                        padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+                        textDecoration: 'none', transition: 'border-color 0.15s'
+                      }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
                     >
@@ -227,7 +244,12 @@ export default function PageLivre() {
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {versions.map(v => (
-                <Link key={v.id} href={`/audio/${v.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
+                <Link key={v.id} href={`/audio/${v.id}`}
+                  onClick={() => {
+                    console.log('CLICK - scroll actuel:', window.scrollY)
+                    sessionStorage.setItem(`scroll:/audio/livre/${id}`, String(window.scrollY))
+                  }}
+                  style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
                 >
