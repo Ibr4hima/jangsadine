@@ -22,6 +22,7 @@ type AudioContextType = {
   dureeTotal: number
   markers: Marker[]
   markerActuel: Marker | null
+  fermerLivre: () => void
   jouer: (piste: PisteAudio) => void
   toggleLecture: () => void
   seeker: (pct: number) => void
@@ -110,6 +111,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       toggleLecture()
       return
     }
+    // Fermer le livre audio
+    if (livreAudioRef.current) {
+      livreAudioRef.current.pause()
+      livreAudioRef.current.src = ''
+    }
+    setLivreAudio(null)
+    setEnLectureLivre(false)
+    setProgressionLivre(0)
+
     audio.src = nouvellePiste.url
     audio.play()
     setPiste(nouvellePiste)
@@ -137,8 +147,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }
 
   function jouerLivre(url: string, titre: string) {
-    // Mettre en pause le lecteur principal si actif
-    if (audioRef.current && enLecture) audioRef.current.pause()
+    // Fermer l'épisode
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = ''
+    }
+    setPiste(null)
+    setEnLecture(false)
+    setProgression(0)
+    setMarkers([])
+    setMarkerActuel(null)
 
     if (livreAudioRef.current) {
       livreAudioRef.current.pause()
@@ -180,11 +198,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
   }
 
+  function fermerLivre() {
+    if (livreAudioRef.current) { livreAudioRef.current.pause(); livreAudioRef.current.src = '' }
+    setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
+  }
+
   return (
     <AudioCtx.Provider value={{
       piste, enLecture, progression, dureeTotal, markers, markerActuel,
       jouer, toggleLecture, seeker, reculer, avancer, fermer,
-      livreAudio, enLectureLivre, progressionLivre, jouerLivre, toggleLivre
+      livreAudio, enLectureLivre, progressionLivre, jouerLivre, toggleLivre, fermerLivre
     }}>      {children}
     </AudioCtx.Provider>
   )
