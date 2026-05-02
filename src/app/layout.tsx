@@ -38,10 +38,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LecteurGlobal />
           <ScrollTop />
           <ScrollRestore />
-          <audio id="audio-principal" preload="metadata">
+          <audio id="audio-principal" preload="metadata" playsInline>
             <source id="source-principal" src="" type="audio/mpeg" />
           </audio>
-          <audio id="audio-livre" preload="metadata">
+          <audio id="audio-livre" preload="metadata" playsInline>
             <source id="source-livre" src="" type="audio/mpeg" />
           </audio>
         </AudioProvider>
