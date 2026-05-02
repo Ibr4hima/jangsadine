@@ -81,19 +81,6 @@ export default function PageLivre() {
     charger()
   }, [id])
 
-  useEffect(() => {
-    if (!loading) {
-      const saved = sessionStorage.getItem(`scroll:/audio/livre/${id}`)
-      console.log('RESTORE - valeur sauvegardée:', saved)
-      if (saved && parseInt(saved) > 0) {
-        setTimeout(() => {
-          console.log('RESTORE - scroll vers:', parseInt(saved))
-          window.scrollTo({ top: parseInt(saved), behavior: 'instant' })
-        }, 100)
-      }
-    }
-  }, [loading])
-
   const categorie = (livre?.categories as any)?.nom || ''
 
   if (loading) return (
@@ -116,11 +103,10 @@ export default function PageLivre() {
 
       <section style={{ background: 'var(--bleu)', padding: '40px 24px 36px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <Link href="/audio"
-            onClick={() => sessionStorage.setItem('scroll:/audio', String(0))}
-            style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>
+          <button onClick={() => window.history.back()}
+            style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '16px', display: 'inline-block', padding: 0 }}>
             ← Retour aux cours
-          </Link>
+          </button>
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             {categorie}
           </span>
