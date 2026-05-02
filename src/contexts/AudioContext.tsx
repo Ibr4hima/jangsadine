@@ -85,8 +85,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       setPiste(prev => prev ? { ...prev, duree: dureeReelle } : prev)
     })
 
-    audio.addEventListener('play', () => setEnLecture(true))
-    audio.addEventListener('pause', () => setEnLecture(false))
+    audio.addEventListener('play', () => {
+      setEnLecture(true)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing'
+      }
+    })
+
+    audio.addEventListener('pause', () => {
+      setEnLecture(false)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused'
+      }
+    })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
     // Un seul objet Audio pour les livres
@@ -105,8 +116,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         } catch { }
       }
     })
-    livreAudioEl.addEventListener('play', () => setEnLectureLivre(true))
-    livreAudioEl.addEventListener('pause', () => setEnLectureLivre(false))
+    livreAudioEl.addEventListener('play', () => {
+      setEnLectureLivre(true)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing'
+      }
+    })
+
+    livreAudioEl.addEventListener('pause', () => {
+      setEnLectureLivre(false)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused'
+      }
+    })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
 
     return () => {
@@ -124,11 +146,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
     navigator.mediaSession.setActionHandler('play', () => {
       audio.play().catch(() => {
-        // Sur iOS, forcer le rechargement à la position actuelle
-        const currentTime = audio.currentTime
-        audio.load()
-        audio.currentTime = currentTime
-        audio.play()
+        setTimeout(() => {
+          audio.play().catch(console.error)
+        }, 300)
       })
     })
     navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
