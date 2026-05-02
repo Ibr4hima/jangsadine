@@ -62,7 +62,7 @@ export default function PageCours() {
     const [cours, setCours] = useState<Cours | null>(null)
     const [episodes, setEpisodes] = useState<Episode[]>([])
     const [loading, setLoading] = useState(true)
-    const [chapitresOuverts, setChapitresOuverts] = useState(false)
+    const [chapitresOuverts, setChapitresOuverts] = useState(true)
     const [descOuverteId, setDescOuverteId] = useState<string | null>(null)
     const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker, markerActuel, markers } = useAudio()
 
@@ -127,11 +127,9 @@ export default function PageCours() {
                                         style={{
                                             position: 'absolute', top: '50%', transform: 'translate(-50%, -50%)',
                                             left: (m.temps_secondes / dureeTotal * 100) + '%',
-                                            width: '10px', height: '10px', borderRadius: '50%',
-                                            background: markerActuel?.id === m.id ? 'var(--or)' : 'white',
-                                            border: '2px solid ' + (markerActuel?.id === m.id ? 'var(--or)' : 'var(--bleu)'),
+                                            width: '2px', height: '10px', borderRadius: '1px',
+                                            background: markerActuel?.id === m.id ? 'var(--or)' : 'rgba(255,255,255,0.9)',
                                             cursor: 'pointer', zIndex: 2, transition: 'all 0.2s',
-                                            boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
                                         }}
                                     />
                                 ))}
@@ -141,7 +139,6 @@ export default function PageCours() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '14px' }}>
                             <span>{formaterTemps(tempsActuel)}</span>
                             <span>{dureeTotal > 0 ? formaterTemps(dureeTotal) : (piste?.duree || '...')}</span>
-
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: markers.length > 0 ? '16px' : '0' }}>
