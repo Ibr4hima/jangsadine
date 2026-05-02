@@ -51,17 +51,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string } | null>(null)
   const [enLectureLivre, setEnLectureLivre] = useState(false)
   const [progressionLivre, setProgressionLivre] = useState(0)
-  const silenceRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
-    const audio = document.getElementById('audio-principal') as HTMLAudioElement || new Audio()
-    // Silence pour maintenir la session iOS active pendant la pause
-    const silence = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAABAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN//MUZAMAAAGkAAAAAAAAA0gAAAAATEFN//MUZAYAAAGkAAAAAAAAA0gAAAAATEFN//MUZAkAAAGkAAAAAAAAA0gAAAAATEFN')
-    silence.loop = true
-    silence.volume = 0.001
-    silenceRef.current = silence
+    const audio = document.getElementById('audio-principal') as HTMLAudioElement
+    const livreAudioEl = document.getElementById('audio-livre') as HTMLAudioElement
     audioRef.current = audio
+    livreAudioRef.current = livreAudioEl
 
+    // Listeners épisode
     audio.addEventListener('timeupdate', () => {
       setProgression((audio.currentTime / audio.duration) * 100 || 0)
       if (markersRef.current.length > 0) {
@@ -69,172 +66,65 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         setMarkerActuel(actuel || null)
       }
       if ('mediaSession' in navigator && audio.duration) {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration: audio.duration,
-            playbackRate: audio.playbackRate,
-            position: audio.currentTime,
-          })
-        } catch { }
+        try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }) } catch { }
       }
     })
-
     audio.addEventListener('loadedmetadata', () => {
       setDureeTotal(audio.duration)
       const h = Math.floor(audio.duration / 3600)
       const m = Math.floor((audio.duration % 3600) / 60)
       const s = Math.floor(audio.duration % 60)
-      const dureeReelle = h > 0
-        ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0')
-        : m + ':' + s.toString().padStart(2, '0')
-      setPiste(prev => prev ? { ...prev, duree: dureeReelle } : prev)
+      setPiste(prev => prev ? { ...prev, duree: h > 0 ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') : m + ':' + s.toString().padStart(2, '0') } : prev)
     })
-
-    audio.addEventListener('play', () => {
-      setEnLecture(true)
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'playing'
-      }
-      silenceRef.current?.pause()
-    })
-
-    audio.addEventListener('pause', () => {
-      setEnLecture(false)
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'paused'
-      }
-      silenceRef.current?.play().catch(() => { })
-    })
+    audio.addEventListener('play', () => { setEnLecture(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing' })
+    audio.addEventListener('pause', () => { setEnLecture(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused' })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
-    const livreAudioEl = document.getElementById('audio-livre') as HTMLAudioElement || new Audio()
-    livreAudioRef.current = livreAudioEl
-
+    // Listeners livre
     livreAudioEl.addEventListener('timeupdate', () => {
       setProgressionLivre((livreAudioEl.currentTime / livreAudioEl.duration) * 100 || 0)
       if ('mediaSession' in navigator && livreAudioEl.duration) {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration: livreAudioEl.duration,
-            playbackRate: livreAudioEl.playbackRate,
-            position: livreAudioEl.currentTime,
-          })
-        } catch { }
+        try { navigator.mediaSession.setPositionState({ duration: livreAudioEl.duration, playbackRate: livreAudioEl.playbackRate, position: livreAudioEl.currentTime }) } catch { }
       }
     })
-    livreAudioEl.addEventListener('play', () => {
-      setEnLectureLivre(true)
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'playing'
-      }
-    })
-
-    livreAudioEl.addEventListener('pause', () => {
-      setEnLectureLivre(false)
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'paused'
-      }
-    })
+    livreAudioEl.addEventListener('play', () => { setEnLectureLivre(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing' })
+    livreAudioEl.addEventListener('pause', () => { setEnLectureLivre(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused' })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
-    // Fix iOS PWA + Safari : reprendre quand la page redevient visible
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Resynchroniser la Media Session
-        if ('mediaSession' in navigator) {
-          if (audioRef.current && !audioRef.current.paused) {
-            navigator.mediaSession.playbackState = 'playing'
-            if (audioRef.current.duration) {
-              try {
-                navigator.mediaSession.setPositionState({
-                  duration: audioRef.current.duration,
-                  playbackRate: audioRef.current.playbackRate,
-                  position: audioRef.current.currentTime,
-                })
-              } catch { }
-            }
-          }
-          if (livreAudioRef.current && !livreAudioRef.current.paused) {
-            navigator.mediaSession.playbackState = 'playing'
-          }
-        }
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      audio.pause(); audio.src = ''
-      livreAudioEl.pause(); livreAudioEl.src = ''
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
   }, [])
 
-  useEffect(() => {
-    markersRef.current = markers
-  }, [markers])
+  useEffect(() => { markersRef.current = markers }, [markers])
 
   function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
     navigator.mediaSession.playbackState = 'playing'
-
-    navigator.mediaSession.setActionHandler('play', () => {
-      if (audio.readyState === 0 && audio.src) {
-        const pos = audio.currentTime
-        audio.load()
-        audio.currentTime = pos
-      }
-      audio.play().catch(() => {
-        setTimeout(() => audio.play().catch(console.error), 300)
-      })
-    })
-    navigator.mediaSession.setActionHandler('pause', () => {
-      audio.pause()
-    })
-    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-      audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
-    })
-    navigator.mediaSession.setActionHandler('seekforward', (details) => {
-      audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
-    })
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (details.seekTime !== undefined) audio.currentTime = details.seekTime
-    })
+    navigator.mediaSession.setActionHandler('play', () => { audio.play().catch(console.error) })
+    navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
+    navigator.mediaSession.setActionHandler('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d?.seekOffset || 10)) })
+    navigator.mediaSession.setActionHandler('seekforward', (d) => { audio.currentTime = Math.min(audio.duration, audio.currentTime + (d?.seekOffset || 10)) })
+    navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime !== undefined) audio.currentTime = d.seekTime })
   }
 
   function jouer(nouvellePiste: PisteAudio) {
     const audio = audioRef.current
     if (!audio) return
-    if (piste?.id === nouvellePiste.id) {
-      toggleLecture()
-      return
-    }
+    if (piste?.id === nouvellePiste.id) { toggleLecture(); return }
 
-    // Mettre en pause le livre audio
     if (livreAudioRef.current) livreAudioRef.current.pause()
-    setLivreAudio(null)
-    setEnLectureLivre(false)
-    setProgressionLivre(0)
+    setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
 
-    audio.src = nouvellePiste.url
-    audio.play()
-    setPiste(nouvellePiste)
-    setProgression(0)
-    setDureeTotal(0)
-    setMarkers([])
-    setMarkerActuel(null)
+    const source = document.getElementById('source-principal') as HTMLSourceElement
+    if (source) source.src = nouvellePiste.url
+    audio.load()
+    audio.play().catch(console.error)
 
-    supabase.from('episode_markers')
-      .select('*')
-      .eq('episode_id', nouvellePiste.id)
-      .order('temps_secondes')
-      .then(({ data }) => {
-        if (data && data.length > 0) setMarkers(data)
-      })
+    setPiste(nouvellePiste); setProgression(0); setDureeTotal(0); setMarkers([]); setMarkerActuel(null)
+
+    supabase.from('episode_markers').select('*').eq('episode_id', nouvellePiste.id).order('temps_secondes')
+      .then(({ data }) => { if (data && data.length > 0) setMarkers(data) })
 
     setupMediaSession(audio, {
-      title: nouvellePiste.titre,
-      artist: nouvellePiste.sheikh,
-      album: 'Jàng sa Diné',
+      title: nouvellePiste.titre, artist: nouvellePiste.sheikh, album: 'Jàng sa Diné',
       artwork: [{ src: window.location.origin + '/logo.png', sizes: '512x512', type: 'image/png' }]
     })
   }
@@ -243,23 +133,18 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const livreAudioEl = livreAudioRef.current
     if (!livreAudioEl) return
 
-    // Mettre en pause l'épisode
     if (audioRef.current) audioRef.current.pause()
-    setPiste(null)
-    setEnLecture(false)
-    setProgression(0)
-    setMarkers([])
-    setMarkerActuel(null)
+    setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
 
-    livreAudioEl.src = url
-    livreAudioEl.play()
-    setLivreAudio({ url, titre })
-    setProgressionLivre(0)
+    const source = document.getElementById('source-livre') as HTMLSourceElement
+    if (source) source.src = url
+    livreAudioEl.load()
+    livreAudioEl.play().catch(console.error)
+
+    setLivreAudio({ url, titre }); setProgressionLivre(0)
 
     setupMediaSession(livreAudioEl, {
-      title: titre,
-      artist: 'Jàng sa Diné',
-      album: 'Livre audio',
+      title: titre, artist: 'Jàng sa Diné', album: 'Livre audio',
       artwork: [{ src: window.location.origin + '/logo.png', sizes: '512x512', type: 'image/png' }]
     })
   }
@@ -267,30 +152,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function toggleLivre() {
     const audio = livreAudioRef.current
     if (!audio) return
-    if (enLectureLivre) {
-      audio.pause()
-    } else {
-      if (audio.paused) {
-        audio.play().catch(() => {
-          setTimeout(() => audio.play().catch(console.error), 300)
-        })
-      }
-    }
+    enLectureLivre ? audio.pause() : audio.play().catch(console.error)
   }
 
   function toggleLecture() {
     const audio = audioRef.current
     if (!audio) return
-    if (enLecture) {
-      audio.pause()
-    } else {
-      // Force la reprise sur iOS
-      if (audio.paused) {
-        audio.play().catch(() => {
-          setTimeout(() => audio.play().catch(console.error), 300)
-        })
-      }
-    }
+    enLecture ? audio.pause() : audio.play().catch(console.error)
   }
 
   function seeker(pct: number) {
@@ -302,12 +170,12 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
 
   function fermer() {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = '' }
+    if (audioRef.current) { audioRef.current.pause(); const s = document.getElementById('source-principal') as HTMLSourceElement; if (s) s.src = '' }
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
   }
 
   function fermerLivre() {
-    if (livreAudioRef.current) { livreAudioRef.current.pause(); livreAudioRef.current.src = '' }
+    if (livreAudioRef.current) { livreAudioRef.current.pause(); const s = document.getElementById('source-livre') as HTMLSourceElement; if (s) s.src = '' }
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
   }
 
