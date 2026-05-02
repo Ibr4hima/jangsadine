@@ -51,9 +51,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string } | null>(null)
   const [enLectureLivre, setEnLectureLivre] = useState(false)
   const [progressionLivre, setProgressionLivre] = useState(0)
+  const silenceRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     const audio = document.getElementById('audio-principal') as HTMLAudioElement || new Audio()
+    // Silence pour maintenir la session iOS active pendant la pause
+    const silence = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAABAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN//MUZAMAAAGkAAAAAAAAA0gAAAAATEFN//MUZAYAAAGkAAAAAAAAA0gAAAAATEFN//MUZAkAAAGkAAAAAAAAA0gAAAAATEFN')
+    silence.loop = true
+    silence.volume = 0.001
+    silenceRef.current = silence
     audioRef.current = audio
 
     audio.addEventListener('timeupdate', () => {
@@ -89,6 +95,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing'
       }
+      silenceRef.current?.pause()
     })
 
     audio.addEventListener('pause', () => {
@@ -96,6 +103,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
       }
+      silenceRef.current?.play().catch(() => { })
     })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
