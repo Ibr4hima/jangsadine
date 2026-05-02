@@ -175,7 +175,7 @@ export default function Navbar() {
                                 ))}
                             </div>
                             <div style={{ maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                <TitreDefilant texte={'📖 ' + livreAudio.titre} style={{ fontSize: '13px', fontWeight: 600, color: 'white' }} />
+                                <TitreDefilant texte={'' + livreAudio.titre} style={{ fontSize: '13px', fontWeight: 600, color: 'white' }} />
                             </div>
                             <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleLivre() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--or)', display: 'flex', alignItems: 'center', padding: 0 }}>
                                 {enLectureLivre ? (
