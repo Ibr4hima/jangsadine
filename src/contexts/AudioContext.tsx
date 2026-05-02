@@ -171,6 +171,32 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audio.addEventListener('pause', () => setEnLectureLivre(false))
     audio.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
     audio.play()
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: titre,
+        artist: 'Jàng sa Diné',
+        album: 'Livre audio',
+        artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
+      })
+      navigator.mediaSession.setActionHandler('play', () => audio.play())
+      navigator.mediaSession.setActionHandler('pause', () => audio.pause())
+      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+        audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
+      })
+      navigator.mediaSession.setActionHandler('seekforward', (details) => {
+        audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
+      })
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate,
+            position: audio.currentTime,
+          })
+        }
+      })
+    }
     setLivreAudio({ url, titre })
   }
 

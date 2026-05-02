@@ -137,9 +137,7 @@ export default function Navbar() {
                                     ))}
                                 </div>
                                 <div style={{ maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'white', display: 'inline-block', animation: piste.titre.length > 18 ? 'defilement 8s linear infinite' : 'none', paddingRight: '20px' }}>
-                                        {piste.titre}
-                                    </span>
+                                    <TitreDefilant texte={piste.titre} style={{ fontSize: '13px', fontWeight: 600, color: 'white' }} />
                                 </div>
                                 <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleLecture() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--or)', display: 'flex', alignItems: 'center', padding: 0 }}>
                                     {enLecture ? (
