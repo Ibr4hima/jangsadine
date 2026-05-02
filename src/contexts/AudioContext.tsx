@@ -128,10 +128,35 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       }
     })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
+    // Fix iOS PWA + Safari : reprendre quand la page redevient visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Resynchroniser la Media Session
+        if ('mediaSession' in navigator) {
+          if (audioRef.current && !audioRef.current.paused) {
+            navigator.mediaSession.playbackState = 'playing'
+            if (audioRef.current.duration) {
+              try {
+                navigator.mediaSession.setPositionState({
+                  duration: audioRef.current.duration,
+                  playbackRate: audioRef.current.playbackRate,
+                  position: audioRef.current.currentTime,
+                })
+              } catch { }
+            }
+          }
+          if (livreAudioRef.current && !livreAudioRef.current.paused) {
+            navigator.mediaSession.playbackState = 'playing'
+          }
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       audio.pause(); audio.src = ''
       livreAudioEl.pause(); livreAudioEl.src = ''
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
