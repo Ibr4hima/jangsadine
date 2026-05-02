@@ -231,15 +231,30 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function toggleLivre() {
     const audio = livreAudioRef.current
     if (!audio) return
-    if (enLectureLivre) audio.pause()
-    else audio.play()
+    if (enLectureLivre) {
+      audio.pause()
+    } else {
+      if (audio.paused) {
+        audio.play().catch(() => {
+          setTimeout(() => audio.play().catch(console.error), 300)
+        })
+      }
+    }
   }
 
   function toggleLecture() {
     const audio = audioRef.current
     if (!audio) return
-    if (enLecture) audio.pause()
-    else audio.play()
+    if (enLecture) {
+      audio.pause()
+    } else {
+      // Force la reprise sur iOS
+      if (audio.paused) {
+        audio.play().catch(() => {
+          setTimeout(() => audio.play().catch(console.error), 300)
+        })
+      }
+    }
   }
 
   function seeker(pct: number) {
