@@ -127,7 +127,6 @@ export default function Khoutbah() {
                         {k.serie && <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#faf3dc', color: '#b8911f' }}>{k.serie}{k.numero_serie ? ' · ' + k.numero_serie : ''}</span>}
                       </div>
                     </div>
-                    {k.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{k.duree}</span>}
                   </div>
 
                 </div>

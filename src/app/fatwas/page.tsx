@@ -213,7 +213,6 @@ export default function Fatwas() {
                               : <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
                           </div>
                           <span style={{ fontSize: '13px', color: actif ? 'var(--bleu)' : '#888', fontWeight: 500 }}>{f.sheikh}</span>
-                          {f.duree && <span style={{ fontSize: '12px', color: '#bbb', marginLeft: 'auto' }}>{f.duree}</span>}
                         </div>
                       </div>
                     )

@@ -126,7 +126,6 @@ export default function Conferences() {
                       />
                       <p style={{ fontSize: '12px', color: '#999' }}>{c.sheikh}</p>
                     </div>
-                    {c.duree && <span style={{ fontSize: '12px', color: '#bbb', flexShrink: 0 }}>{c.duree}</span>}
                   </div>
 
                 </div>
