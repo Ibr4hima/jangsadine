@@ -145,11 +145,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     navigator.mediaSession.playbackState = 'playing'
 
     navigator.mediaSession.setActionHandler('play', () => {
-      const pos = audio.currentTime
-      audio.play().catch(() => {
-        // Sur iOS : ne pas reload, juste reprendre
+      if (audio.readyState === 0 && audio.src) {
+        const pos = audio.currentTime
+        audio.load()
         audio.currentTime = pos
-        audio.play().catch(console.error)
+      }
+      audio.play().catch(() => {
+        setTimeout(() => audio.play().catch(console.error), 300)
       })
     })
     navigator.mediaSession.setActionHandler('pause', () => {
