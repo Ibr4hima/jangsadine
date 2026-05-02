@@ -28,6 +28,11 @@ type AudioContextType = {
   reculer: () => void
   avancer: () => void
   fermer: () => void
+  livreAudio: { url: string; titre: string } | null
+  enLectureLivre: boolean
+  progressionLivre: number
+  jouerLivre: (url: string, titre: string) => void
+  toggleLivre: () => void
 }
 
 const AudioCtx = createContext<AudioContextType | null>(null)
@@ -41,6 +46,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [markerActuel, setMarkerActuel] = useState<Marker | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const markersRef = useRef<Marker[]>([])
+  const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string } | null>(null)
+  const [enLectureLivre, setEnLectureLivre] = useState(false)
+  const [progressionLivre, setProgressionLivre] = useState(0)
+  const livreAudioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     const audio = new Audio()
@@ -127,6 +136,32 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function jouerLivre(url: string, titre: string) {
+    // Mettre en pause le lecteur principal si actif
+    if (audioRef.current && enLecture) audioRef.current.pause()
+
+    if (livreAudioRef.current) {
+      livreAudioRef.current.pause()
+      livreAudioRef.current.src = ''
+    }
+    const audio = new Audio(url)
+    livreAudioRef.current = audio
+    audio.addEventListener('timeupdate', () => {
+      setProgressionLivre((audio.currentTime / audio.duration) * 100 || 0)
+    })
+    audio.addEventListener('play', () => setEnLectureLivre(true))
+    audio.addEventListener('pause', () => setEnLectureLivre(false))
+    audio.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
+    audio.play()
+    setLivreAudio({ url, titre })
+  }
+
+  function toggleLivre() {
+    if (!livreAudioRef.current) return
+    if (enLectureLivre) livreAudioRef.current.pause()
+    else livreAudioRef.current.play()
+  }
+
   function toggleLecture() {
     if (!audioRef.current) return
     if (enLecture) audioRef.current.pause()
@@ -146,8 +181,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AudioCtx.Provider value={{ piste, enLecture, progression, dureeTotal, markers, markerActuel, jouer, toggleLecture, seeker, reculer, avancer, fermer }}>
-      {children}
+    <AudioCtx.Provider value={{
+      piste, enLecture, progression, dureeTotal, markers, markerActuel,
+      jouer, toggleLecture, seeker, reculer, avancer, fermer,
+      livreAudio, enLectureLivre, progressionLivre, jouerLivre, toggleLivre
+    }}>      {children}
     </AudioCtx.Provider>
   )
 }
@@ -157,3 +195,4 @@ export function useAudio() {
   if (!ctx) throw new Error('useAudio doit etre utilise dans AudioProvider')
   return ctx
 }
+

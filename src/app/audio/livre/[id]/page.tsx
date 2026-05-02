@@ -2,6 +2,7 @@
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
+import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -48,9 +49,7 @@ export default function PageLivre() {
   const [versions, setVersions] = useState<Cours[]>([])
   const [chapitres, setChapitres] = useState<Chapitre[]>([])
   const [loading, setLoading] = useState(true)
-  const [audioLivre, setAudioLivre] = useState<HTMLAudioElement | null>(null)
-  const [enLectureAudio, setEnLectureAudio] = useState(false)
-  const [progressionAudio, setProgressionAudio] = useState(0)
+  const { jouerLivre, toggleLivre, enLectureLivre, progressionLivre, livreAudio } = useAudio()
 
   useEffect(() => {
     async function charger() {
@@ -81,19 +80,6 @@ export default function PageLivre() {
     }
     charger()
   }, [id])
-
-  useEffect(() => {
-    if (!livre?.url_audio) return
-    const audio = new Audio(livre.url_audio)
-    audio.addEventListener('timeupdate', () => {
-      setProgressionAudio((audio.currentTime / audio.duration) * 100 || 0)
-    })
-    audio.addEventListener('play', () => setEnLectureAudio(true))
-    audio.addEventListener('pause', () => setEnLectureAudio(false))
-    audio.addEventListener('ended', () => { setEnLectureAudio(false); setProgressionAudio(0) })
-    setAudioLivre(audio)
-    return () => { audio.pause(); audio.src = '' }
-  }, [livre?.url_audio])
 
   const categorie = (livre?.categories as any)?.nom || ''
 
@@ -147,16 +133,23 @@ export default function PageLivre() {
             )}
             {livre.url_audio && (
               <button
-                onClick={() => { if (!audioLivre) return; enLectureAudio ? audioLivre.pause() : audioLivre.play() }}
+                onClick={() => {
+                  if (!livre.url_audio) return
+                  if (livreAudio?.url === livre.url_audio) {
+                    toggleLivre()
+                  } else {
+                    jouerLivre(livre.url_audio, livre.titre)
+                  }
+                }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  background: enLectureAudio ? 'rgba(217,172,42,0.3)' : 'rgba(255,255,255,0.15)',
+                  background: enLectureLivre && livreAudio?.url === livre.url_audio ? 'rgba(217,172,42,0.3)' : 'rgba(255,255,255,0.15)',
                   color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '13px',
-                  fontWeight: 500, border: enLectureAudio ? '1px solid rgba(217,172,42,0.6)' : '1px solid rgba(255,255,255,0.25)',
+                  fontWeight: 500, border: enLectureLivre && livreAudio?.url === livre.url_audio ? '1px solid rgba(217,172,42,0.6)' : '1px solid rgba(255,255,255,0.25)',
                   cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s'
                 }}>
                 {/* Icône animée */}
-                {enLectureAudio ? (
+                {enLectureLivre && livreAudio?.url === livre.url_audio ? (
                   <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '14px' }}>
                     {[1, 2, 3, 4].map(i => (
                       <div key={i} style={{
@@ -170,11 +163,11 @@ export default function PageLivre() {
                 ) : (
                   <span style={{ fontSize: '16px' }}>🎧</span>
                 )}
-                {enLectureAudio ? '' : 'Écouter le livre'}
+                {enLectureLivre && livreAudio?.url === livre.url_audio ? '' : 'Écouter le livre'}
                 {/* Barre de progression */}
-                {enLectureAudio && (
+                {enLectureLivre && livreAudio?.url === livre.url_audio && (
                   <div style={{ width: '60px', height: '3px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ width: progressionAudio + '%', height: '100%', background: 'var(--or)', borderRadius: '2px', transition: 'width 0.5s' }} />
+                    <div style={{ width: progressionLivre + '%', height: '100%', background: 'var(--or)', borderRadius: '2px', transition: 'width 0.5s' }} />
                   </div>
                 )}
               </button>
