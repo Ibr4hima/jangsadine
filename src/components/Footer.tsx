@@ -53,15 +53,15 @@ const liens = [
 ]
 
 export default function Footer() {
-  const [nbEpisodes, setNbEpisodes] = useState<number | null>(null)
+  const [nbCours, setNbCours] = useState<number | null>(null)
   const [nbKhoutbahConf, setNbKhoutbahConf] = useState<number | null>(null)
 
   useEffect(() => {
     async function charger() {
-      const { count: eps } = await supabase.from('episodes').select('*', { count: 'exact', head: true })
+      const { count: cours } = await supabase.from('cours').select('*', { count: 'exact', head: true })
       const { count: confs } = await supabase.from('conferences').select('*', { count: 'exact', head: true })
       const { count: khs } = await supabase.from('khoutbahs').select('*', { count: 'exact', head: true })
-      if (eps) setNbEpisodes(arrondir(eps))
+      if (cours) setNbCours(arrondir(cours))
       if (confs !== null && khs !== null) setNbKhoutbahConf(arrondir(confs + khs))
     }
     charger()
@@ -81,8 +81,8 @@ export default function Footer() {
               </span>
             </div>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
-              {nbEpisodes && nbKhoutbahConf
-                ? `Plus de ${nbEpisodes} cours audio et plus de ${nbKhoutbahConf} conférences et khoutbah en wolof — le tout gratuitement.`
+              {nbCours && nbKhoutbahConf
+                ? `Plus de ${nbCours} cours audio et plus de ${nbKhoutbahConf} conférences et khoutbah en wolof — le tout gratuitement.`
                 : 'Apprends ta religion — cours audio, khoutbah, conférences et ebooks islamiques accessibles gratuitement.'
               }
             </p>
