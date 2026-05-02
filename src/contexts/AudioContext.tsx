@@ -38,6 +38,39 @@ type AudioContextType = {
 
 const AudioCtx = createContext<AudioContextType | null>(null)
 
+// Helper pour jouer en gérant le déchargement iOS
+async function safePlay(audio: HTMLAudioElement) {
+  if (!audio.src) return
+  const currentTime = audio.currentTime
+
+  // Si iOS a déchargé l'audio, le recharger et restaurer la position
+  if (audio.readyState < 2) {
+    audio.load()
+    await new Promise<void>((resolve) => {
+      const onLoaded = () => {
+        audio.removeEventListener('loadedmetadata', onLoaded)
+        resolve()
+      }
+      audio.addEventListener('loadedmetadata', onLoaded)
+      // Timeout de sécurité au cas où l'événement ne se déclenche pas
+      setTimeout(() => {
+        audio.removeEventListener('loadedmetadata', onLoaded)
+        resolve()
+      }, 2000)
+    })
+    if (currentTime > 0 && !isNaN(currentTime)) {
+      audio.currentTime = currentTime
+    }
+  }
+
+  try {
+    await audio.play()
+  } catch (err) {
+    console.error('Play failed, retry:', err)
+    setTimeout(() => audio.play().catch(console.error), 300)
+  }
+}
+
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [piste, setPiste] = useState<PisteAudio | null>(null)
   const [enLecture, setEnLecture] = useState(false)
@@ -85,7 +118,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       setPiste(prev => prev ? { ...prev, duree: dureeReelle } : prev)
     })
 
-    audio.addEventListener('play', () => {
+    // 'playing' confirme que le son sort vraiment (mieux que 'play' sur iOS)
+    audio.addEventListener('playing', () => {
       setEnLecture(true)
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing'
@@ -98,7 +132,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         navigator.mediaSession.playbackState = 'paused'
       }
     })
+
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
+
+    // Gérer le cas où iOS suspend la connexion pendant une longue pause
+    audio.addEventListener('stalled', () => {
+      const time = audio.currentTime
+      audio.load()
+      if (time > 0 && !isNaN(time)) audio.currentTime = time
+    })
 
     // Un seul objet Audio pour les livres
     const livreAudioEl = new Audio()
@@ -116,7 +158,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         } catch { }
       }
     })
-    livreAudioEl.addEventListener('play', () => {
+
+    livreAudioEl.addEventListener('playing', () => {
       setEnLectureLivre(true)
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing'
@@ -129,7 +172,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         navigator.mediaSession.playbackState = 'paused'
       }
     })
+
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
+
+    livreAudioEl.addEventListener('stalled', () => {
+      const time = livreAudioEl.currentTime
+      livreAudioEl.load()
+      if (time > 0 && !isNaN(time)) livreAudioEl.currentTime = time
+    })
 
     return () => {
       audio.pause(); audio.src = ''
@@ -144,20 +194,29 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
-    navigator.mediaSession.setActionHandler('play', () => {
-      audio.play().catch(() => {
-        setTimeout(() => {
-          audio.play().catch(console.error)
-        }, 300)
-      })
+
+    navigator.mediaSession.setActionHandler('play', async () => {
+      await safePlay(audio)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing'
+      }
     })
-    navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
+
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audio.pause()
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused'
+      }
+    })
+
     navigator.mediaSession.setActionHandler('seekbackward', (details) => {
       audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
     })
+
     navigator.mediaSession.setActionHandler('seekforward', (details) => {
       audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
     })
+
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime !== undefined) audio.currentTime = details.seekTime
     })
@@ -179,7 +238,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     audio.src = nouvellePiste.url
     audio.load()
-    audio.play()
+    audio.play().catch(console.error)
     setPiste(nouvellePiste)
     setProgression(0)
     setDureeTotal(0)
@@ -216,7 +275,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     livreAudioEl.src = url
     livreAudioEl.load()
-    livreAudioEl.play()
+    livreAudioEl.play().catch(console.error)
     setLivreAudio({ url, titre })
     setProgressionLivre(0)
 
@@ -234,11 +293,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (enLectureLivre) {
       audio.pause()
     } else {
-      if (audio.paused) {
-        audio.play().catch(() => {
-          setTimeout(() => audio.play().catch(console.error), 300)
-        })
-      }
+      safePlay(audio)
     }
   }
 
@@ -248,12 +303,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (enLecture) {
       audio.pause()
     } else {
-      // Force la reprise sur iOS
-      if (audio.paused) {
-        audio.play().catch(() => {
-          setTimeout(() => audio.play().catch(console.error), 300)
-        })
-      }
+      safePlay(audio)
     }
   }
 
