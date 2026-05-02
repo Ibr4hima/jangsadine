@@ -38,6 +38,19 @@ type AudioContextType = {
 
 const AudioCtx = createContext<AudioContextType | null>(null)
 
+function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
+  if (!('mediaSession' in navigator)) return
+  navigator.mediaSession.metadata = new MediaMetadata(metadata)
+  navigator.mediaSession.setActionHandler('play', () => audio.play())
+  navigator.mediaSession.setActionHandler('pause', () => audio.pause())
+  navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+    audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
+  })
+  navigator.mediaSession.setActionHandler('seekforward', (details) => {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
+  })
+}
+
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [piste, setPiste] = useState<PisteAudio | null>(null)
   const [enLecture, setEnLecture] = useState(false)
@@ -63,11 +76,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         setMarkerActuel(actuel || null)
       }
       if ('mediaSession' in navigator && audio.duration) {
-        navigator.mediaSession.setPositionState({
-          duration: audio.duration,
-          playbackRate: audio.playbackRate,
-          position: audio.currentTime,
-        })
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate,
+            position: audio.currentTime,
+          })
+        } catch { }
       }
     })
 
@@ -85,17 +100,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audio.addEventListener('play', () => setEnLecture(true))
     audio.addEventListener('pause', () => setEnLecture(false))
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
-
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.setActionHandler('play', () => audio.play())
-      navigator.mediaSession.setActionHandler('pause', () => audio.pause())
-      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-        audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
-      })
-      navigator.mediaSession.setActionHandler('seekforward', (details) => {
-        audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
-      })
-    }
 
     return () => { audio.pause(); audio.src = '' }
   }, [])
@@ -136,14 +140,12 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         if (data && data.length > 0) setMarkers(data)
       })
 
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: nouvellePiste.titre,
-        artist: nouvellePiste.sheikh,
-        album: 'Jàng sa Diné',
-        artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
-      })
-    }
+    setupMediaSession(audio, {
+      title: nouvellePiste.titre,
+      artist: nouvellePiste.sheikh,
+      album: 'Jàng sa Diné',
+      artwork: [{ src: window.location.origin + '/logo.png', sizes: '512x512', type: 'image/png' }]
+    })
   }
 
   function jouerLivre(url: string, titre: string) {
@@ -162,42 +164,35 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       livreAudioRef.current.pause()
       livreAudioRef.current.src = ''
     }
+
     const audio = new Audio(url)
     livreAudioRef.current = audio
+
     audio.addEventListener('timeupdate', () => {
       setProgressionLivre((audio.currentTime / audio.duration) * 100 || 0)
-    })
-    audio.addEventListener('play', () => setEnLectureLivre(true))
-    audio.addEventListener('pause', () => setEnLectureLivre(false))
-    audio.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
-    audio.play()
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: titre,
-        artist: 'Jàng sa Diné',
-        album: 'Livre audio',
-        artwork: [{ src: '/logo.png', sizes: '512x512', type: 'image/png' }]
-      })
-      navigator.mediaSession.setActionHandler('play', () => audio.play())
-      navigator.mediaSession.setActionHandler('pause', () => audio.pause())
-      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-        audio.currentTime = Math.max(0, audio.currentTime - (details?.seekOffset || 10))
-      })
-      navigator.mediaSession.setActionHandler('seekforward', (details) => {
-        audio.currentTime = Math.min(audio.duration, audio.currentTime + (details?.seekOffset || 10))
-      })
-
-      audio.addEventListener('timeupdate', () => {
-        if (audio.duration) {
+      if ('mediaSession' in navigator && audio.duration) {
+        try {
           navigator.mediaSession.setPositionState({
             duration: audio.duration,
             playbackRate: audio.playbackRate,
             position: audio.currentTime,
           })
-        }
-      })
-    }
+        } catch { }
+      }
+    })
+    audio.addEventListener('play', () => setEnLectureLivre(true))
+    audio.addEventListener('pause', () => setEnLectureLivre(false))
+    audio.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
+
+    audio.play()
     setLivreAudio({ url, titre })
+
+    setupMediaSession(audio, {
+      title: titre,
+      artist: 'Jàng sa Diné',
+      album: 'Livre audio',
+      artwork: [{ src: window.location.origin + '/logo.png', sizes: '512x512', type: 'image/png' }]
+    })
   }
 
   function toggleLivre() {
@@ -219,6 +214,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   function reculer() { if (audioRef.current) audioRef.current.currentTime -= 10 }
   function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
+
   function fermer() {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = '' }
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
@@ -234,7 +230,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       piste, enLecture, progression, dureeTotal, markers, markerActuel,
       jouer, toggleLecture, seeker, reculer, avancer, fermer,
       livreAudio, enLectureLivre, progressionLivre, jouerLivre, toggleLivre, fermerLivre
-    }}>      {children}
+    }}>
+      {children}
     </AudioCtx.Provider>
   )
 }
@@ -244,4 +241,3 @@ export function useAudio() {
   if (!ctx) throw new Error('useAudio doit etre utilise dans AudioProvider')
   return ctx
 }
-
