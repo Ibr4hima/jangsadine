@@ -38,6 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LecteurGlobal />
           <ScrollTop />
           <ScrollRestore />
+          <audio id="audio-principal" style={{ display: 'none' }} />
+          <audio id="audio-livre" style={{ display: 'none' }} />
         </AudioProvider>
       </body>
     </html>

@@ -53,8 +53,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [progressionLivre, setProgressionLivre] = useState(0)
 
   useEffect(() => {
-    // Un seul objet Audio pour les épisodes
-    const audio = new Audio()
+    const audio = document.getElementById('audio-principal') as HTMLAudioElement || new Audio()
     audioRef.current = audio
 
     audio.addEventListener('timeupdate', () => {
@@ -100,8 +99,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
-    // Un seul objet Audio pour les livres
-    const livreAudioEl = new Audio()
+    const livreAudioEl = document.getElementById('audio-livre') as HTMLAudioElement || new Audio()
     livreAudioRef.current = livreAudioEl
 
     livreAudioEl.addEventListener('timeupdate', () => {
