@@ -103,10 +103,9 @@ export default function PageLivre() {
 
       <section style={{ background: 'var(--bleu)', padding: '40px 24px 36px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <button onClick={() => window.history.back()}
-            style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '16px', display: 'inline-block', padding: 0 }}>
+          <Link href="/audio" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>
             ← Retour aux cours
-          </button>
+          </Link>
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
             {categorie}
           </span>
@@ -197,12 +196,11 @@ export default function PageLivre() {
                     {chap.numero}
                   </span>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Link href={`/audio/livre/${id}/chapitre/${chap.id}`}
-                      style={{
-                        flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
-                        padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
-                        textDecoration: 'none', transition: 'border-color 0.15s'
-                      }}
+                    <Link href={`/audio/livre/${id}/chapitre/${chap.id}`} style={{
+                      flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
+                      padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+                      textDecoration: 'none', transition: 'border-color 0.15s'
+                    }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
                     >
@@ -229,8 +227,7 @@ export default function PageLivre() {
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {versions.map(v => (
-                <Link key={v.id} href={`/audio/${v.id}`}
-                  style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
+                <Link key={v.id} href={`/audio/${v.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
                 >
