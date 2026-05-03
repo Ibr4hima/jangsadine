@@ -198,7 +198,6 @@ export default function PageLivre() {
                   </span>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Link href={`/audio/livre/${id}/chapitre/${chap.id}`}
-                      onClick={() => sessionStorage.setItem(`scroll:/audio/livre/${id}`, String(window.scrollY))}
                       style={{
                         flex: 1, background: 'white', border: '1px solid var(--bordure)', borderRadius: '12px',
                         padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
@@ -231,10 +230,6 @@ export default function PageLivre() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {versions.map(v => (
                 <Link key={v.id} href={`/audio/${v.id}`}
-                  onClick={() => {
-                    console.log('CLICK - scroll actuel:', window.scrollY)
-                    sessionStorage.setItem(`scroll:/audio/livre/${id}`, String(window.scrollY))
-                  }}
                   style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}

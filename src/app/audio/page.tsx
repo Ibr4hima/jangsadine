@@ -67,12 +67,6 @@ export default function Audio() {
             if (coursAvecId) coursAvecId.forEach(c => { if (c.livre_id) serieMap[c.livre_id] = c.id })
             setCoursSerieUniqueMap(serieMap)
             setLoading(false)
-
-            setLoading(false)
-            const saved = sessionStorage.getItem('scroll:/audio')
-            if (saved && parseInt(saved) > 0) {
-                setTimeout(() => window.scrollTo({ top: parseInt(saved), behavior: 'instant' }), 100)
-            }
         }
         charger()
     }, [])
@@ -145,7 +139,6 @@ export default function Audio() {
                             const nbVersions = livresAvecNb[l.id] || 0
                             return (
                                 <Link key={l.id} href={coursSerieUniqueMap[l.id] ? `/audio/${coursSerieUniqueMap[l.id]}` : `/audio/livre/${l.id}`}
-                                    onClick={() => sessionStorage.setItem('scroll:/audio', String(window.scrollY))}
                                     style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none', transition: 'border-color 0.15s, transform 0.15s' }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
