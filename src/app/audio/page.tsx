@@ -44,9 +44,12 @@ export default function Audio() {
     const [livres, setLivres] = useState<Livre[]>([])
     const [livresAvecNb, setLivresAvecNb] = useState<Record<string, number>>({})
     const [coursData, setCoursData] = useState<{ livre_id: string; sheikh: string }[]>([])
-    const [categorieActive, setCategorieActive] = useState<string>(
-        typeof window !== 'undefined' ? sessionStorage.getItem('categorie:/audio') || 'toutes' : 'toutes'
-    )
+    const [categorieActive, setCategorieActive] = useState<string>('toutes')
+
+    useEffect(() => {
+        const saved = sessionStorage.getItem('categorie:/audio')
+        if (saved) setCategorieActive(saved)
+    }, [])
     const [loading, setLoading] = useState(true)
     const [recherche, setRecherche] = useState('')
     const [coursSerieUniqueMap, setCoursSerieUniqueMap] = useState<Record<string, string>>({})
