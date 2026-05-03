@@ -3,7 +3,6 @@ import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -90,7 +89,10 @@ export default function PageCours() {
             <Navbar />
             <section style={{ background: 'var(--bleu)', padding: '40px 24px 36px' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <Link href="/audio" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>← Retour aux cours</Link>
+                    <button onClick={() => window.history.back()}
+                        style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '16px', display: 'inline-block' }}>
+                        ← Page précédente
+                    </button>
                     <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>{(cours.categories as any)?.nom}</span>
                     <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', marginBottom: '6px', lineHeight: 1.3 }}>{cours.titre}</h1>
                     <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginBottom: cours.description ? '10px' : '0' }}>{cours.sheikh} · {cours.nb_episodes} épisode{cours.nb_episodes > 1 ? 's' : ''}</p>
