@@ -155,38 +155,40 @@ export default function Navbar() {
                     )}
 
                     {livreAudio && (
-                        <div style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', gap: '6px', background: 'var(--bleu)', borderRadius: '20px', padding: '6px 14px', height: '30px', transition: 'opacity 0.15s', marginLeft: '8px' }}>
-                            <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '12px' }}>
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} style={{
-                                        width: '2px',
-                                        background: 'var(--or)',
-                                        borderRadius: '2px',
-                                        height: i === 2 ? '12px' : '7px',
-                                        animationName: (enLecture || enLectureLivre) ? 'pulse-bar' : 'none',
-                                        animationDuration: '0.3s',
-                                        animationTimingFunction: 'ease-in-out',
-                                        animationIterationCount: 'infinite',
-                                        animationDirection: 'alternate',
-                                        animationDelay: `${i * 0.1}s`,
-                                    }} />
-                                ))}
+                        <Link href={`/audio/livre/${livreAudio.livreId}`} style={{ textDecoration: 'none', marginLeft: '8px' }}>
+                            <div style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', gap: '6px', background: 'var(--bleu)', borderRadius: '20px', padding: '6px 14px', height: '30px', transition: 'opacity 0.15s' }}>
+                                <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '12px' }}>
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} style={{
+                                            width: '2px',
+                                            background: 'var(--or)',
+                                            borderRadius: '2px',
+                                            height: i === 2 ? '12px' : '7px',
+                                            animationName: enLectureLivre ? 'pulse-bar' : 'none',
+                                            animationDuration: '0.3s',
+                                            animationTimingFunction: 'ease-in-out',
+                                            animationIterationCount: 'infinite',
+                                            animationDirection: 'alternate',
+                                            animationDelay: `${i * 0.1}s`,
+                                        }} />
+                                    ))}
+                                </div>
+                                <div style={{ maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                    <TitreDefilant texte={'' + livreAudio.titre} style={{ fontSize: '13px', fontWeight: 600, color: 'white' }} />
+                                </div>
+                                <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleLivre() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--or)', display: 'flex', alignItems: 'center', padding: 0 }}>
+                                    {enLectureLivre ? (
+                                        <div style={{ display: 'flex', gap: '2px' }}>
+                                            <div style={{ width: '2px', height: '10px', background: 'var(--or)', borderRadius: '1px' }} />
+                                            <div style={{ width: '2px', height: '10px', background: 'var(--or)', borderRadius: '1px' }} />
+                                        </div>
+                                    ) : (
+                                        <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid var(--or)' }} />
+                                    )}
+                                </button>
+                                <button onClick={e => { e.preventDefault(); e.stopPropagation(); fermerLivre() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: '12px', padding: '0 0 0 4px' }}>✕</button>
                             </div>
-                            <div style={{ maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                <TitreDefilant texte={'' + livreAudio.titre} style={{ fontSize: '13px', fontWeight: 600, color: 'white' }} />
-                            </div>
-                            <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleLivre() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--or)', display: 'flex', alignItems: 'center', padding: 0 }}>
-                                {enLectureLivre ? (
-                                    <div style={{ display: 'flex', gap: '2px' }}>
-                                        <div style={{ width: '2px', height: '10px', background: 'var(--or)', borderRadius: '1px' }} />
-                                        <div style={{ width: '2px', height: '10px', background: 'var(--or)', borderRadius: '1px' }} />
-                                    </div>
-                                ) : (
-                                    <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid var(--or)' }} />
-                                )}
-                            </button>
-                            <button onClick={e => { e.preventDefault(); e.stopPropagation(); fermerLivre() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: '12px', padding: '0 0 0 4px' }}>✕</button>
-                        </div>
+                        </Link>
                     )}
 
                     {prochaine && !surPagePrieres && (

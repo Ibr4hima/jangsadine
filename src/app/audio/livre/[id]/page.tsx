@@ -138,7 +138,7 @@ export default function PageLivre() {
                   if (livreAudio?.url === livre.url_audio) {
                     toggleLivre()
                   } else {
-                    jouerLivre(livre.url_audio, livre.titre)
+                    jouerLivre(livre.url_audio, livre.titre, livre.id)
                   }
                 }}
                 style={{

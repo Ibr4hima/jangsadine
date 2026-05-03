@@ -29,10 +29,10 @@ type AudioContextType = {
   reculer: () => void
   avancer: () => void
   fermer: () => void
-  livreAudio: { url: string; titre: string } | null
+  livreAudio: { url: string; titre: string; livreId: string } | null
   enLectureLivre: boolean
   progressionLivre: number
-  jouerLivre: (url: string, titre: string) => void
+  jouerLivre: (url: string, titre: string, livreId: string) => void
   toggleLivre: () => void
 }
 
@@ -48,7 +48,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const livreAudioRef = useRef<HTMLAudioElement | null>(null)
   const markersRef = useRef<Marker[]>([])
-  const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string } | null>(null)
+  const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string; livreId: string } | null>(null)
   const [enLectureLivre, setEnLectureLivre] = useState(false)
   const [progressionLivre, setProgressionLivre] = useState(0)
 
@@ -129,7 +129,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  function jouerLivre(url: string, titre: string) {
+  function jouerLivre(url: string, titre: string, livreId: string) {
     const livreAudioEl = livreAudioRef.current
     if (!livreAudioEl) return
 
@@ -141,7 +141,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     livreAudioEl.load()
     livreAudioEl.play().catch(console.error)
 
-    setLivreAudio({ url, titre }); setProgressionLivre(0)
+    setLivreAudio({ url, titre, livreId }); setProgressionLivre(0)
 
     setupMediaSession(livreAudioEl, {
       title: titre, artist: 'Jàng sa Diné', album: 'Livre audio',
