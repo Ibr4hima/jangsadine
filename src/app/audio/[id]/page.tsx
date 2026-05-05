@@ -207,7 +207,10 @@ export default function PageCours() {
                                     {index + 1}
                                 </span>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div onClick={() => jouer({ id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })}
+                                    <div onClick={() => {
+                                        jouer({ id: ep.id, titre: ep.titre, sheikh: cours.sheikh, url: ep.url_audio, duree: ep.duree, href: `/audio/${id}`, ...pisteVoisins(episodes, i, cours.sheikh, id as string) })
+                                        if (ep.description) setDescOuverteId(ep.id)
+                                    }}
                                         style={{ overflow: 'hidden', background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: descOuverte ? '10px 10px 0 0' : '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', transition: 'all 0.15s' }}
                                         onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
                                         onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = descOuverte ? 'var(--bleu)' : 'var(--bordure)' }}
