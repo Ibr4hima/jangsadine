@@ -1,9 +1,11 @@
 'use client'
+import EditeurTexte from '@/components/EditeurTexte';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 type Categorie = { id: string; nom: string; slug: string }
 type CoursItem = { id: string; titre: string; sheikh: string }
 type Marker = { titre: string; temps: string }
+
 
 export default function Admin() {
     const [categories, setCategories] = useState<Categorie[]>([])
@@ -518,7 +520,7 @@ export default function Admin() {
                             <label style={labelStyle}>Titre de base</label>
                             <input style={inputStyle} value={epTitre} onChange={e => setEpTitre(e.target.value)} placeholder="ex: Les trois principes (numerote auto si multiple)" />
                             <label style={labelStyle}>Description (optionnel)</label>
-                            <textarea style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} value={epDescription} onChange={e => setEpDescription(e.target.value)} placeholder="ex: Ce cours traite du Hadith Sahih, Hasan et Daif..." />
+                            <EditeurTexte value={epDescription} onChange={setEpDescription} placeholder="ex: Ce cours traite du Hadith Sahih, Hasan et Daif..." />
                             <label style={labelStyle}>Numero de depart</label>
                             <input style={inputStyle} type="number" value={epNumero} onChange={e => setEpNumero(e.target.value)} placeholder="1" required />
                             {fichiers.length === 1 && (
@@ -743,7 +745,7 @@ export default function Admin() {
                             <label style={labelStyle}>Numéro de départ</label>
                             <input style={inputStyle} type="number" value={epChapNumero} onChange={e => setEpChapNumero(e.target.value)} placeholder="1" required />
                             <label style={labelStyle}>Description (optionnel)</label>
-                            <textarea style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} value={epChapDescription} onChange={e => setEpChapDescription(e.target.value)} placeholder="ex: Ce cours traite de..." />
+                            <EditeurTexte value={epChapDescription} onChange={setEpChapDescription} />
                             {epChapFichiers.length === 1 && (
                                 <>
                                     <label style={labelStyle}>Durée (détectée automatiquement)</label>

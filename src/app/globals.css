@@ -172,3 +172,38 @@ html {
     transform: scaleY(1);
   }
 }
+
+/* Styles description épisode */
+.ep-description ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.ep-description ol {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.ep-description li {
+  margin-bottom: 4px;
+}
+
+.ep-description strong {
+  font-weight: 700;
+}
+
+.ep-description em {
+  font-style: italic;
+}
+
+.ep-description u {
+  text-decoration: underline;
+}
+
+.ep-description blockquote {
+  border-left: 3px solid #28558b;
+  padding-left: 12px;
+  color: #666;
+  font-style: italic;
+  margin: 8px 0;
+}

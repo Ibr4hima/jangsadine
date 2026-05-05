@@ -234,8 +234,7 @@ export default function PageCours() {
                                     {/* Panneau description */}
                                     {ep.description && descOuverte && (
                                         <div style={{ background: '#f8f6f1', border: `1px solid var(--bleu)`, borderTop: 'none', borderRadius: '0 0 10px 10px', padding: '12px 16px' }}>
-                                            <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.7, margin: 0 }}>{ep.description}</p>
-                                        </div>
+                                            <div className="ep-description" style={{ fontSize: '13px', color: '#555', lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: ep.description || '' }} />                                        </div>
                                     )}
                                 </div>
                             </div>
