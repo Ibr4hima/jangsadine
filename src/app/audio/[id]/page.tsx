@@ -14,6 +14,7 @@ type Cours = {
     nb_episodes: number
     description: string | null
     livre_id: string | null
+    serie_unique: boolean
     categories: { nom: string }
     livres: { url_pdf: string | null } | null
 }
@@ -90,9 +91,9 @@ export default function PageCours() {
             <Navbar />
             <section style={{ background: 'var(--bleu)', padding: '40px 24px 36px' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <Link href={cours.livre_id ? `/audio/livre/${cours.livre_id}` : '/audio'}
+                    <Link href={cours.serie_unique || !cours.livre_id ? '/audio' : `/audio/livre/${cours.livre_id}`}
                         style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', display: 'inline-block', marginBottom: '16px' }}>
-                        ← Page précédente
+                        ← {cours.serie_unique || !cours.livre_id ? 'Retour aux cours' : 'Page précédente'}
                     </Link>
                     <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>{(cours.categories as any)?.nom}</span>
                     <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', marginBottom: '6px', lineHeight: 1.3 }}>{cours.titre}</h1>
