@@ -78,6 +78,10 @@ export default function Admin() {
     const [modifLivrePdf, setModifLivrePdf] = useState<File | null>(null)
     const [modifCoursId, setModifCoursId] = useState('')
     const [modifCoursLivreId, setModifCoursLivreId] = useState('')
+    const [ebookCats, setEbookCats] = useState<{ id: string; nom: string; couleur: string }[]>([])
+    const [ebookCat, setEbookCat] = useState('')
+    const [ebookNouveauCat, setEbookNouveauCat] = useState('')
+    const [ebookNouveauCouleur, setEbookNouveauCouleur] = useState('#b7410e')
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
 
@@ -89,6 +93,8 @@ export default function Admin() {
             const { data: fCats } = await supabase.from('fatwas_categories').select('*').order('nom')
             const { data: fSheikhs } = await supabase.from('fatwas_sheikhs').select('*').order('nom')
             const { data: chaps } = await supabase.from('chapitres_livre').select('id, titre, livre_id').order('numero')
+            const { data: ebCats } = await supabase.from('ebooks_categories').select('*').order('nom')
+            if (ebCats) setEbookCats(ebCats)
             if (chaps) setChapitresList(chaps)
             if (cats) setCategories(cats)
             if (cours) setCoursList(cours)
@@ -236,10 +242,18 @@ export default function Admin() {
             const urlPdf = await uploadFichier(ebFichier, 'ebooks')
             let urlCover = null
             if (ebCover) urlCover = await uploadFichier(ebCover, 'covers')
-            const { error } = await supabase.from('ebooks').insert({ titre: ebTitre, description: ebDescription, categorie: ebCategorie, url_pdf: urlPdf, nb_pages: ebPages ? parseInt(ebPages) : null, image_couverture: urlCover })
+
+            let catFinale = ebookCat
+            if (ebookNouveauCat) {
+                await supabase.from('ebooks_categories').insert({ nom: ebookNouveauCat, couleur: ebookNouveauCouleur })
+                catFinale = ebookNouveauCat
+                const { data } = await supabase.from('ebooks_categories').select('*').order('nom')
+                if (data) setEbookCats(data)
+            }
+            const { error } = await supabase.from('ebooks').insert({ titre: ebTitre, description: ebDescription, categorie: catFinale, url_pdf: urlPdf, nb_pages: ebPages ? parseInt(ebPages) : null, image_couverture: urlCover })
             if (error) throw error
             setMessage('Ebook ajouté avec succès !')
-            setEbTitre(''); setEbDescription(''); setEbCategorie(''); setEbPages(''); setEbFichier(null); setEbCover(null)
+            setEbTitre(''); setEbDescription(''); setEbCategorie(''); setEbPages(''); setEbFichier(null); setEbCover(null); setEbookCat(''); setEbookNouveauCat(''); setEbookNouveauCouleur('#b7410e')
             const pdfInput = document.getElementById('pdf-input') as HTMLInputElement
             const coverInput = document.getElementById('cover-input') as HTMLInputElement
             if (pdfInput) pdfInput.value = ''
@@ -599,12 +613,27 @@ export default function Admin() {
                             <input style={inputStyle} value={ebTitre} onChange={e => setEbTitre(e.target.value)} placeholder="ex: Les regles du jeune" required />
                             <label style={labelStyle}>Description (optionnel)</label>
                             <input style={inputStyle} value={ebDescription} onChange={e => setEbDescription(e.target.value)} placeholder="Courte description" />
-                            <label style={labelStyle}>Categorie</label>
-                            <select style={{ ...inputStyle, background: 'white' }} value={ebCategorie} onChange={e => setEbCategorie(e.target.value)} required>
-                                <option value="">Selectionner</option>
-                                <option value="Aqeedah">Aqeedah</option>
-                                <option value="Fiqh">Fiqh</option>
-                            </select>
+                            <label style={labelStyle}>Catégorie</label>
+                            {ebookCats.length > 0 && (
+                                <select style={{ ...inputStyle, background: 'white' }} value={ebookCat} onChange={e => setEbookCat(e.target.value)}>
+                                    <option value="">Choisir une catégorie existante...</option>
+                                    {ebookCats.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
+                                </select>
+                            )}
+                            <input style={inputStyle} value={ebookNouveauCat} onChange={e => setEbookNouveauCat(e.target.value)} placeholder="Ou créer une nouvelle catégorie..." />
+                            {ebookNouveauCat && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <label style={labelStyle}>Couleur de la catégorie</label>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {['#b7410e', '#B78F7A', '#A8C3BC', '#d3d3ff', '#bbb791', '#e491a6', '#096c6c', '#ffd3ac', '#00674f', '#E5AA70', '#e35336', '#c68346', '#CCFFCC', '#EED9C4', '#FFA800', '#7B9EA6', '#C4A882', '#8FAF8F', '#D4A5C9', '#A67B5B', '#6B8E9F', '#C9956C', '#7FA99B', '#D4B896', '#9B7FA6', '#5C8374', '#C17B5C', '#8BA5A5', '#D4C5A9', '#A89070']
+                                            .filter(c => !ebookCats.map(cat => cat.couleur).includes(c))
+                                            .map(c => (
+                                                <div key={c} onClick={() => setEbookNouveauCouleur(c)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, cursor: 'pointer', border: ebookNouveauCouleur === c ? '3px solid #1a1a2e' : '3px solid transparent', transition: 'all 0.15s' }} />
+                                            ))}
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#aaa', marginTop: '6px' }}>Couleur sélectionnée : <span style={{ fontWeight: 600, color: ebookNouveauCouleur }}>{ebookNouveauCouleur}</span></p>
+                                </div>
+                            )}
                             <label style={labelStyle}>Nombre de pages (optionnel)</label>
                             <input style={inputStyle} type="number" value={ebPages} onChange={e => setEbPages(e.target.value)} placeholder="ex: 24" />
                             <label style={labelStyle}>Fichier PDF</label>

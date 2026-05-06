@@ -5,19 +5,36 @@ import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
 
 type Ebook = { id: string; titre: string; description: string; categorie: string; url_pdf: string; nb_pages: number; image_couverture: string | null }
-const couleurBg: Record<string, string> = { Aqeedah: '#e8f0f8', Fiqh: '#faf3dc' }
-const couleurTxt: Record<string, string> = { Aqeedah: '#28558b', Fiqh: '#b8911f' }
+type EbookCat = { id: string; nom: string; couleur: string }
+
 export default function Ebooks() {
   const [ebooks, setEbooks] = useState<Ebook[]>([])
+  const [cats, setCats] = useState<EbookCat[]>([])
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     async function charger() {
-      const { data } = await supabase.from('ebooks').select('*').order('created_at', { ascending: false })
-      if (data) setEbooks(data)
+      const [{ data: ebData }, { data: catData }] = await Promise.all([
+        supabase.from('ebooks').select('*').order('created_at', { ascending: false }),
+        supabase.from('ebooks_categories').select('*').order('nom')
+      ])
+      if (ebData) setEbooks(ebData)
+      if (catData) setCats(catData)
       setLoading(false)
     }
     charger()
   }, [])
+
+  function getCouleur(categorie: string) {
+    const cat = cats.find(c => c.nom === categorie)
+    return cat?.couleur || '#888'
+  }
+
+  function getCouleurBg(categorie: string) {
+    const couleur = getCouleur(categorie)
+    return couleur + '22'
+  }
+
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
       <Navbar />
@@ -50,9 +67,10 @@ export default function Ebooks() {
                       <div style={{ fontSize: '32px' }}>📄</div>
                       <p style={{ fontSize: '11px', color: '#bbb', textAlign: 'center', padding: '0 8px' }}>{eb.titre}</p>
                     </div>
-                  )}                </div>
+                  )}
+                </div>
                 <div style={{ textAlign: 'center', width: '100%' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '8px', background: couleurBg[eb.categorie] || '#f0f0f0', color: couleurTxt[eb.categorie] || '#666', display: 'inline-block', marginBottom: '5px' }}>{eb.categorie}</span>
+                  <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '8px', background: getCouleurBg(eb.categorie), color: getCouleur(eb.categorie), display: 'inline-block', marginBottom: '5px' }}>{eb.categorie}</span>
                   <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--texte)', lineHeight: 1.4, textAlign: 'center' }}>{eb.titre}</p>
                   {eb.nb_pages && <p style={{ fontSize: '11px', color: '#bbb', marginTop: '2px' }}>{eb.nb_pages} pages</p>}
                 </div>
@@ -62,7 +80,6 @@ export default function Ebooks() {
         )}
       </div>
       <Footer />
-
     </main>
   )
 }
