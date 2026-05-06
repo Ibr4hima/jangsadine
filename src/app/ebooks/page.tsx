@@ -27,13 +27,20 @@ export default function Ebooks() {
 
   function getCouleur(categorie: string) {
     const cat = cats.find(c => c.nom === categorie)
-    return cat?.couleur || '#888'
+    return cat?.couleur || '#888888'
   }
 
   function getCouleurBg(categorie: string) {
-    const couleur = getCouleur(categorie)
-    return couleur + '22'
+    const cat = cats.find(c => c.nom === categorie)
+    if (!cat) return '#f0f0f0'
+    // Convertir hex en rgb avec transparence
+    const hex = cat.couleur.replace('#', '')
+    const r = parseInt(hex.substring(0, 2), 16)
+    const g = parseInt(hex.substring(2, 4), 16)
+    const b = parseInt(hex.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, 0.18)`
   }
+
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
