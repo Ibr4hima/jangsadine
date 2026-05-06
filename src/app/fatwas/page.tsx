@@ -18,7 +18,7 @@ function formaterTemps(s: number) {
 
 export default function Fatwas() {
   const [fatwas, setFatwas] = useState<Fatwa[]>([])
-  const [categories, setCategories] = useState<{ nom: string; couleur: string }[]>([])
+  const [categories, setCategories] = useState<{ nom: string; couleur: string; epingle: boolean }[]>([])
   const [sheikhs, setSheikhs] = useState<string[]>([])
   const [categorieActive, setCategorieActive] = useState('toutes')
   const [sheikhActif, setSheikhActif] = useState('tous')
@@ -31,11 +31,17 @@ export default function Fatwas() {
   useEffect(() => {
     async function charger() {
       const { data: fatwasData } = await supabase.from('fatwas').select('*').order('categorie').order('created_at')
-      const { data: catsData } = await supabase.from('fatwas_categories').select('nom, couleur').order('nom')
+      const { data: catsData } = await supabase.from('fatwas_categories').select('nom, couleur, epingle').order('nom')
       const { data: sheikhsData } = await supabase.from('fatwas_sheikhs').select('nom').order('nom')
       if (fatwasData) setFatwas(fatwasData)
-      if (catsData) setCategories(catsData)
-      if (sheikhsData) setSheikhs(sheikhsData.map(s => s.nom))
+      if (catsData) {
+        const triees = [...catsData].sort((a, b) => {
+          if (a.epingle && !b.epingle) return -1
+          if (!a.epingle && b.epingle) return 1
+          return 0
+        })
+        setCategories(triees)
+      } if (sheikhsData) setSheikhs(sheikhsData.map(s => s.nom))
       setLoading(false)
     }
     charger()
@@ -180,45 +186,50 @@ export default function Fatwas() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {Object.entries(groupes).map(([categorie, items]) => (
-              <div key={categorie}>
-                {/* En-tête catégorie */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
-                  <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 14px', borderRadius: '20px', background: (categories.find(c => c.nom === categorie)?.couleur || '#f0f0f0') + '22', color: categories.find(c => c.nom === categorie)?.couleur || '#666', border: '1px solid ' + ((categories.find(c => c.nom === categorie)?.couleur || '#ccc') + '44') }}>
-                    {categorie}
-                  </span>
-                  <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
-                </div>
-
-                {/* Fatwas de cette catégorie */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {items.map(f => {
-                    const actif = piste?.id === f.id
-                    return (
-                      <div key={f.id} style={{ background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', transition: 'all 0.15s' }}
-                        onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                        onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                        onClick={() => jouer({ id: f.id, titre: f.question, sheikh: f.sheikh, url: f.url_audio, duree: f.duree, href: '/fatwas' })}
-                      >
-                        {/* Question */}
-                        <p style={{ fontSize: '15px', fontWeight: 600, color: actif ? 'var(--bleu)' : 'var(--texte)', lineHeight: 1.5, marginBottom: '12px' }}>
-                          {f.question}
-                        </p>
-                        {/* Bas de carte */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: actif ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            {actif && enLecture
-                              ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /></div>
-                              : <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
-                          </div>
-                          <span style={{ fontSize: '13px', color: actif ? 'var(--bleu)' : '#888', fontWeight: 500 }}>{f.sheikh}</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+            {Object.entries(groupes).sort(([a], [b]) => {
+              const catA = categories.find(c => c.nom === a)
+              const catB = categories.find(c => c.nom === b)
+              if (catA?.epingle && !catB?.epingle) return -1
+              if (!catA?.epingle && catB?.epingle) return 1
+              return 0
+            }).map(([categorie, items]) => (<div key={categorie}>
+              {/* En-tête catégorie */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 14px', borderRadius: '20px', background: (categories.find(c => c.nom === categorie)?.couleur || '#f0f0f0') + '22', color: categories.find(c => c.nom === categorie)?.couleur || '#666', border: '1px solid ' + ((categories.find(c => c.nom === categorie)?.couleur || '#ccc') + '44') }}>
+                  {categorie}
+                </span>
+                <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
               </div>
+
+              {/* Fatwas de cette catégorie */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {items.map(f => {
+                  const actif = piste?.id === f.id
+                  return (
+                    <div key={f.id} style={{ background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
+                      onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
+                      onClick={() => jouer({ id: f.id, titre: f.question, sheikh: f.sheikh, url: f.url_audio, duree: f.duree, href: '/fatwas' })}
+                    >
+                      {/* Question */}
+                      <p style={{ fontSize: '15px', fontWeight: 600, color: actif ? 'var(--bleu)' : 'var(--texte)', lineHeight: 1.5, marginBottom: '12px' }}>
+                        {f.question}
+                      </p>
+                      {/* Bas de carte */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: actif ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {actif && enLecture
+                            ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /></div>
+                            : <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                        </div>
+                        <span style={{ fontSize: '13px', color: actif ? 'var(--bleu)' : '#888', fontWeight: 500 }}>{f.sheikh}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
             ))}
           </div>
         )}
