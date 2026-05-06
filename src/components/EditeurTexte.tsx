@@ -26,6 +26,7 @@ const btnStyle = (actif: boolean): React.CSSProperties => ({
 
 export default function EditeurTexte({ value, onChange, placeholder }: Props) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,
