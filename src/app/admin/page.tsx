@@ -245,11 +245,19 @@ export default function Admin() {
 
             let catFinale = ebookCat
             if (ebookNouveauCat) {
+                // Vérifier si la catégorie existe déjà
+                const exists = ebookCats.some(c => c.nom.toLowerCase() === ebookNouveauCat.toLowerCase())
+                if (exists) {
+                    setMessage('Cette catégorie existe déjà !')
+                    setUploading(false)
+                    return
+                }
                 await supabase.from('ebooks_categories').insert({ nom: ebookNouveauCat, couleur: ebookNouveauCouleur })
                 catFinale = ebookNouveauCat
                 const { data } = await supabase.from('ebooks_categories').select('*').order('nom')
                 if (data) setEbookCats(data)
             }
+
             const { error } = await supabase.from('ebooks').insert({ titre: ebTitre, description: ebDescription, categorie: catFinale, url_pdf: urlPdf, nb_pages: ebPages ? parseInt(ebPages) : null, image_couverture: urlCover })
             if (error) throw error
             setMessage('Ebook ajouté avec succès !')
@@ -305,6 +313,12 @@ export default function Admin() {
             const duree = await getDuree(fatwaFichier)
             let catFinale = fatwaCat
             if (fatwaNouveauCat) {
+                const exists = fatwaCats.some(c => c.nom.toLowerCase() === fatwaNouveauCat.toLowerCase())
+                if (exists) {
+                    setMessage('Cette catégorie existe déjà !')
+                    setUploading(false)
+                    return
+                }
                 await supabase.from('fatwas_categories').insert({ nom: fatwaNouveauCat, couleur: fatwaNouveauCouleur })
                 catFinale = fatwaNouveauCat
                 const { data } = await supabase.from('fatwas_categories').select('*').order('nom')
