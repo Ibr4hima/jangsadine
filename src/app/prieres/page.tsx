@@ -131,7 +131,7 @@ export default function Prieres() {
         setFajrDemain(fajrDemainFmt)
 
         setHoraires([
-          { nom: 'Fajr', heure: fajrDemainFmt, cle: 'Fajr' },
+          { nom: 'Fajr', heure: enMinutes(fmt(prayerTimes.isha)) < nowMin() ? fajrDemainFmt : fajrFmt, cle: 'Fajr' },
           { nom: 'Lever du soleil', heure: fmt(prayerTimes.sunrise), cle: 'Sunrise' },
           { nom: 'Dhuhr', heure: fmt(prayerTimes.dhuhr), cle: 'Dhuhr' },
           { nom: 'Asr', heure: fmt(prayerTimes.asr), cle: 'Asr' },
