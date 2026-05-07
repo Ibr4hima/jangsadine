@@ -96,10 +96,12 @@ export default function Prieres() {
         // Géolocalisation inverse
         const geo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`)
         const gd = await geo.json()
-        const nomVille = (gd.city || gd.locality || gd.principalSubdivision || '').replace(/\s*\(.*\)\s*/g, '').trim()
+        const nomQuartier = (gd.neighbourhood || gd.locality || '').replace(/\s*\(.*\)\s*/g, '').trim()
+        const nomVille = (gd.city || gd.principalSubdivision || '').replace(/\s*\(.*\)\s*/g, '').trim()
         const nomPays = (gd.countryName || '').replace(/\s*\(.*\)\s*/g, '').trim()
         const countryCode = gd.countryCode || ''
-        setVille(nomVille && nomPays ? nomVille + ', ' + nomPays : nomVille || nomPays)
+        const parties = [nomQuartier, nomVille, nomPays].filter(Boolean)
+        setVille(parties.join(', '))
 
         // Date hijri via Aladhan
         const d = new Date()
