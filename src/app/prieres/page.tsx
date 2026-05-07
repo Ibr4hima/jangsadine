@@ -80,6 +80,7 @@ export default function Prieres() {
   const [tick, setTick] = useState(0)
   const [dateHijri, setDateHijri] = useState('')
   const [methodeNom, setMethodeNom] = useState('')
+  const [fajrDemain, setFajrDemain] = useState('')
 
   useEffect(() => {
     const iv = setInterval(() => setTick(t => t + 1), 1000)
@@ -123,6 +124,12 @@ export default function Prieres() {
         const fajrFmt = fmt(prayerTimes.fajr)
         const maghribFmt = fmt(prayerTimes.maghrib)
 
+        const demain = new Date(d)
+        demain.setDate(demain.getDate() + 1)
+        const prayerTimesDemain = new adhan.PrayerTimes(coords, demain, methode)
+        const fajrDemainFmt = fmt(prayerTimesDemain.fajr)
+        setFajrDemain(fajrDemainFmt)
+
         setHoraires([
           { nom: 'Fajr', heure: fajrFmt, cle: 'Fajr' },
           { nom: 'Lever du soleil', heure: fmt(prayerTimes.sunrise), cle: 'Sunrise' },
@@ -132,6 +139,7 @@ export default function Prieres() {
           { nom: 'Isha', heure: fmt(prayerTimes.isha), cle: 'Isha' },
           { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(maghribFmt, fajrFmt), cle: 'MoitieNuit' },
           { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(maghribFmt, fajrFmt), cle: 'Tahajjud' },
+          { nom: 'Fajr (demain)', heure: fajrDemainFmt, cle: 'FajrDemain' },
         ])
         setLoading(false)
       } catch (e) { console.error(e); setErreur('Impossible de recuperer les horaires'); setLoading(false) }
@@ -140,7 +148,7 @@ export default function Prieres() {
 
   const now = nowMin()
   const prieresPrincipales = horaires.filter(p => p.cle !== 'Sunrise' && p.cle !== 'Tahajjud')
-  const prochaine = prieresPrincipales.find(p => enMinutes(p.heure) > now) || prieresPrincipales[0]
+  const prochaine = prieresPrincipales.find(p => enMinutes(p.heure) > now) || { nom: 'Fajr', heure: fajrDemain, cle: 'Fajr' }
   const prog = prochaine ? progression(prochaine.heure) : 0
   const rayon = 80
   const circonf = 2 * Math.PI * rayon
