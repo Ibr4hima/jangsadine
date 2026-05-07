@@ -131,15 +131,14 @@ export default function Prieres() {
         setFajrDemain(fajrDemainFmt)
 
         setHoraires([
-          { nom: 'Fajr', heure: fajrFmt, cle: 'Fajr' },
+          { nom: 'Fajr', heure: fajrDemainFmt, cle: 'Fajr' },
           { nom: 'Lever du soleil', heure: fmt(prayerTimes.sunrise), cle: 'Sunrise' },
           { nom: 'Dhuhr', heure: fmt(prayerTimes.dhuhr), cle: 'Dhuhr' },
           { nom: 'Asr', heure: fmt(prayerTimes.asr), cle: 'Asr' },
           { nom: 'Maghrib', heure: maghribFmt, cle: 'Maghrib' },
           { nom: 'Isha', heure: fmt(prayerTimes.isha), cle: 'Isha' },
-          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(maghribFmt, fajrFmt), cle: 'MoitieNuit' },
-          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(maghribFmt, fajrFmt), cle: 'Tahajjud' },
-          { nom: 'Fajr (demain)', heure: fajrDemainFmt, cle: 'FajrDemain' },
+          { nom: 'Moitié de la nuit', heure: calculerMoitieNuit(maghribFmt, fajrDemainFmt), cle: 'MoitieNuit' },
+          { nom: 'Dernier tiers de la nuit', heure: calculerDernierTiers(maghribFmt, fajrDemainFmt), cle: 'Tahajjud' },
         ])
         setLoading(false)
       } catch (e) { console.error(e); setErreur('Impossible de recuperer les horaires'); setLoading(false) }
