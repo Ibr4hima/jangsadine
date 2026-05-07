@@ -80,7 +80,12 @@ export default function Navbar() {
                         { nom: 'Isha', heure: fmt(prayerTimes.isha) },
                     ]
                     const now = nowMin()
-                    const next = prieres.find(p => enMinutes(p.heure) > now) || prieres[0]
+                    const next = prieres.find(p => enMinutes(p.heure) > now) || (() => {
+                        const demain = new Date()
+                        demain.setDate(demain.getDate() + 1)
+                        const prayerTimesDemain = new adhan.PrayerTimes(coords, demain, methode)
+                        return { nom: 'Fajr', heure: fmt(prayerTimesDemain.fajr) }
+                    })()
                     setProchaine(next)
                 } catch { }
             }, () => { })
