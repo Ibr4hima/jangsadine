@@ -44,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <audio id="audio-livre" preload="metadata">
             <source id="source-livre" src={undefined} type="audio/mpeg" />
           </audio>
+          <audio id="audio-silence" src="/silence.wav" loop preload="auto"></audio>
         </AudioProvider>
       </body>
     </html>
