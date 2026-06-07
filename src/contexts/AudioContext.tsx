@@ -103,15 +103,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     audio.addEventListener('pause', () => {
       setEnLecture(false)
-      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
-        if (mediaMetaRef.current?.audio === audio) applyMediaSession(audio, mediaMetaRef.current.metadata)
         setTimeout(() => {
-          if (mediaMetaRef.current?.audio === audio && audio.paused) {
+          if (mediaMetaRef.current?.audio === audio && audio.paused)
             navigator.mediaSession.playbackState = 'paused'
-            applyMediaSession(audio, mediaMetaRef.current.metadata)
-          }
         }, 600)
       }
     })
@@ -133,15 +129,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     livreAudioEl.addEventListener('pause', () => {
       setEnLectureLivre(false)
-      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
-        if (mediaMetaRef.current?.audio === livreAudioEl) applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
         setTimeout(() => {
-          if (mediaMetaRef.current?.audio === livreAudioEl && livreAudioEl.paused) {
+          if (mediaMetaRef.current?.audio === livreAudioEl && livreAudioEl.paused)
             navigator.mediaSession.playbackState = 'paused'
-            applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
-          }
         }, 600)
       }
     })
@@ -183,7 +175,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       oscCtxRef.current?.resume().catch(() => {})
       audio.play().catch(() => { setTimeout(() => audio.play().catch(console.error), 300) })
     })
-    navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
+    navigator.mediaSession.setActionHandler('pause', () => { oscCtxRef.current?.resume().catch(() => {}); audio.pause() })
     navigator.mediaSession.setActionHandler('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d?.seekOffset || 10)) })
     navigator.mediaSession.setActionHandler('seekforward', (d) => { audio.currentTime = Math.min(audio.duration, audio.currentTime + (d?.seekOffset || 10)) })
     navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime !== undefined) audio.currentTime = d.seekTime })
@@ -247,13 +239,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function toggleLivre() {
     const audio = livreAudioRef.current
     if (!audio) return
-    enLectureLivre ? audio.pause() : audio.play().catch(console.error)
+    if (enLectureLivre) { oscCtxRef.current?.resume().catch(() => {}); audio.pause() }
+    else audio.play().catch(console.error)
   }
 
   function toggleLecture() {
     const audio = audioRef.current
     if (!audio) return
-    enLecture ? audio.pause() : audio.play().catch(console.error)
+    if (enLecture) { oscCtxRef.current?.resume().catch(() => {}); audio.pause() }
+    else audio.play().catch(console.error)
   }
 
   function seeker(pct: number) {
