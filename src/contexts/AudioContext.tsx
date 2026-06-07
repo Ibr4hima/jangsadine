@@ -71,7 +71,6 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       }
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => { document.removeEventListener('visibilitychange', onVisibilityChange) }
 
     // Listeners épisode
     audio.addEventListener('timeupdate', () => {
@@ -129,6 +128,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       }
     })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
+
+    return () => { document.removeEventListener('visibilitychange', onVisibilityChange) }
   }, [])
 
   useEffect(() => { markersRef.current = markers }, [markers])
