@@ -47,11 +47,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [markerActuel, setMarkerActuel] = useState<Marker | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const livreAudioRef = useRef<HTMLAudioElement | null>(null)
-  // Boucle silence volume=0 : maintient la session audio iOS quand l'audio principal est en pause
-  const silenceRef = useRef<HTMLAudioElement | null>(null)
-  const sessionActiveRef = useRef(false)
   const markersRef = useRef<Marker[]>([])
   const mediaMetaRef = useRef<{ audio: HTMLAudioElement; metadata: MediaMetadataInit } | null>(null)
+  // Oscillateur Web Audio API à gain=0 : maintient la session iOS sans apparaître comme un média
+  const oscCtxRef = useRef<AudioContext | null>(null)
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string; livreId: string } | null>(null)
   const [enLectureLivre, setEnLectureLivre] = useState(false)
   const [progressionLivre, setProgressionLivre] = useState(0)
@@ -59,18 +58,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = document.getElementById('audio-principal') as HTMLAudioElement
     const livreAudioEl = document.getElementById('audio-livre') as HTMLAudioElement
-    const silenceEl = document.getElementById('audio-silence') as HTMLAudioElement
     audioRef.current = audio
     livreAudioRef.current = livreAudioEl
-    silenceRef.current = silenceEl
-    silenceEl.volume = 0
-
-    // Si iOS interrompt le silence (appel, autre app), on le redémarre pour garder la session active
-    silenceEl.addEventListener('pause', () => {
-      if (sessionActiveRef.current) {
-        setTimeout(() => { silenceEl.play().catch(() => {}) }, 300)
-      }
-    })
 
     const reveil = () => {
       if (!mediaMetaRef.current) return
@@ -78,8 +67,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       applyMediaSession(a, metadata)
       if ('mediaSession' in navigator)
         navigator.mediaSession.playbackState = a.paused ? 'paused' : 'playing'
-      if (sessionActiveRef.current && silenceRef.current?.paused) {
-        silenceRef.current.play().catch(() => {})
+      if (oscCtxRef.current?.state === 'suspended') {
+        oscCtxRef.current.resume().catch(() => {})
       }
     }
     const onVisibilityChange = () => { if (!document.hidden) reveil() }
@@ -114,9 +103,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     audio.addEventListener('pause', () => {
       setEnLecture(false)
-      if (sessionActiveRef.current && silenceRef.current?.paused) {
-        silenceRef.current.play().catch(() => {})
-      }
+      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
         if (mediaMetaRef.current?.audio === audio) applyMediaSession(audio, mediaMetaRef.current.metadata)
@@ -146,9 +133,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     livreAudioEl.addEventListener('pause', () => {
       setEnLectureLivre(false)
-      if (sessionActiveRef.current && silenceRef.current?.paused) {
-        silenceRef.current.play().catch(() => {})
-      }
+      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
         if (mediaMetaRef.current?.audio === livreAudioEl) applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
@@ -170,13 +155,32 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { markersRef.current = markers }, [markers])
 
+  function initSession() {
+    if (oscCtxRef.current) {
+      if (oscCtxRef.current.state === 'suspended') oscCtxRef.current.resume().catch(() => {})
+      return
+    }
+    try {
+      const ctx = new AudioContext()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      gain.gain.value = 0
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start()
+      oscCtxRef.current = ctx
+    } catch { }
+  }
+
+  function closeSession() {
+    oscCtxRef.current?.suspend().catch(() => {})
+  }
+
   function applyMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
     navigator.mediaSession.setActionHandler('play', () => {
-      if (sessionActiveRef.current && silenceRef.current?.paused) {
-        silenceRef.current.play().catch(() => {})
-      }
+      oscCtxRef.current?.resume().catch(() => {})
       audio.play().catch(() => { setTimeout(() => audio.play().catch(console.error), 300) })
     })
     navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
@@ -200,8 +204,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (livreAudioRef.current) livreAudioRef.current.pause()
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
 
-    sessionActiveRef.current = true
-    silenceRef.current?.play().catch(() => {})
+    initSession()
 
     const source = document.getElementById('source-principal') as HTMLSourceElement
     if (source) source.src = nouvellePiste.url
@@ -226,8 +229,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (audioRef.current) audioRef.current.pause()
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
 
-    sessionActiveRef.current = true
-    silenceRef.current?.play().catch(() => {})
+    initSession()
 
     const source = document.getElementById('source-livre') as HTMLSourceElement
     if (source) source.src = url
@@ -263,18 +265,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
 
   function fermer() {
-    sessionActiveRef.current = false
+    closeSession()
     if (audioRef.current) { audioRef.current.pause(); const s = document.getElementById('source-principal') as HTMLSourceElement; if (s) s.src = '' }
-    if (silenceRef.current) silenceRef.current.pause()
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
     mediaMetaRef.current = null
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
   }
 
   function fermerLivre() {
-    sessionActiveRef.current = false
+    closeSession()
     if (livreAudioRef.current) { livreAudioRef.current.pause(); const s = document.getElementById('source-livre') as HTMLSourceElement; if (s) s.src = '' }
-    if (silenceRef.current) silenceRef.current.pause()
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
     mediaMetaRef.current = null
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
