@@ -86,14 +86,8 @@ img {
 
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 14px;
-}
-
-@media (min-width: 560px) {
-  .modules-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 @media screen and (max-width: 768px) {
