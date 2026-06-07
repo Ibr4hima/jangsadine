@@ -72,6 +72,14 @@ function fmt(date: Date) {
   return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
 }
 
+// Retourne true si (now >= cibleMin + grace), en gérant le passage de minuit
+function estPasse(cibleMin: number, now: number, grace = 0): boolean {
+  const target = cibleMin + grace
+  if (target > now) return false
+  if (now - target > 720) return false  // écart > 12h → la cible est demain, pas passée
+  return true
+}
+
 export default function Prieres() {
   const [horaires, setHoraires] = useState<PriereInfo[]>([])
   const [ville, setVille] = useState('')
@@ -152,6 +160,8 @@ export default function Prieres() {
   const rayon = 80
   const circonf = 2 * Math.PI * rayon
   const dashOffset = circonf - (prog / 100) * circonf
+  const sunriseHeure = horaires.find(p => p.cle === 'Sunrise')?.heure ?? ''
+  const moitieNuitHeure = horaires.find(p => p.cle === 'MoitieNuit')?.heure ?? ''
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
@@ -203,8 +213,18 @@ export default function Prieres() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {horaires.map(p => {
                 const estProchaine = prochaine?.cle === p.cle
-                const estPassee = enMinutes(p.heure) < now && !estProchaine
                 const estTahajjud = p.cle === 'Tahajjud' || p.cle === 'MoitieNuit'
+                const estGrise = (() => {
+                  switch (p.cle) {
+                    case 'Fajr': return sunriseHeure !== '' && estPasse(enMinutes(sunriseHeure), now)
+                    case 'Sunrise': return estPasse(enMinutes(p.heure), now, 15)
+                    case 'Dhuhr': case 'Asr': case 'Maghrib': return estPasse(enMinutes(p.heure), now, 5)
+                    case 'Isha': return moitieNuitHeure !== '' && estPasse(enMinutes(moitieNuitHeure), now, 1)
+                    case 'MoitieNuit': return estPasse(enMinutes(p.heure), now, 1)
+                    case 'Tahajjud': return false
+                    default: return estPasse(enMinutes(p.heure), now)
+                  }
+                })()
                 return (
                   <div key={p.cle} style={{
                     background: estProchaine ? 'var(--bleu)' : 'white',
@@ -214,18 +234,18 @@ export default function Prieres() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    opacity: estPassee && !estTahajjud ? 0.45 : 1,
+                    opacity: estGrise ? 0.45 : 1,
                     transition: 'all 0.2s',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: estProchaine ? '#d9ac2a' : estTahajjud ? '#d9ac2a' : '#ccc', flexShrink: 0 }} />
                       <div>
-                        <p style={{ fontSize: '15px', fontWeight: estProchaine ? 700 : 500, color: estProchaine ? 'white' : (estPassee && !estTahajjud) ? '#aaa' : 'var(--texte)' }}>{p.nom}</p>
+                        <p style={{ fontSize: '15px', fontWeight: estProchaine ? 700 : 500, color: estProchaine ? 'white' : estGrise ? '#aaa' : 'var(--texte)' }}>{p.nom}</p>
                         {p.cle === 'Tahajjud' && <p style={{ fontSize: '10px', color: '#b8911f', marginTop: '1px' }}>Tahajjud — Prière de la nuit</p>}
                         {p.cle === 'MoitieNuit' && <p style={{ fontSize: '10px', color: '#b8911f', marginTop: '1px' }}>Fin de l'heure du Isha</p>}
                       </div>
                     </div>
-                    <p style={{ fontSize: '17px', fontWeight: 700, color: estProchaine ? '#d9ac2a' : (estPassee && !estTahajjud) ? '#ccc' : estTahajjud ? '#b8911f' : 'var(--bleu)', fontVariantNumeric: 'tabular-nums' }}>{format24(p.heure)}</p>
+                    <p style={{ fontSize: '17px', fontWeight: 700, color: estProchaine ? '#d9ac2a' : estGrise ? '#ccc' : estTahajjud ? '#b8911f' : 'var(--bleu)', fontVariantNumeric: 'tabular-nums' }}>{format24(p.heure)}</p>
                   </div>
                 )
               })}
