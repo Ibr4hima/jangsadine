@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
 import { supabase } from '@/lib/supabase'
-import { BookMarked, BookOpen, Clock, Headphones, Mic } from 'lucide-react'
+import { BookMarked, Clock, Headphones, Mic } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -23,7 +23,6 @@ const modules = [
   { nom: 'Conférences', href: '/conferences', couleur: '#faf3dc', iconColor: '#b8911f' },
   { nom: 'Khoutbah', href: '/khoutbah', couleur: '#e8f0f8', iconColor: '#28558b' },
   { nom: 'Heures de prières', href: '/prieres', couleur: '#faf3dc', iconColor: '#b8911f' },
-  { nom: 'Ebooks', href: '/ebooks', couleur: '#e8f0f8', iconColor: '#28558b' },
 ]
 
 const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Tafsir & Sciences du Coran', 'Seerah', 'Éthique & Bons comportements', 'Fatwas', 'Khoutbah', 'Conférences']
@@ -33,7 +32,6 @@ const icones: Record<string, React.ReactNode> = {
   'Conférences': <Mic size={22} strokeWidth={1.5} />,
   'Khoutbah': <BookMarked size={22} strokeWidth={1.5} />,
   'Heures de prières': <Clock size={22} strokeWidth={1.5} />,
-  'Ebooks': <BookOpen size={22} strokeWidth={1.5} />,
 }
 
 export default function Accueil() {

@@ -13,7 +13,6 @@ const liens = [
     { label: 'Khoutbah', href: '/khoutbah' },
     { label: 'Fatwas', href: '/fatwas' },
     { label: 'Prières', href: '/prieres' },
-    { label: 'Ebooks', href: '/ebooks' },
 ]
 
 type Priere = { nom: string; heure: string }

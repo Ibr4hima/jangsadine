@@ -49,7 +49,6 @@ const liens = [
   { label: 'Khoutbah', href: '/khoutbah' },
   { label: 'Fatwas', href: '/fatwas' },
   { label: 'Prières', href: '/prieres' },
-  { label: 'Ebooks', href: '/ebooks' },
 ]
 
 export default function Footer() {
