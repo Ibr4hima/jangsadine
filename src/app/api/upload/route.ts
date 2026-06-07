@@ -1,5 +1,4 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NextRequest, NextResponse } from 'next/server'
 
 const s3 = new S3Client({
@@ -13,16 +12,24 @@ const s3 = new S3Client({
 
 export async function POST(req: NextRequest) {
     try {
-        const { nom } = await req.json()
+        const formData = await req.formData()
+        const file = formData.get('file') as File | null
+        const nom = formData.get('nom') as string | null
 
-        const command = new PutObjectCommand({
+        if (!file || !nom) {
+            return NextResponse.json({ error: 'Fichier ou nom manquant' }, { status: 400 })
+        }
+
+        const buffer = Buffer.from(await file.arrayBuffer())
+
+        await s3.send(new PutObjectCommand({
             Bucket: process.env.R2_BUCKET_NAME,
             Key: nom,
-        })
+            Body: buffer,
+            ContentType: file.type || 'application/octet-stream',
+        }))
 
-        const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
-
-        return NextResponse.json({ url, key: nom })
+        return NextResponse.json({ key: nom })
     } catch (error) {
         console.error(error)
         return NextResponse.json({ error: 'Erreur upload' }, { status: 500 })

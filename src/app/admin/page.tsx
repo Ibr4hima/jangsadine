@@ -112,9 +112,11 @@ export default function Admin() {
             .replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u').replace(/[ç]/g, 'c')
             .replace(/[^a-zA-Z0-9.\-_]/g, '')
         const nomFichier = `${dossier}/${Date.now()}-${nomNettoye}`
-        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier }) })
-        const { url } = await res.json()
-        await fetch(url, { method: 'PUT', body: fichier })
+        const form = new FormData()
+        form.append('file', fichier)
+        form.append('nom', nomFichier)
+        const res = await fetch('/api/upload', { method: 'POST', body: form })
+        if (!res.ok) throw new Error(`Erreur upload "${fichier.name}"`)
         return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
     }
 
@@ -199,32 +201,29 @@ export default function Admin() {
             if (isMultiple) setMessage(`Calcul des durées (${fichiers.length} fichiers)...`)
             const durees = await Promise.all(fichiers.map(f => isMultiple ? getDuree(f) : Promise.resolve(epDuree)))
 
-            // 2. Signed URLs par lots de 3 (évite le throttling de la serverless function)
-            setMessage('Préparation des uploads...')
-            const uploadData: { url: string; nomFichier: string; f: File; numero: number; duree: string }[] = []
+            // 2. Uploads R2 via API (server-side) par lots de 3
+            let uploaded = 0
+            const uploadData: { nomFichier: string; numero: number; duree: string }[] = []
             for (let i = 0; i < fichiers.length; i += BATCH) {
                 const batch = await Promise.all(fichiers.slice(i, i + BATCH).map(async (f, j) => {
                     const numero = numeroDepart + i + j
                     const nomFichier = `${coursId}/${numero}-${f.name.replace(/\s/g, '-')}`
-                    const data = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier }) }).then(r => r.json())
-                    if (!data.url) throw new Error(`Impossible d'obtenir l'URL signée pour "${f.name}"`)
-                    return { url: data.url, nomFichier, f, numero, duree: durees[i + j] }
+                    const form = new FormData()
+                    form.append('file', f)
+                    form.append('nom', nomFichier)
+                    const res = await fetch('/api/upload', { method: 'POST', body: form })
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}))
+                        throw new Error(`Erreur upload "${f.name}": ${err.error || res.status}`)
+                    }
+                    return { nomFichier, numero, duree: durees[i + j] }
                 }))
                 uploadData.push(...batch)
-            }
-
-            // 3. Uploads R2 en parallèle par lots de 3
-            let uploaded = 0
-            for (let i = 0; i < uploadData.length; i += BATCH) {
-                await Promise.all(uploadData.slice(i, i + BATCH).map(async ({ url, f }) => {
-                    const res = await fetch(url, { method: 'PUT', body: f })
-                    if (!res.ok) throw new Error(`Erreur upload "${f.name}" : ${res.status}`)
-                }))
-                uploaded += Math.min(BATCH, uploadData.length - i)
+                uploaded += batch.length
                 setMessage(`Upload ${uploaded}/${fichiers.length}...`)
             }
 
-            // 4. Bulk insert Supabase
+            // 3. Bulk insert Supabase
             setMessage('Enregistrement...')
             const inserts = uploadData.map(({ nomFichier, numero, duree }, i) => ({
                 cours_id: coursId,
