@@ -121,31 +121,24 @@ export default function Admin() {
     function getDuree(file: File): Promise<string> {
         return new Promise(resolve => {
             const audio = new Audio()
-            audio.preload = 'metadata'
-
             const url = URL.createObjectURL(file)
-
+            const fmt = (d: number) => {
+                const t = Math.round(d)
+                const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60
+                return h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${m}:${s.toString().padStart(2, '0')}`
+            }
             audio.addEventListener('loadedmetadata', () => {
-                // Pour les MP3 VBR, seekons à la fin pour forcer le calcul exact
-                if (audio.duration === Infinity || isNaN(audio.duration)) {
-                    audio.currentTime = 1e101 // force le navigateur à calculer la vraie durée
+                if (!isNaN(audio.duration) && audio.duration !== Infinity && audio.duration > 0) {
+                    URL.revokeObjectURL(url); resolve(fmt(audio.duration))
+                } else {
+                    // VBR MP3 : seeked est plus rapide et fiable que timeupdate
+                    audio.addEventListener('seeked', () => {
+                        URL.revokeObjectURL(url)
+                        resolve(!isNaN(audio.duration) && audio.duration > 0 ? fmt(audio.duration) : '')
+                    }, { once: true })
+                    audio.currentTime = 1e101
                 }
             })
-
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration !== Infinity && !isNaN(audio.duration) && audio.duration > 0) {
-                    const totalSecondes = Math.round(audio.duration)
-                    const h = Math.floor(totalSecondes / 3600)
-                    const m = Math.floor((totalSecondes % 3600) / 60)
-                    const s = totalSecondes % 60
-                    const result = h > 0
-                        ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0')
-                        : m + ':' + s.toString().padStart(2, '0')
-                    URL.revokeObjectURL(url)
-                    resolve(result)
-                }
-            })
-
             audio.addEventListener('error', () => { URL.revokeObjectURL(url); resolve('') })
             audio.src = url
         })
@@ -198,32 +191,53 @@ export default function Admin() {
         if (fichiers.length === 0) return setMessage('Selectionne au moins un fichier audio')
         setUploading(true); setMessage('')
         try {
-            for (let i = 0; i < fichiers.length; i++) {
-                const f = fichiers[i]
-                const numero = parseInt(epNumero) + i
+            const numeroDepart = parseInt(epNumero)
+            const isMultiple = fichiers.length > 1
+
+            // 1. Durées en parallèle
+            if (isMultiple) setMessage(`Calcul des durées (${fichiers.length} fichiers)...`)
+            const durees = await Promise.all(fichiers.map(f => isMultiple ? getDuree(f) : Promise.resolve(epDuree)))
+
+            // 2. Signed URLs en parallèle
+            setMessage('Préparation des uploads...')
+            const uploadData = await Promise.all(fichiers.map(async (f, i) => {
+                const numero = numeroDepart + i
                 const nomFichier = `${coursId}/${numero}-${f.name.replace(/\s/g, '-')}`
-                const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: f.type }) })
-                const { url } = await res.json()
-                await fetch(url, { method: 'PUT', body: f, headers: { 'Content-Type': f.type } })
-                const urlAudio = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
-                const duree = fichiers.length > 1 ? await getDuree(f) : epDuree
-                const titreEp = fichiers.length > 1 ? (epTitre ? epTitre + ' — ' + numero : f.name.replace(/\.[^/.]+$/, '')) : epTitre
-                const { data: epData, error } = await supabase.from('episodes').insert({ cours_id: coursId, titre: titreEp, numero, description: epDescription || null, duree, url_audio: urlAudio }).select().single()
-                if (error) throw error
+                const { url } = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: f.type }) }).then(r => r.json())
+                return { url, nomFichier, f, numero, duree: durees[i] }
+            }))
 
-                // Ajouter les markers si épisode unique
-                if (fichiers.length === 1 && markers.length > 0 && epData) {
-                    for (const m of markers) {
-                        await supabase.from('episode_markers').insert({
-                            episode_id: epData.id,
-                            titre: m.titre,
-                            temps_secondes: tempsEnSecondes(m.temps)
-                        })
-                    }
-                }
-
-                setMessage('Upload ' + (i + 1) + '/' + fichiers.length + '...')
+            // 3. Uploads R2 en parallèle par lots de 3
+            const BATCH = 3
+            let uploaded = 0
+            for (let i = 0; i < uploadData.length; i += BATCH) {
+                await Promise.all(uploadData.slice(i, i + BATCH).map(({ url, f }) =>
+                    fetch(url, { method: 'PUT', body: f, headers: { 'Content-Type': f.type } })
+                ))
+                uploaded += Math.min(BATCH, uploadData.length - i)
+                setMessage(`Upload ${uploaded}/${fichiers.length}...`)
             }
+
+            // 4. Bulk insert Supabase
+            setMessage('Enregistrement...')
+            const inserts = uploadData.map(({ nomFichier, numero, duree }, i) => ({
+                cours_id: coursId,
+                titre: isMultiple ? (epTitre ? `${epTitre} — ${numero}` : fichiers[i].name.replace(/\.[^/.]+$/, '')) : epTitre,
+                numero,
+                description: epDescription || null,
+                duree,
+                url_audio: `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
+            }))
+            const { data: insertedEps, error } = await supabase.from('episodes').insert(inserts).select()
+            if (error) throw error
+
+            // Markers (épisode unique uniquement)
+            if (!isMultiple && markers.length > 0 && insertedEps?.[0]) {
+                await Promise.all(markers.map(m => supabase.from('episode_markers').insert({
+                    episode_id: insertedEps[0].id, titre: m.titre, temps_secondes: tempsEnSecondes(m.temps)
+                })))
+            }
+
             const { data: eps } = await supabase.from('episodes').select('id').eq('cours_id', coursId)
             await supabase.from('cours').update({ nb_episodes: eps?.length || 0 }).eq('id', coursId)
             setMessage('Episodes ajoutés avec succès !')
