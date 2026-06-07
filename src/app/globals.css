@@ -90,20 +90,9 @@ img {
   gap: 14px;
 }
 
-.modules-grid>a:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  width: 50%;
-  margin: 0 auto;
-}
-
-@media (min-width: 640px) {
+@media (min-width: 560px) {
   .modules-grid {
-    grid-template-columns: repeat(5, minmax(140px, 1fr));
-  }
-
-  .modules-grid>a:last-child:nth-child(odd) {
-    grid-column: auto;
-    width: 100%;
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
