@@ -103,9 +103,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     audio.addEventListener('pause', () => {
       setEnLecture(false)
+      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
         if (mediaMetaRef.current?.audio === audio) applyMediaSession(audio, mediaMetaRef.current.metadata)
+        // Ré-affirme notre session 600ms après pour contrer une app tierce qui pourrait la récupérer
+        setTimeout(() => {
+          if (mediaMetaRef.current?.audio === audio && audio.paused) {
+            navigator.mediaSession.playbackState = 'paused'
+            applyMediaSession(audio, mediaMetaRef.current.metadata)
+          }
+        }, 600)
       }
     })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
@@ -126,9 +134,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     livreAudioEl.addEventListener('pause', () => {
       setEnLectureLivre(false)
+      oscCtxRef.current?.resume().catch(() => {})
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
         if (mediaMetaRef.current?.audio === livreAudioEl) applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
+        setTimeout(() => {
+          if (mediaMetaRef.current?.audio === livreAudioEl && livreAudioEl.paused) {
+            navigator.mediaSession.playbackState = 'paused'
+            applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
+          }
+        }, 600)
       }
     })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
