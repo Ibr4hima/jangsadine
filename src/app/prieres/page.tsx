@@ -146,7 +146,7 @@ export default function Prieres() {
   }, [])
 
   const now = nowMin()
-  const prieresPrincipales = horaires.filter(p => p.cle !== 'Sunrise' && p.cle !== 'Tahajjud')
+  const prieresPrincipales = horaires.filter(p => p.cle !== 'Sunrise' && p.cle !== 'Tahajjud' && p.cle !== 'MoitieNuit')
   const prochaine = prieresPrincipales.find(p => enMinutes(p.heure) > now) || { nom: 'Fajr', heure: fajrDemain, cle: 'Fajr' }
   const prog = prochaine ? progression(prochaine.heure) : 0
   const rayon = 80
