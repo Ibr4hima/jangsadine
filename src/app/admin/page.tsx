@@ -193,27 +193,33 @@ export default function Admin() {
         try {
             const numeroDepart = parseInt(epNumero)
             const isMultiple = fichiers.length > 1
+            const BATCH = 3
 
             // 1. Durées en parallèle
             if (isMultiple) setMessage(`Calcul des durées (${fichiers.length} fichiers)...`)
             const durees = await Promise.all(fichiers.map(f => isMultiple ? getDuree(f) : Promise.resolve(epDuree)))
 
-            // 2. Signed URLs en parallèle
+            // 2. Signed URLs par lots de 3 (évite le throttling de la serverless function)
             setMessage('Préparation des uploads...')
-            const uploadData = await Promise.all(fichiers.map(async (f, i) => {
-                const numero = numeroDepart + i
-                const nomFichier = `${coursId}/${numero}-${f.name.replace(/\s/g, '-')}`
-                const { url } = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: f.type }) }).then(r => r.json())
-                return { url, nomFichier, f, numero, duree: durees[i] }
-            }))
+            const uploadData: { url: string; nomFichier: string; f: File; numero: number; duree: string }[] = []
+            for (let i = 0; i < fichiers.length; i += BATCH) {
+                const batch = await Promise.all(fichiers.slice(i, i + BATCH).map(async (f, j) => {
+                    const numero = numeroDepart + i + j
+                    const nomFichier = `${coursId}/${numero}-${f.name.replace(/\s/g, '-')}`
+                    const data = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: f.type || 'audio/mpeg' }) }).then(r => r.json())
+                    if (!data.url) throw new Error(`Impossible d'obtenir l'URL signée pour "${f.name}"`)
+                    return { url: data.url, nomFichier, f, numero, duree: durees[i + j] }
+                }))
+                uploadData.push(...batch)
+            }
 
             // 3. Uploads R2 en parallèle par lots de 3
-            const BATCH = 3
             let uploaded = 0
             for (let i = 0; i < uploadData.length; i += BATCH) {
-                await Promise.all(uploadData.slice(i, i + BATCH).map(({ url, f }) =>
-                    fetch(url, { method: 'PUT', body: f, headers: { 'Content-Type': f.type } })
-                ))
+                await Promise.all(uploadData.slice(i, i + BATCH).map(async ({ url, f }) => {
+                    const res = await fetch(url, { method: 'PUT', body: f, headers: { 'Content-Type': f.type || 'audio/mpeg' } })
+                    if (!res.ok) throw new Error(`Erreur upload "${f.name}" : ${res.status}`)
+                }))
                 uploaded += Math.min(BATCH, uploadData.length - i)
                 setMessage(`Upload ${uploaded}/${fichiers.length}...`)
             }
