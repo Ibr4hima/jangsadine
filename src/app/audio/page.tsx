@@ -76,6 +76,14 @@ export default function Audio() {
         charger()
     }, [])
 
+    useEffect(() => {
+        if (loading) return
+        const saved = sessionStorage.getItem('scroll:/audio')
+        if (!saved) return
+        sessionStorage.removeItem('scroll:/audio')
+        requestAnimationFrame(() => window.scrollTo(0, parseInt(saved, 10)))
+    }, [loading])
+
     const livresFiltres = livres.filter(l => {
         const cat = categories.find(c => c.id === l.categorie_id)
         const matchCategorie = categorieActive === 'toutes' || cat?.slug === categorieActive
@@ -145,6 +153,7 @@ export default function Audio() {
                             const nbVersions = livresAvecNb[l.id] || 0
                             return (
                                 <Link key={l.id} href={coursSerieUniqueMap[l.id] ? `/audio/${coursSerieUniqueMap[l.id]}` : `/audio/livre/${l.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none', transition: 'border-color 0.15s, transform 0.15s' }}
+                                    onClick={() => sessionStorage.setItem('scroll:/audio', String(window.scrollY))}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
                                 >
