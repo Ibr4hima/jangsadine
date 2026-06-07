@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
 import { supabase } from '@/lib/supabase'
-import { BookMarked, Clock, Headphones, Mic } from 'lucide-react'
+import { BookMarked, BookOpen, Clock, Headphones, HelpCircle, Mic } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -18,33 +18,56 @@ const couleurTxt: Record<string, string> = {
   Seerah: '#c05c2e', 'Invocations': '#06402B', 'Éthique & Bons comportements': '#6b3db5', 'Séries de cours': '#654321',
 }
 
-const modules = [
-  { nom: 'Cours audio', href: '/audio', couleur: '#e8f0f8', iconColor: '#28558b' },
-  { nom: 'Conférences', href: '/conferences', couleur: '#faf3dc', iconColor: '#b8911f' },
-  { nom: 'Khoutbah', href: '/khoutbah', couleur: '#e8f0f8', iconColor: '#28558b' },
-  { nom: 'Heures de prières', href: '/prieres', couleur: '#faf3dc', iconColor: '#b8911f' },
+const sections = [
+  {
+    nom: 'Cours audio', desc: 'Dourous complets par des sheikhs reconnus',
+    href: '/audio', bg: '#e8f0f8', color: '#28558b',
+    icon: <Headphones size={22} strokeWidth={1.5} />,
+  },
+  {
+    nom: 'Khoutbah', desc: 'Prêches du vendredi en wolof et en français',
+    href: '/khoutbah', bg: '#faf3dc', color: '#b8911f',
+    icon: <BookMarked size={22} strokeWidth={1.5} />,
+  },
+  {
+    nom: 'Conférences', desc: 'Causeries et conférences islamiques',
+    href: '/conferences', bg: '#eaf4ee', color: '#2d7a4f',
+    icon: <Mic size={22} strokeWidth={1.5} />,
+  },
+  {
+    nom: 'Ebooks', desc: 'Livres et ressources en PDF, gratuits',
+    href: '/ebooks', bg: '#fdf0eb', color: '#c05c2e',
+    icon: <BookOpen size={22} strokeWidth={1.5} />,
+  },
+  {
+    nom: 'Fatwas', desc: 'Questions et réponses de jurisprudence',
+    href: '/fatwas', bg: '#f2eefa', color: '#6b3db5',
+    icon: <HelpCircle size={22} strokeWidth={1.5} />,
+  },
+  {
+    nom: 'Prières', desc: 'Horaires géolocalisés, partout dans le monde',
+    href: '/prieres', bg: '#DEE8CE', color: '#06402B',
+    icon: <Clock size={22} strokeWidth={1.5} />,
+  },
 ]
 
-const categories = ['Aqeedah', 'Fiqh', 'Hadith', 'Tafsir & Sciences du Coran', 'Seerah', 'Éthique & Bons comportements', 'Fatwas', 'Khoutbah', 'Conférences']
-
-const icones: Record<string, React.ReactNode> = {
-  'Cours audio': <Headphones size={22} strokeWidth={1.5} />,
-  'Conférences': <Mic size={22} strokeWidth={1.5} />,
-  'Khoutbah': <BookMarked size={22} strokeWidth={1.5} />,
-  'Heures de prières': <Clock size={22} strokeWidth={1.5} />,
-}
-
 export default function Accueil() {
-  const [derniersCours, setDerniersCours] = useState<{ id: string; titre: string; sheikh: string; nb_episodes: number; categories: { nom: string } }[]>([])
+  const [derniersCours, setDerniersCours] = useState<{
+    id: string; titre: string; sheikh: string; nb_episodes: number; categories: { nom: string }
+  }[]>([])
+  const [nbCours, setNbCours] = useState<number | null>(null)
 
   useEffect(() => {
     async function charger() {
-      const { data } = await supabase
-        .from('cours')
-        .select('id, titre, sheikh, nb_episodes, categories(nom)')
-        .order('created_at', { ascending: false })
-        .limit(3)
+      const [{ data }, { count }] = await Promise.all([
+        supabase.from('cours')
+          .select('id, titre, sheikh, nb_episodes, categories(nom)')
+          .order('created_at', { ascending: false })
+          .limit(4),
+        supabase.from('cours').select('*', { count: 'exact', head: true }),
+      ])
       if (data) setDerniersCours(data as any)
+      if (count) setNbCours(count)
     }
     charger()
   }, [])
@@ -53,68 +76,143 @@ export default function Accueil() {
     <main>
       <Navbar />
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section style={{
         background: 'var(--fond-creme)',
-        padding: '72px 24px 60px',
+        padding: '80px 24px 68px',
         textAlign: 'center',
         borderBottom: '1px solid var(--bordure)',
       }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '580px', margin: '0 auto' }}>
           <Image
             src="/basmallah.png"
             alt="Bismillah ir-rahman ir-rahim"
-            width={320}
-            height={80}
-            style={{ margin: '0 auto 20px', opacity: 0.85 }}
+            width={280}
+            height={70}
+            style={{ margin: '0 auto 32px', opacity: 0.8 }}
           />
-          <h1 style={{ fontSize: '52px', fontWeight: 700, color: 'var(--texte)', lineHeight: 1.15, marginBottom: '16px' }}>
+
+          <h1 style={{
+            fontSize: 'clamp(40px, 8vw, 60px)',
+            fontWeight: 700,
+            color: 'var(--texte)',
+            lineHeight: 1.1,
+            letterSpacing: '-0.5px',
+            marginBottom: '18px',
+          }}>
             Apprends ta{' '}
             <span style={{ color: 'var(--or)' }}>religion</span>
-            <br />
           </h1>
-          <p style={{ fontSize: '16px', color: 'var(--texte-muted)', lineHeight: 1.7, marginBottom: '32px' }}>
-            Cours audio, khoutbah, conférences, fatwas, ebooks et heures de prières —<br />
-            accessible à tous gratuitement.
+
+          <p style={{
+            fontSize: '17px',
+            color: 'var(--texte-muted)',
+            lineHeight: 1.75,
+            marginBottom: '36px',
+            maxWidth: '440px',
+            margin: '0 auto 36px',
+          }}>
+            Cours audio, khoutbah, conférences, fatwas et ebooks —
+            tout ce dont tu as besoin, gratuitement.
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/audio" style={{ background: 'var(--bleu)', color: 'white', padding: '13px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: 500 }}>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '48px' }}>
+            <Link href="/audio" style={{
+              background: 'var(--bleu)', color: 'white',
+              padding: '14px 32px', borderRadius: '10px',
+              fontSize: '15px', fontWeight: 600,
+              boxShadow: '0 2px 14px rgba(40,85,139,0.28)',
+              transition: 'opacity 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
               Découvrir les cours
             </Link>
-            <Link href="/ebooks" style={{ border: '1.5px solid var(--or)', color: 'var(--or-fonce)', padding: '13px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: 500 }}>
-              Consulter les Ebooks
+            <Link href="/ebooks" style={{
+              background: 'white',
+              border: '1.5px solid var(--or)',
+              color: 'var(--or-fonce)',
+              padding: '14px 32px', borderRadius: '10px',
+              fontSize: '15px', fontWeight: 600,
+              transition: 'background 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = '#fdf8ec'}
+              onMouseLeave={e => e.currentTarget.style.background = 'white'}
+            >
+              Voir les ebooks
             </Link>
+          </div>
+
+          {/* Stats strip */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            borderTop: '1px solid var(--bordure)',
+            paddingTop: '28px',
+          }}>
+            {[
+              { val: nbCours ? `+${nbCours}` : '—', label: 'cours audio' },
+              { val: '100%', label: 'gratuit' },
+              { val: 'FR · WO', label: 'langues' },
+            ].map((s, i) => (
+              <div key={i} style={{
+                flex: 1,
+                padding: '0 20px',
+                borderLeft: i > 0 ? '1px solid var(--bordure)' : 'none',
+              }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--bleu)', marginBottom: '3px' }}>{s.val}</div>
+                <div style={{ fontSize: '11px', color: 'var(--texte-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 500 }}>{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Barre or */}
+      {/* Gold bar */}
       <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
 
-      {/* Modules */}
-      <section style={{ background: 'var(--blanc)', padding: '56px 24px' }}>
+      {/* ── Content sections ── */}
+      <section style={{ background: 'white', padding: '68px 24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>
-            La plateforme
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px', textAlign: 'center' }}>
+            Explorer
           </p>
-          <h2 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--texte)', marginBottom: '32px' }}>
-            Tout ce dont tu as besoin
+          <h2 style={{ fontSize: 'clamp(26px, 4vw, 34px)', fontWeight: 700, color: 'var(--texte)', marginBottom: '44px', textAlign: 'center' }}>
+            Tout le contenu, en un seul endroit
           </h2>
-          <div className="modules-grid">
-            {modules.map((mod) => (
-              <Link key={mod.href} href={mod.href} style={{
-                border: '1px solid var(--bordure)', borderRadius: '12px', padding: '28px 16px',
-                background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center',
-                justifyContent: 'center', textAlign: 'center', gap: '12px', transition: 'border-color 0.15s, transform 0.15s',
+
+          <div className="sections-grid">
+            {sections.map(s => (
+              <Link key={s.href} href={s.href} style={{
+                display: 'flex', alignItems: 'flex-start', gap: '14px',
+                padding: '18px 20px', borderRadius: '14px',
+                border: '1px solid var(--bordure)',
+                background: 'white',
+                transition: 'border-color 0.18s, box-shadow 0.18s, transform 0.18s',
               }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = s.color
+                  e.currentTarget.style.boxShadow = `0 4px 20px ${s.color}1a`
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--bordure)'
+                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
               >
-                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: mod.couleur, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: mod.iconColor }}>
-                  {icones[mod.nom]}
+                <div style={{
+                  width: '44px', height: '44px', borderRadius: '12px',
+                  background: s.bg, color: s.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  {s.icon}
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', lineHeight: 1.3 }}>
-                  {mod.nom}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--texte)', marginBottom: '4px' }}>{s.nom}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--texte-muted)', lineHeight: 1.45 }}>{s.desc}</div>
                 </div>
               </Link>
             ))}
@@ -122,56 +220,107 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* Barre or */}
+      {/* Gold bar */}
       <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
 
-      {/* Aperçu cours audio */}
-      <section style={{ background: 'var(--fond-creme)', padding: '56px 24px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '6px' }}>
-            Bibliothèque
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--texte)' }}>Dourous</h2>
-            <Link href="/audio" style={{ fontSize: '14px', color: 'var(--bleu)', fontWeight: 500 }}>Voir tout →</Link>
+      {/* ── Derniers cours ── */}
+      <section style={{ background: 'var(--fond-creme)', padding: '68px 24px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase' }}>
+              Bibliothèque
+            </p>
+            <Link href="/audio" style={{ fontSize: '14px', color: 'var(--bleu)', fontWeight: 500 }}>
+              Tout voir →
+            </Link>
           </div>
+          <h2 style={{ fontSize: 'clamp(26px, 4vw, 34px)', fontWeight: 700, color: 'var(--texte)', marginBottom: '28px' }}>
+            Derniers cours
+          </h2>
 
-          {/* Catégories */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
-            {categories.map((cat) => (
-              <span key={cat} style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, border: '1px solid var(--bordure)', background: 'white', color: '#666', cursor: 'pointer' }}>
-                {cat}
-              </span>
-            ))}
-          </div>
-
-          {/* 3 derniers cours */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {derniersCours.map((cours) => {
+            {derniersCours.map(cours => {
               const nomCat = (cours.categories as any)?.nom
+              const bgCat = couleurBg[nomCat] || '#f0f0f0'
+              const txtCat = couleurTxt[nomCat] || '#888'
               return (
                 <Link key={cours.id} href={`/audio/${cours.id}`} style={{
-                  minWidth: 0, overflow: 'hidden', background: 'white',
-                  border: '1px solid var(--bordure)', borderRadius: '12px',
-                  padding: '14px 16px', display: 'flex', alignItems: 'center',
-                  gap: '14px', textDecoration: 'none', transition: 'border-color 0.15s'
+                  display: 'flex', alignItems: 'center', gap: '16px',
+                  background: 'white', border: '1px solid var(--bordure)',
+                  borderRadius: '14px', padding: '16px 20px',
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
                 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--bleu)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bordure)'}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'var(--bleu)'
+                    e.currentTarget.style.boxShadow = '0 2px 14px rgba(40,85,139,0.09)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--bordure)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
                 >
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: couleurBg[nomCat] || '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (couleurTxt[nomCat] || '#aaa'), marginLeft: '2px' }} />
+                  {/* Play circle */}
+                  <div style={{
+                    width: '46px', height: '46px', borderRadius: '50%',
+                    background: bgCat,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <div style={{
+                      width: 0, height: 0,
+                      borderTop: '6px solid transparent',
+                      borderBottom: '6px solid transparent',
+                      borderLeft: `11px solid ${txtCat}`,
+                      marginLeft: '3px',
+                    }} />
                   </div>
+
+                  {/* Text */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <TitreDefilant texte={cours.titre} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--texte)', marginBottom: '4px' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 8px', borderRadius: '10px', background: couleurBg[nomCat] || '#f0f0f0', color: couleurTxt[nomCat] || '#666' }}>{cours.sheikh}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 500, padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#999' }}>{cours.nb_episodes}</span>
+                    <TitreDefilant
+                      texte={cours.titre}
+                      style={{ fontSize: '15px', fontWeight: 600, color: 'var(--texte)', marginBottom: '6px' }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: '12px', fontWeight: 500,
+                        padding: '2px 10px', borderRadius: '20px',
+                        background: bgCat, color: txtCat,
+                      }}>
+                        {cours.sheikh}
+                      </span>
+                      {nomCat && (
+                        <span style={{ fontSize: '12px', color: '#aaa' }}>·</span>
+                      )}
+                      {nomCat && (
+                        <span style={{ fontSize: '12px', color: 'var(--texte-muted)' }}>{nomCat}</span>
+                      )}
                     </div>
+                  </div>
+
+                  {/* Episode count */}
+                  <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--texte)' }}>{cours.nb_episodes}</span>
+                    <div style={{ fontSize: '11px', color: '#aaa' }}>épisode{cours.nb_episodes > 1 ? 's' : ''}</div>
                   </div>
                 </Link>
               )
             })}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+            <Link href="/audio" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              border: '1.5px solid var(--bleu)', color: 'var(--bleu)',
+              padding: '12px 28px', borderRadius: '10px',
+              fontSize: '14px', fontWeight: 600,
+              transition: 'background 0.15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bleu)'; e.currentTarget.style.color = 'white' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--bleu)' }}
+            >
+              Voir toute la bibliothèque →
+            </Link>
           </div>
         </div>
       </section>
