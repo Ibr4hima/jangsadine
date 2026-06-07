@@ -173,12 +173,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       osc.start()
       // Quand iOS rend la session (fin d'un vocal WhatsApp, etc.), on reprend le contrôle
       ctx.addEventListener('statechange', () => {
-        if (ctx.state === 'running' && mediaMetaRef.current) {
-          const { audio: a, metadata } = mediaMetaRef.current
+        if (ctx.state !== 'running' || !mediaMetaRef.current || !('mediaSession' in navigator)) return
+        const { audio: a, metadata } = mediaMetaRef.current
+        // Si une autre app a effacé ou remplacé notre metadata → re-applique tout
+        // Sinon (c'est notre propre resume() qui a déclenché le statechange) → juste playbackState
+        if (navigator.mediaSession.metadata?.title !== metadata.title) {
           applyMediaSession(a, metadata)
-          if ('mediaSession' in navigator)
-            navigator.mediaSession.playbackState = a.paused ? 'paused' : 'playing'
         }
+        navigator.mediaSession.playbackState = a.paused ? 'paused' : 'playing'
       })
       oscCtxRef.current = ctx
     } catch { }
