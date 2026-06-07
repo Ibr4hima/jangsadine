@@ -44,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <audio id="audio-livre" preload="metadata">
             <source id="source-livre" src={undefined} type="audio/mpeg" />
           </audio>
+          {/* Audio silencieux en boucle pour maintenir la session iOS active même en pause */}
+          <audio id="audio-silence" src="/silence.wav" loop preload="auto"></audio>
         </AudioProvider>
       </body>
     </html>

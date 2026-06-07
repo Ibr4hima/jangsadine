@@ -47,6 +47,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [markerActuel, setMarkerActuel] = useState<Marker | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const livreAudioRef = useRef<HTMLAudioElement | null>(null)
+  const silenceRef = useRef<HTMLAudioElement | null>(null)
   const markersRef = useRef<Marker[]>([])
   const mediaMetaRef = useRef<{ audio: HTMLAudioElement; metadata: MediaMetadataInit } | null>(null)
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string; livreId: string } | null>(null)
@@ -56,8 +57,21 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const audio = document.getElementById('audio-principal') as HTMLAudioElement
     const livreAudioEl = document.getElementById('audio-livre') as HTMLAudioElement
+    const silenceEl = document.getElementById('audio-silence') as HTMLAudioElement
     audioRef.current = audio
     livreAudioRef.current = livreAudioEl
+    silenceRef.current = silenceEl
+    silenceEl.volume = 0
+
+    const onVisibilityChange = () => {
+      if (!document.hidden && mediaMetaRef.current) {
+        applyMediaSession(mediaMetaRef.current.audio, mediaMetaRef.current.metadata)
+        if ('mediaSession' in navigator)
+          navigator.mediaSession.playbackState = mediaMetaRef.current.audio.paused ? 'paused' : 'playing'
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => { document.removeEventListener('visibilitychange', onVisibilityChange) }
 
     // Listeners épisode
     audio.addEventListener('timeupdate', () => {
@@ -151,6 +165,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     setPiste(nouvellePiste); setProgression(0); setDureeTotal(0); setMarkers([]); setMarkerActuel(null)
 
+    if (silenceRef.current) silenceRef.current.play().catch(() => {})
+
     supabase.from('episode_markers').select('*').eq('episode_id', nouvellePiste.id).order('temps_secondes')
       .then(({ data }) => { if (data && data.length > 0) setMarkers(data) })
 
@@ -173,6 +189,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     livreAudioEl.play().catch(console.error)
 
     setLivreAudio({ url, titre, livreId }); setProgressionLivre(0)
+
+    if (silenceRef.current) silenceRef.current.play().catch(() => {})
 
     setupMediaSession(livreAudioEl, {
       title: titre, artist: 'Jàng sa Diné', album: 'Livre audio',
@@ -202,11 +220,17 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   function fermer() {
     if (audioRef.current) { audioRef.current.pause(); const s = document.getElementById('source-principal') as HTMLSourceElement; if (s) s.src = '' }
+    if (silenceRef.current) silenceRef.current.pause()
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
+    mediaMetaRef.current = null
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
   }
 
   function fermerLivre() {
     if (livreAudioRef.current) { livreAudioRef.current.pause(); const s = document.getElementById('source-livre') as HTMLSourceElement; if (s) s.src = '' }
+    if (silenceRef.current) silenceRef.current.pause()
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
+    mediaMetaRef.current = null
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
   }
 
