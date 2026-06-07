@@ -72,14 +72,20 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    const onVisibilityChange = () => {
-      if (!document.hidden && mediaMetaRef.current) {
-        applyMediaSession(mediaMetaRef.current.audio, mediaMetaRef.current.metadata)
-        if ('mediaSession' in navigator)
-          navigator.mediaSession.playbackState = mediaMetaRef.current.audio.paused ? 'paused' : 'playing'
+    const reveil = () => {
+      if (!mediaMetaRef.current) return
+      const { audio: a, metadata } = mediaMetaRef.current
+      applyMediaSession(a, metadata)
+      if ('mediaSession' in navigator)
+        navigator.mediaSession.playbackState = a.paused ? 'paused' : 'playing'
+      if (sessionActiveRef.current && silenceRef.current?.paused) {
+        silenceRef.current.play().catch(() => {})
       }
     }
+    const onVisibilityChange = () => { if (!document.hidden) reveil() }
+    const onPageShow = (e: PageTransitionEvent) => { if (e.persisted) reveil() }
     document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('pageshow', onPageShow)
 
     // Listeners épisode
     audio.addEventListener('timeupdate', () => {
@@ -138,7 +144,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
 
-    return () => { document.removeEventListener('visibilitychange', onVisibilityChange) }
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('pageshow', onPageShow)
+    }
   }, [])
 
   useEffect(() => { markersRef.current = markers }, [markers])
@@ -146,7 +155,12 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function applyMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
-    navigator.mediaSession.setActionHandler('play', () => { audio.play().catch(console.error) })
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (sessionActiveRef.current && silenceRef.current?.paused) {
+        silenceRef.current.play().catch(() => {})
+      }
+      audio.play().catch(() => { setTimeout(() => audio.play().catch(console.error), 300) })
+    })
     navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
     navigator.mediaSession.setActionHandler('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d?.seekOffset || 10)) })
     navigator.mediaSession.setActionHandler('seekforward', (d) => { audio.currentTime = Math.min(audio.duration, audio.currentTime + (d?.seekOffset || 10)) })
