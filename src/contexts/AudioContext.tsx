@@ -61,7 +61,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current = audio
     livreAudioRef.current = livreAudioEl
     silenceRef.current = silenceEl
-    silenceEl.muted = true
+    silenceEl.volume = 0
 
     const onVisibilityChange = () => {
       if (!document.hidden && mediaMetaRef.current) {
