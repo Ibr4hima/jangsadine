@@ -48,6 +48,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const livreAudioRef = useRef<HTMLAudioElement | null>(null)
   const silenceRef = useRef<HTMLAudioElement | null>(null)
+  const sessionActiveRef = useRef(false)
   const markersRef = useRef<Marker[]>([])
   const mediaMetaRef = useRef<{ audio: HTMLAudioElement; metadata: MediaMetadataInit } | null>(null)
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string; livreId: string } | null>(null)
@@ -62,6 +63,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     livreAudioRef.current = livreAudioEl
     silenceRef.current = silenceEl
     silenceEl.volume = 0
+
+    // Si iOS interrompt le silence (appel, Siri, autre app), on le redémarre
+    // pour maintenir la session audio active tant qu'un contenu est chargé
+    silenceEl.addEventListener('pause', () => {
+      if (sessionActiveRef.current) {
+        setTimeout(() => { silenceEl.play().catch(() => {}) }, 300)
+      }
+    })
 
     const onVisibilityChange = () => {
       if (!document.hidden && mediaMetaRef.current) {
@@ -159,6 +168,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (livreAudioRef.current) livreAudioRef.current.pause()
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
 
+    sessionActiveRef.current = true
     if (silenceRef.current) silenceRef.current.play().catch(() => {})
 
     const source = document.getElementById('source-principal') as HTMLSourceElement
@@ -184,6 +194,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (audioRef.current) audioRef.current.pause()
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
 
+    sessionActiveRef.current = true
     if (silenceRef.current) silenceRef.current.play().catch(() => {})
 
     const source = document.getElementById('source-livre') as HTMLSourceElement
@@ -220,6 +231,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   function avancer() { if (audioRef.current) audioRef.current.currentTime += 10 }
 
   function fermer() {
+    sessionActiveRef.current = false
     if (audioRef.current) { audioRef.current.pause(); const s = document.getElementById('source-principal') as HTMLSourceElement; if (s) s.src = '' }
     if (silenceRef.current) silenceRef.current.pause()
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
@@ -228,6 +240,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }
 
   function fermerLivre() {
+    sessionActiveRef.current = false
     if (livreAudioRef.current) { livreAudioRef.current.pause(); const s = document.getElementById('source-livre') as HTMLSourceElement; if (s) s.src = '' }
     if (silenceRef.current) silenceRef.current.pause()
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = null
