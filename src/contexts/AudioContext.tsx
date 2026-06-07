@@ -48,6 +48,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const livreAudioRef = useRef<HTMLAudioElement | null>(null)
   const markersRef = useRef<Marker[]>([])
+  const mediaMetaRef = useRef<{ audio: HTMLAudioElement; metadata: MediaMetadataInit } | null>(null)
   const [livreAudio, setLivreAudio] = useState<{ url: string; titre: string; livreId: string } | null>(null)
   const [enLectureLivre, setEnLectureLivre] = useState(false)
   const [progressionLivre, setProgressionLivre] = useState(0)
@@ -76,8 +77,20 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       const s = Math.floor(audio.duration % 60)
       setPiste(prev => prev ? { ...prev, duree: h > 0 ? h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') : m + ':' + s.toString().padStart(2, '0') } : prev)
     })
-    audio.addEventListener('play', () => { setEnLecture(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing' })
-    audio.addEventListener('pause', () => { setEnLecture(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused' })
+    audio.addEventListener('play', () => {
+      setEnLecture(true)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing'
+        if (mediaMetaRef.current?.audio === audio) applyMediaSession(audio, mediaMetaRef.current.metadata)
+      }
+    })
+    audio.addEventListener('pause', () => {
+      setEnLecture(false)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused'
+        if (mediaMetaRef.current?.audio === audio) applyMediaSession(audio, mediaMetaRef.current.metadata)
+      }
+    })
     audio.addEventListener('ended', () => { setEnLecture(false); setProgression(0) })
 
     // Listeners livre
@@ -87,22 +100,40 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         try { navigator.mediaSession.setPositionState({ duration: livreAudioEl.duration, playbackRate: livreAudioEl.playbackRate, position: livreAudioEl.currentTime }) } catch { }
       }
     })
-    livreAudioEl.addEventListener('play', () => { setEnLectureLivre(true); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing' })
-    livreAudioEl.addEventListener('pause', () => { setEnLectureLivre(false); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused' })
+    livreAudioEl.addEventListener('play', () => {
+      setEnLectureLivre(true)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing'
+        if (mediaMetaRef.current?.audio === livreAudioEl) applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
+      }
+    })
+    livreAudioEl.addEventListener('pause', () => {
+      setEnLectureLivre(false)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused'
+        if (mediaMetaRef.current?.audio === livreAudioEl) applyMediaSession(livreAudioEl, mediaMetaRef.current.metadata)
+      }
+    })
     livreAudioEl.addEventListener('ended', () => { setEnLectureLivre(false); setProgressionLivre(0) })
   }, [])
 
   useEffect(() => { markersRef.current = markers }, [markers])
 
-  function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
+  function applyMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
     if (!('mediaSession' in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata(metadata)
-    navigator.mediaSession.playbackState = 'playing'
     navigator.mediaSession.setActionHandler('play', () => { audio.play().catch(console.error) })
     navigator.mediaSession.setActionHandler('pause', () => { audio.pause() })
     navigator.mediaSession.setActionHandler('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d?.seekOffset || 10)) })
     navigator.mediaSession.setActionHandler('seekforward', (d) => { audio.currentTime = Math.min(audio.duration, audio.currentTime + (d?.seekOffset || 10)) })
     navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime !== undefined) audio.currentTime = d.seekTime })
+  }
+
+  function setupMediaSession(audio: HTMLAudioElement, metadata: MediaMetadataInit) {
+    if (!('mediaSession' in navigator)) return
+    mediaMetaRef.current = { audio, metadata }
+    applyMediaSession(audio, metadata)
+    navigator.mediaSession.playbackState = 'playing'
   }
 
   function jouer(nouvellePiste: PisteAudio) {
