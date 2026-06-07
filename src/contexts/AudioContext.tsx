@@ -171,6 +171,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       osc.connect(gain)
       gain.connect(ctx.destination)
       osc.start()
+      // Quand iOS rend la session (fin d'un vocal WhatsApp, etc.), on reprend le contrôle
+      ctx.addEventListener('statechange', () => {
+        if (ctx.state === 'running' && mediaMetaRef.current) {
+          const { audio: a, metadata } = mediaMetaRef.current
+          applyMediaSession(a, metadata)
+          if ('mediaSession' in navigator)
+            navigator.mediaSession.playbackState = a.paused ? 'paused' : 'playing'
+        }
+      })
       oscCtxRef.current = ctx
     } catch { }
   }
