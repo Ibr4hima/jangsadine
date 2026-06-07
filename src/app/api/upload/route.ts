@@ -13,12 +13,11 @@ const s3 = new S3Client({
 
 export async function POST(req: NextRequest) {
     try {
-        const { nom, type } = await req.json()
+        const { nom } = await req.json()
 
         const command = new PutObjectCommand({
             Bucket: process.env.R2_BUCKET_NAME,
             Key: nom,
-            ContentType: type,
         })
 
         const url = await getSignedUrl(s3, command, { expiresIn: 3600 })

@@ -112,9 +112,9 @@ export default function Admin() {
             .replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u').replace(/[ç]/g, 'c')
             .replace(/[^a-zA-Z0-9.\-_]/g, '')
         const nomFichier = `${dossier}/${Date.now()}-${nomNettoye}`
-        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: fichier.type }) })
+        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier }) })
         const { url } = await res.json()
-        await fetch(url, { method: 'PUT', body: fichier, headers: { 'Content-Type': fichier.type } })
+        await fetch(url, { method: 'PUT', body: fichier })
         return `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${nomFichier}`
     }
 
@@ -206,7 +206,7 @@ export default function Admin() {
                 const batch = await Promise.all(fichiers.slice(i, i + BATCH).map(async (f, j) => {
                     const numero = numeroDepart + i + j
                     const nomFichier = `${coursId}/${numero}-${f.name.replace(/\s/g, '-')}`
-                    const data = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier, type: f.type || 'audio/mpeg' }) }).then(r => r.json())
+                    const data = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: nomFichier }) }).then(r => r.json())
                     if (!data.url) throw new Error(`Impossible d'obtenir l'URL signée pour "${f.name}"`)
                     return { url: data.url, nomFichier, f, numero, duree: durees[i + j] }
                 }))
@@ -217,7 +217,7 @@ export default function Admin() {
             let uploaded = 0
             for (let i = 0; i < uploadData.length; i += BATCH) {
                 await Promise.all(uploadData.slice(i, i + BATCH).map(async ({ url, f }) => {
-                    const res = await fetch(url, { method: 'PUT', body: f, headers: { 'Content-Type': f.type || 'audio/mpeg' } })
+                    const res = await fetch(url, { method: 'PUT', body: f })
                     if (!res.ok) throw new Error(`Erreur upload "${f.name}" : ${res.status}`)
                 }))
                 uploaded += Math.min(BATCH, uploadData.length - i)
