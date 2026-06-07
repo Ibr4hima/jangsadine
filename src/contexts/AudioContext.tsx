@@ -61,7 +61,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     audioRef.current = audio
     livreAudioRef.current = livreAudioEl
     silenceRef.current = silenceEl
-    silenceEl.volume = 0
+    silenceEl.muted = true
 
     const onVisibilityChange = () => {
       if (!document.hidden && mediaMetaRef.current) {
@@ -159,14 +159,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (livreAudioRef.current) livreAudioRef.current.pause()
     setLivreAudio(null); setEnLectureLivre(false); setProgressionLivre(0)
 
+    if (silenceRef.current) silenceRef.current.play().catch(() => {})
+
     const source = document.getElementById('source-principal') as HTMLSourceElement
     if (source) source.src = nouvellePiste.url
     audio.load()
     audio.play().catch(console.error)
 
     setPiste(nouvellePiste); setProgression(0); setDureeTotal(0); setMarkers([]); setMarkerActuel(null)
-
-    if (silenceRef.current) silenceRef.current.play().catch(() => {})
 
     supabase.from('episode_markers').select('*').eq('episode_id', nouvellePiste.id).order('temps_secondes')
       .then(({ data }) => { if (data && data.length > 0) setMarkers(data) })
@@ -184,14 +184,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (audioRef.current) audioRef.current.pause()
     setPiste(null); setEnLecture(false); setProgression(0); setMarkers([]); setMarkerActuel(null)
 
+    if (silenceRef.current) silenceRef.current.play().catch(() => {})
+
     const source = document.getElementById('source-livre') as HTMLSourceElement
     if (source) source.src = url
     livreAudioEl.load()
     livreAudioEl.play().catch(console.error)
 
     setLivreAudio({ url, titre, livreId }); setProgressionLivre(0)
-
-    if (silenceRef.current) silenceRef.current.play().catch(() => {})
 
     setupMediaSession(livreAudioEl, {
       title: titre, artist: 'Jàng sa Diné', album: 'Livre audio',
