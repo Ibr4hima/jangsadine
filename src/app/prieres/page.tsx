@@ -162,6 +162,8 @@ export default function Prieres() {
   const dashOffset = circonf - (prog / 100) * circonf
   const sunriseHeure = horaires.find(p => p.cle === 'Sunrise')?.heure ?? ''
   const moitieNuitHeure = horaires.find(p => p.cle === 'MoitieNuit')?.heure ?? ''
+  const fajrMin = enMinutes(horaires.find(p => p.cle === 'Fajr')?.heure ?? '23:59')
+  const avantFajr = now < fajrMin  // on est après minuit, avant Fajr
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
@@ -219,8 +221,8 @@ export default function Prieres() {
                     case 'Fajr': return sunriseHeure !== '' && estPasse(enMinutes(sunriseHeure), now)
                     case 'Sunrise': return estPasse(enMinutes(p.heure), now, 15)
                     case 'Dhuhr': case 'Asr': case 'Maghrib': return estPasse(enMinutes(p.heure), now, 5)
-                    case 'Isha': return moitieNuitHeure !== '' && estPasse(enMinutes(moitieNuitHeure), now, 1)
-                    case 'MoitieNuit': return estPasse(enMinutes(p.heure), now, 1)
+                    case 'Isha': return avantFajr && moitieNuitHeure !== '' && estPasse(enMinutes(moitieNuitHeure), now, 1)
+                    case 'MoitieNuit': return avantFajr && estPasse(enMinutes(p.heure), now, 1)
                     case 'Tahajjud': return false
                     default: return estPasse(enMinutes(p.heure), now)
                   }
