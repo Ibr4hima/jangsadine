@@ -7,7 +7,6 @@ import MiniEgaliseur from '@/components/MiniEgaliseur'
 import Navbar from '@/components/Navbar'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -56,8 +55,7 @@ export default function PageChapitre() {
       <Navbar />
 
       {/* ── Héros ── */}
-      <HeroDetail>
-        <Link href={`/audio/livre/${id}`} style={{ color: W70, fontSize: 13, display: 'inline-block', marginBottom: 14 }}>← {chapitre.livre?.titre}</Link>
+      <HeroDetail retour={`/audio/livre/${id}`}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '4px 12px', marginBottom: 10 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase' }}>Chapitre {chapitre.numero}</span>

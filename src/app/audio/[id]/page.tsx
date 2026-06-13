@@ -7,7 +7,6 @@ import MiniEgaliseur from '@/components/MiniEgaliseur'
 import Navbar from '@/components/Navbar'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -74,8 +73,7 @@ export default function PageCours() {
       <Navbar />
 
       {/* ── Héros ── */}
-      <HeroDetail>
-        <Link href={retour} style={{ color: W70, fontSize: 13, display: 'inline-block', marginBottom: 14 }}>← Retour</Link>
+      <HeroDetail retour={retour}>
         <div style={{ textAlign: 'center' }}>
           {nomCat && (
             <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '4px 12px', marginBottom: 10 }}>

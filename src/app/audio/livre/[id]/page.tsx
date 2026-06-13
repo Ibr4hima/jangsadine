@@ -59,8 +59,7 @@ export default function PageLivre() {
       <Navbar />
 
       {/* ── Héros ── */}
-      <HeroDetail>
-        <Link href="/audio" style={{ color: W70, fontSize: 13, display: 'inline-block', marginBottom: 14 }}>← Retour aux cours</Link>
+      <HeroDetail retour="/audio">
         <div style={{ textAlign: 'center' }}>
           {categorie && (
             <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '4px 12px', marginBottom: 10 }}>
