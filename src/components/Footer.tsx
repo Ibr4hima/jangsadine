@@ -67,19 +67,21 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer style={{ background: '#1a1a2e', marginTop: 'auto' }}>
-      <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 32px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '32px', marginBottom: '40px' }}>
+    <footer style={{ marginTop: 'auto', position: 'relative', background: 'linear-gradient(180deg, #1c3d66 0%, #13294a 100%)', borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' }}>
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d6ad3a 30%, #d6ad3a 70%, transparent)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(110% 70% at 50% 0%, rgba(214,173,58,0.07), transparent 55%)', pointerEvents: 'none' }} />
 
-          <div style={{ maxWidth: '280px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <Image src="/logo.png" alt="Jàng sa Diné" width={36} height={36} />
-              <span style={{ fontSize: '17px', fontWeight: 700, color: 'white' }}>
-                Jàng sa <span style={{ color: '#d9ac2a' }}>Diné</span>
+      <div style={{ position: 'relative', maxWidth: '1100px', margin: '0 auto', padding: '52px 28px 28px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '40px', marginBottom: '44px' }}>
+
+          <div style={{ maxWidth: '300px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '14px' }}>
+              <Image src="/logo.png" alt="Jàng sa Diné" width={38} height={38} />
+              <span style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '0.2px' }}>
+                Jàng sa <span style={{ color: '#d6ad3a' }}>Diné</span>
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75 }}>
               {nbCours && nbKhoutbahConf
                 ? `Plus de ${nbCours} cours audio et plus de ${nbKhoutbahConf} conférences et khoutbah en wolof — le tout gratuitement.`
                 : 'Apprends ta religion — cours audio, khoutbah, conférences et ebooks islamiques accessibles gratuitement.'
@@ -88,40 +90,40 @@ export default function Footer() {
           </div>
 
           <div>
-            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Navigation</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1.8px', color: '#d6ad3a', textTransform: 'uppercase', marginBottom: '16px' }}>Navigation</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {liens.map(l => (
-                <Link key={l.href} href={l.href} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', transition: 'color 0.15s' }}
-                  onMouseEnter={(e: any) => e.currentTarget.style.color = 'white'}
-                  onMouseLeave={(e: any) => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                <Link key={l.href} href={l.href} style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.6)', transition: 'color 0.15s' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = '#d6ad3a'}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
                 >{l.label}</Link>
               ))}
             </div>
           </div>
 
           <div>
-            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: '#d9ac2a', textTransform: 'uppercase', marginBottom: '14px' }}>Nous suivre</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1.8px', color: '#d6ad3a', textTransform: 'uppercase', marginBottom: '16px' }}>Nous suivre</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
               {reseaux.map(r => (
                 <a key={r.nom} href={r.href} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', transition: 'opacity 0.15s' }}
-                  onMouseEnter={(e: any) => e.currentTarget.style.opacity = '0.75'}
-                  onMouseLeave={(e: any) => e.currentTarget.style.opacity = '1'}
+                  style={{ display: 'flex', alignItems: 'center', gap: '11px', textDecoration: 'none', transition: 'transform 0.15s' }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.transform = 'translateX(2px)'}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => e.currentTarget.style.transform = 'translateX(0)'}
                 >
-                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: r.couleur + '22', border: '1px solid ' + r.couleur + '44', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.couleur, flexShrink: 0 }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: r.couleur + '26', border: '1px solid ' + r.couleur + '4d', display: 'flex', alignItems: 'center', justifyContent: 'center', color: r.couleur, flexShrink: 0 }}>
                     {r.icone}
                   </div>
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{r.nom}</span>
+                  <span style={{ fontSize: '13.5px', fontWeight: 500, color: 'rgba(255,255,255,0.72)' }}>{r.nom}</span>
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '24px' }} />
+        <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', marginBottom: '22px' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>© {new Date().getFullYear()} Jàng sa Diné — Tous droits réservés</p>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>© {new Date().getFullYear()} Jàng sa Diné — Tous droits réservés</p>
         </div>
       </div>
     </footer>

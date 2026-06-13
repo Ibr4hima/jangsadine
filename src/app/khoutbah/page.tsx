@@ -2,141 +2,212 @@
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
+import MiniEgaliseur from '@/components/MiniEgaliseur'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
+import { Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 type Khoutbah = { id: string; titre: string; sheikh: string; duree: string; url_audio: string; serie: string | null; numero_serie: number | null }
 
-function formaterTemps(s: number) {
-  if (!s || isNaN(s)) return '0:00'
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = Math.floor(s % 60)
-  if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
-  return m + ':' + sec.toString().padStart(2, '0')
+// ─── palette identique à l'app ───────────────────────────────
+const BLEU = '#2d578c'
+const OR = '#d6ad3a'
+const BG_TOP = '#3d6ba3'
+const BG_MID = '#2d578c'
+const BG_BOT = '#234a7a'
+const W14 = 'rgba(255,255,255,0.14)'
+const W55 = 'rgba(255,255,255,0.55)'
+const W70 = 'rgba(255,255,255,0.70)'
+const W10 = 'rgba(255,255,255,0.10)'
+
+function normaliser(t: string) {
+  return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+// ─── Squelette de chargement ──────────────────────────────────
+function Squelettes({ n = 6 }: { n?: number }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {Array.from({ length: n }).map((_, i) => (
+        <div key={i} className="squelette" style={{ height: 72, borderRadius: 18 }} />
+      ))}
+    </div>
+  )
+}
+
+// ─── Carte d'une khoutbah ─────────────────────────────────────
+function CarteKhoutbah({ k, actif, enLecture, onPress }: {
+  k: Khoutbah, actif: boolean, enLecture: boolean, onPress: () => void
+}) {
+  const badge = k.serie ? `${k.serie}${k.numero_serie ? ` · ${k.numero_serie}` : ''}` : null
+
+  return (
+    <div
+      onClick={onPress}
+      className="carte-piste"
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: actif ? '#f5f9fe' : '#fff',
+        borderRadius: 18, padding: 12,
+        border: actif ? `1.5px solid ${BLEU}` : '1.5px solid transparent',
+        boxShadow: '0 4px 10px rgba(58,74,92,0.06)',
+        cursor: 'pointer',
+      }}
+    >
+      {/* pastille play / égaliseur */}
+      <div style={{
+        width: 42, height: 42, borderRadius: 21, flexShrink: 0,
+        background: actif ? BLEU : '#edf2f8',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: actif ? `0 3px 6px rgba(45,87,140,0.30)` : 'none',
+      }}>
+        {actif && enLecture ? (
+          <MiniEgaliseur />
+        ) : (
+          <svg width="16" height="16" viewBox="0 -960 960 960">
+            <path d="M320-200v-560l440 280-440 280Z" fill={actif ? 'white' : BLEU} />
+          </svg>
+        )}
+      </div>
+
+      {/* titre + sheikh + badge série */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <TitreDefilant
+          texte={k.titre}
+          style={{
+            fontSize: 14, fontWeight: 600,
+            color: actif ? BLEU : 'var(--texte)',
+            marginBottom: 3,
+          }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <p style={{ fontSize: 12, color: 'var(--texte-muted)', margin: 0, flexShrink: 1 }}>{k.sheikh}</p>
+          {badge && (
+            <span style={{
+              fontSize: 10.5, fontWeight: 600,
+              padding: '2px 8px', borderRadius: 7,
+              background: '#faf3dc', color: '#b8911f',
+              whiteSpace: 'nowrap',
+            }}>
+              {badge}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function Khoutbah() {
   const [khoutbahs, setKhoutbahs] = useState<Khoutbah[]>([])
   const [recherche, setRecherche] = useState('')
   const [loading, setLoading] = useState(true)
-  const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker } = useAudio()
+  const { jouer, piste, enLecture, toggleLecture } = useAudio()
 
   useEffect(() => {
-    async function charger() {
-      const { data } = await supabase.from('khoutbahs').select('*').order('serie').order('numero_serie').order('created_at', { ascending: false })
-      if (data) setKhoutbahs(data)
-      setLoading(false)
-    }
-    charger()
+    supabase.from('khoutbahs').select('*').order('serie').order('numero_serie').order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setKhoutbahs(data); setLoading(false) })
   }, [])
 
   const filtres = khoutbahs.filter(k =>
-    k.titre.toLowerCase().includes(recherche.toLowerCase()) ||
-    k.sheikh.toLowerCase().includes(recherche.toLowerCase()) ||
-    (k.serie && k.serie.toLowerCase().includes(recherche.toLowerCase()))
+    normaliser(k.titre).includes(normaliser(recherche)) ||
+    normaliser(k.sheikh).includes(normaliser(recherche)) ||
+    (k.serie && normaliser(k.serie).includes(normaliser(recherche)))
   )
 
-  const idx = khoutbahs.findIndex(k => k.id === piste?.id)
-  const precedente = idx > 0 ? khoutbahs[idx - 1] : null
-  const suivante = idx < khoutbahs.length - 1 ? khoutbahs[idx + 1] : null
-  const tempsActuel = (progression / 100) * dureeTotal
+  const onPiste = (k: Khoutbah) => {
+    if (piste?.id === k.id) { toggleLecture(); return }
+    jouer({ id: k.id, titre: k.titre, sheikh: k.sheikh, url: k.url_audio, duree: k.duree, href: '/khoutbah' })
+  }
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
-        <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Khoutbah</h1>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Sermons du vendredi</p>
-        <div style={{ maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
-          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher une khoutbah..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '14px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
-          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
-        </div>
-      </section>
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px', flex: 1, width: '100%' }}>
-        {piste && khoutbahs.some(k => k.id === piste.id) && (
-          <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '28px' }}>
-            <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>En cours d'écoute</p>
-            <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '4px' }}>{piste.titre}</h2>
-            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>{piste.sheikh}</p>
-            <div onClick={e => { const rect = e.currentTarget.getBoundingClientRect(); seeker(((e.clientX - rect.left) / rect.width) * 100) }} style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', marginBottom: '6px' }}>
-              <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '14px' }}>
-              <span>{formaterTemps(tempsActuel)}</span>
-              <span>{formaterTemps(dureeTotal)}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <button onClick={() => precedente && jouer({ id: precedente.id, titre: precedente.titre, sheikh: precedente.sheikh, url: precedente.url_audio, duree: precedente.duree, href: '/khoutbah' })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: precedente ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
-              </button>
-              <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <img src="/icons/replay_10.svg" width="26" height="26" />
-              </button>
-              <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {enLecture ? <div style={{ display: 'flex', gap: '4px' }}><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />}
-              </button>
-              <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <img src="/icons/forward_10.svg" width="26" height="26" />
-              </button>
-              <button onClick={() => suivante && jouer({ id: suivante.id, titre: suivante.titre, sheikh: suivante.sheikh, url: suivante.url_audio, duree: suivante.duree, href: '/khoutbah' })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: suivante ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
-              </button>
-            </div>
+      {/* ── Héros ── */}
+      <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
+        <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(140,180,230,0.12)', top: -140, right: -100 }} />
+        <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(214,173,58,0.06)', bottom: -80, left: -70 }} />
+
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '28px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          {/* eyebrow + titre */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '5px 13px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase', lineHeight: 1 }}>Médiathèque</span>
           </div>
-        )}
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Khoutbah</h1>
 
+          {/* barre de recherche en verre */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: W10, border: `1px solid ${W14}`, borderRadius: 999, padding: '10px 16px', width: '100%' }}>
+            <Search size={17} color={W55} strokeWidth={2} style={{ flexShrink: 0 }} />
+            <input
+              value={recherche}
+              onChange={e => setRecherche(e.target.value)}
+              placeholder="Rechercher..."
+              style={{
+                flex: 1, background: 'none', border: 'none', outline: 'none',
+                fontSize: 14, fontFamily: 'inherit', color: '#fff',
+              }}
+            />
+            {recherche && (
+              <button onClick={() => setRecherche('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                <X size={15} color={W70} strokeWidth={2} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Liste ── */}
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 80px', flex: 1, width: '100%' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>Chargement...</div>
+          <Squelettes />
         ) : filtres.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '16px', color: '#aaa' }}>{recherche ? 'Aucune khoutbah pour "' + recherche + '"' : 'Les khoutbahs arrivent bientot'}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '56px 0' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 32, background: '#e4ebf3', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Search size={26} color="#9aa8b8" strokeWidth={2} />
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--texte-muted)', textAlign: 'center' }}>
+              {recherche ? `Aucune khoutbah pour « ${recherche} »` : 'Les khoutbahs arrivent bientôt'}
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {filtres.map((k, index) => {
-              const est = piste?.id === k.id
-              return (
-                <div key={k.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#bbb', width: '20px', textAlign: 'right', flexShrink: 0 }}>
-                    {index + 1}
-                  </span>
-
-                  <div onClick={() => jouer({ id: k.id, titre: k.titre, sheikh: k.sheikh, url: k.url_audio, duree: k.duree, href: '/khoutbah' })}
-                    style={{ flex: 1, minWidth: 0, overflow: 'hidden', background: est ? '#e8f0f8' : 'white', border: '1px solid ' + (est ? 'var(--bleu)' : 'var(--bordure)'), borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.15s' }}
-                    onMouseEnter={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                    onMouseLeave={e => { if (!est) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                  >
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: est ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {est && enLecture
-                        ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '12px', background: 'white', borderRadius: '2px' }} /></div>
-                        : <div style={{ width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid ' + (est ? 'white' : '#aaa'), marginLeft: '2px' }} />}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <TitreDefilant
-                        texte={k.titre}
-                        style={{ fontSize: '14px', fontWeight: 600, color: est ? 'var(--bleu)' : 'var(--texte)', marginBottom: '4px' }}
-                      />                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{k.sheikh}</p>
-                        {k.serie && <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#faf3dc', color: '#b8911f' }}>{k.serie}{k.numero_serie ? ' · ' + k.numero_serie : ''}</span>}
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              )
-            })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filtres.map((k, i) => (
+              <div key={k.id} className="kh-item" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}>
+                <CarteKhoutbah
+                  k={k}
+                  actif={piste?.id === k.id}
+                  enLecture={enLecture}
+                  onPress={() => onPiste(k)}
+                />
+              </div>
+            ))}
           </div>
         )}
       </div>
 
       <Footer />
+
+      <style>{`
+        .carte-piste { transition: box-shadow 0.15s, transform 0.1s; }
+        .carte-piste:hover { box-shadow: 0 6px 18px rgba(58,74,92,0.10); transform: translateY(-1px); }
+        .kh-item { animation: khFadeUp 0.35s ease both; }
+        @keyframes khFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .squelette {
+          background: #dde3ea;
+          animation: sqPulse 1.4s ease-in-out infinite;
+        }
+        @keyframes sqPulse {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 0.65; }
+        }
+        input::placeholder { color: ${W55}; }
+      `}</style>
     </main>
   )
 }

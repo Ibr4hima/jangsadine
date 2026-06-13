@@ -49,10 +49,10 @@
 }
 
 :root {
-  --bleu: #28558b;
-  --or: #d9ac2a;
+  --bleu: #2d578c;
+  --or: #d6ad3a;
   --or-fonce: #b8911f;
-  --fond-creme: #f8f6f1;
+  --fond-creme: #F2F0EF;
   --bordure: #e8e4da;
   --texte: #1a1a2e;
   --texte-muted: #666666;
@@ -154,6 +154,59 @@ html {
   to {
     transform: scaleY(1);
   }
+}
+
+/* ── MiniÉgaliseur (réplique de l'app : 5 barres, 6 étapes) ── */
+@keyframes eqbar0 {
+  0%   { height: 3.18px; }
+  15.29% { height: 9.93px; }
+  32.94% { height: 4.53px; }
+  47.06% { height: 14.65px; }
+  65.88% { height: 6.55px; }
+  82.35% { height: 11.95px; }
+  100% { height: 3.18px; }
+}
+@keyframes eqbar1 {
+  0%   { height: 9.25px; }
+  14.74% { height: 16px; }
+  32.05% { height: 7.9px; }
+  48.08% { height: 13.3px; }
+  67.95% { height: 3.85px; }
+  84.62% { height: 15.33px; }
+  100% { height: 9.25px; }
+}
+@keyframes eqbar2 {
+  0%   { height: 12.63px; }
+  17.61% { height: 6.55px; }
+  32.70% { height: 13.98px; }
+  51.57% { height: 5.2px; }
+  67.30% { height: 16px; }
+  85.53% { height: 8.58px; }
+  100% { height: 12.63px; }
+}
+@keyframes eqbar3 {
+  0%   { height: 7.23px; }
+  15.43% { height: 11.95px; }
+  33.33% { height: 5.88px; }
+  49.38% { height: 10.6px; }
+  66.67% { height: 3.18px; }
+  81.48% { height: 13.98px; }
+  100% { height: 7.23px; }
+}
+@keyframes eqbar4 {
+  0%   { height: 5.88px; }
+  18.18% { height: 5.2px; }
+  33.33% { height: 11.28px; }
+  50.91% { height: 3.85px; }
+  67.27% { height: 9.25px; }
+  81.21% { height: 14.65px; }
+  100% { height: 5.88px; }
+}
+
+/* ── Défilement titre (réplique TextTicker : loop sans rebond, spacer, délai) ── */
+@keyframes tick-defilement {
+  from { transform: translateX(0); }
+  to   { transform: translateX(var(--shift)); }
 }
 
 /* Styles description épisode */

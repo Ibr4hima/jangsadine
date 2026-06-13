@@ -1,194 +1,191 @@
 'use client'
 import Footer from '@/components/Footer'
+import HeroDetail from '@/components/HeroDetail'
 import Navbar from '@/components/Navbar'
+import TitreDefilant from '@/components/TitreDefilant'
+import { couleurBg, couleurTxt } from '@/lib/categories'
 import { supabase } from '@/lib/supabase'
+import { Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+const OR = '#d6ad3a'
+const BLEU = '#2d578c'
+const W14 = 'rgba(255,255,255,0.14)'
+const W55 = 'rgba(255,255,255,0.55)'
+const W70 = 'rgba(255,255,255,0.70)'
+const W10 = 'rgba(255,255,255,0.10)'
+
 function normaliser(texte: string): string {
-    return texte
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[ḍḏṭṯṣṡẓḥḫġ]/g, (c) => ({ ḍ: 'd', ḏ: 'd', ṭ: 't', ṯ: 't', ṣ: 's', ṡ: 's', ẓ: 'z', ḥ: 'h', ḫ: 'h', ġ: 'g' }[c] || c))
-        .replace(/[āīūôê]/g, (c) => ({ ā: 'a', ī: 'i', ū: 'u', ô: 'o', ê: 'e' }[c] || c))
+  return texte
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[ḍḏṭṯṣṡẓḥḫġ]/g, (c) => ({ ḍ: 'd', ḏ: 'd', ṭ: 't', ṯ: 't', ṣ: 's', ṡ: 's', ẓ: 'z', ḥ: 'h', ḫ: 'h', ġ: 'g' }[c] || c))
+    .replace(/[āīūôê]/g, (c) => ({ ā: 'a', ī: 'i', ū: 'u', ô: 'o', ê: 'e' }[c] || c))
 }
 
 type Categorie = { id: string; nom: string; slug: string; ordre: number }
-type Livre = { id: string; titre: string; categorie_id: string; titre_arabe?: string; nb_cours?: number }
-
-const couleurBg: Record<string, string> = {
-    Aqeedah: '#e8f0f8',
-    Fiqh: '#faf3dc',
-    Hadith: '#eaf4ee',
-    'Tafsir & Sciences du Coran': '#fde8f0',
-    Seerah: '#fdf0eb',
-    'Invocations': '#DEE8CE',
-    'Éthique & Bons comportements': '#f2eefa',
-    'Séries de cours': '#EDE8D0',
-}
-
-const couleurTxt: Record<string, string> = {
-    Aqeedah: '#28558b',
-    Fiqh: '#b8911f',
-    Hadith: '#2d7a4f',
-    'Tafsir & Sciences du Coran': '#a02060',
-    Seerah: '#c05c2e',
-    'Invocations': '#06402B',
-    'Éthique & Bons comportements': '#6b3db5',
-    'Séries de cours': '#654321',
-}
+type Livre = { id: string; titre: string; categorie_id: string; titre_arabe?: string; sheikh?: string | null }
 
 export default function Audio() {
-    const [categories, setCategories] = useState<Categorie[]>([])
-    const [livres, setLivres] = useState<Livre[]>([])
-    const [livresAvecNb, setLivresAvecNb] = useState<Record<string, number>>({})
-    const [coursData, setCoursData] = useState<{ livre_id: string; sheikh: string }[]>([])
-    const [categorieActive, setCategorieActive] = useState<string>('toutes')
+  const [categories, setCategories] = useState<Categorie[]>([])
+  const [livres, setLivres] = useState<Livre[]>([])
+  const [catActive, setCatActive] = useState('toutes')
+  const [loading, setLoading] = useState(true)
+  const [recherche, setRecherche] = useState('')
+  const [coursSerieUniqueMap, setCoursSerieUniqueMap] = useState<Record<string, string>>({})
 
-    useEffect(() => {
-        const saved = sessionStorage.getItem('categorie:/audio')
-        if (saved) setCategorieActive(saved)
-    }, [])
-    const [loading, setLoading] = useState(true)
-    const [recherche, setRecherche] = useState('')
-    const [coursSerieUniqueMap, setCoursSerieUniqueMap] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const saved = sessionStorage.getItem('categorie:/audio')
+    if (saved) queueMicrotask(() => setCatActive(saved))
+  }, [])
 
-    useEffect(() => {
-        async function charger() {
-            const { data: cats } = await supabase.from('categories').select('*').order('ordre')
-            const { data: livresList } = await supabase.from('livres').select('*').order('created_at')
-            const { data: coursList } = await supabase.from('cours').select('livre_id, sheikh, serie_unique').not('livre_id', 'is', null)
-            if (cats) setCategories(cats)
-            if (livresList) setLivres(livresList)
-            if (coursList) {
-                const nb: Record<string, number> = {}
-                coursList.forEach(c => { if (c.livre_id) nb[c.livre_id] = (nb[c.livre_id] || 0) + 1 })
-                setLivresAvecNb(nb)
-            }
-            if (coursList) setCoursData(coursList as any)
-            const serieMap: Record<string, string> = {}
-            const { data: coursAvecId } = await supabase.from('cours').select('id, livre_id, serie_unique').eq('serie_unique', true)
-            if (coursAvecId) coursAvecId.forEach(c => { if (c.livre_id) serieMap[c.livre_id] = c.id })
-            setCoursSerieUniqueMap(serieMap)
-            setLoading(false)
-        }
-        charger()
-    }, [])
+  useEffect(() => {
+    async function charger() {
+      const { data: cats } = await supabase.from('categories').select('*').order('ordre')
+      const { data: livresList } = await supabase.from('livres').select('*').order('created_at')
+      if (cats) setCategories(cats)
+      if (livresList) setLivres(livresList)
+      const serieMap: Record<string, string> = {}
+      const { data: coursAvecId } = await supabase.from('cours').select('id, livre_id, serie_unique').eq('serie_unique', true)
+      if (coursAvecId) coursAvecId.forEach(c => { if (c.livre_id) serieMap[c.livre_id] = c.id })
+      setCoursSerieUniqueMap(serieMap)
+      setLoading(false)
+    }
+    charger()
+  }, [])
 
-    useEffect(() => {
-        if (loading) return
-        const saved = sessionStorage.getItem('scroll:/audio')
-        if (!saved) return
-        sessionStorage.removeItem('scroll:/audio')
-        requestAnimationFrame(() => window.scrollTo(0, parseInt(saved, 10)))
-    }, [loading])
+  useEffect(() => {
+    if (loading) return
+    const saved = sessionStorage.getItem('scroll:/audio')
+    if (!saved) return
+    sessionStorage.removeItem('scroll:/audio')
+    requestAnimationFrame(() => window.scrollTo(0, parseInt(saved, 10)))
+  }, [loading])
 
-    const livresFiltres = livres.filter(l => {
-        const cat = categories.find(c => c.id === l.categorie_id)
-        const matchCategorie = categorieActive === 'toutes' || cat?.slug === categorieActive
-        const matchRecherche = recherche === '' ||
-            normaliser(l.titre).includes(normaliser(recherche)) ||
-            (l.titre_arabe ? l.titre_arabe.includes(recherche) : false)
-        return matchCategorie && matchRecherche
-    })
+  const livresFiltres = livres.filter(l => {
+    const cat = categories.find(c => c.id === l.categorie_id)
+    const matchCategorie = catActive === 'toutes' || cat?.slug === catActive
+    const matchRecherche = recherche === '' ||
+      normaliser(l.titre).includes(normaliser(recherche)) ||
+      (l.titre_arabe ? l.titre_arabe.includes(recherche) : false)
+    return matchCategorie && matchRecherche
+  })
 
-    return (
-        <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
-            <Navbar />
-            <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliotheque</p>
-                <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Cours audio</h1>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto' }}>Tous les cours sont dispensés par des savants sénégalais en suivant le Coran et la Sunnah selon la compréhension des pieux prédecesseurs.</p>
-                <div style={{ maxWidth: '500px', margin: '24px auto 0', position: 'relative' }}>
-                    <input
-                        value={recherche}
-                        onChange={e => setRecherche(e.target.value)}
-                        placeholder="Rechercher un cours audio..."
-                        style={{
-                            width: '100%',
-                            padding: '12px 20px 12px 44px',
-                            borderRadius: '50px',
-                            border: 'none',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                            outline: 'none',
-                            background: 'rgba(255,255,255,0.15)',
-                            color: 'white',
-                            boxSizing: 'border-box',
-                        }}
-                    />
-                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
-                </div>
-            </section>
-            <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
-            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '40px', justifyContent: 'center' }}>
-                    <button onClick={() => { setCategorieActive('toutes'); sessionStorage.setItem('categorie:/audio', 'toutes') }}
-                        style={{ padding: '8px 18px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === 'toutes' ? 'none' : '1px solid var(--bordure)', background: categorieActive === 'toutes' ? 'var(--bleu)' : 'white', color: categorieActive === 'toutes' ? 'white' : '#666', transition: 'all 0.15s', fontFamily: 'inherit' }}>
-                        Tous
-                    </button>
-                    {categories.map(cat => (
-                        <button key={cat.id} onClick={() => { setCategorieActive(cat.slug); sessionStorage.setItem('categorie:/audio', cat.slug) }}
-                            style={{ padding: '8px 18px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === cat.slug ? 'none' : '1px solid var(--bordure)', background: categorieActive === cat.slug ? couleurBg[cat.nom] || 'var(--bleu)' : 'white', color: categorieActive === cat.slug ? couleurTxt[cat.nom] || 'var(--bleu)' : '#666', transition: 'all 0.15s', fontFamily: 'inherit' }}
-                            onMouseEnter={e => { if (categorieActive !== cat.slug) { e.currentTarget.style.background = couleurBg[cat.nom] || '#f0f0f0'; e.currentTarget.style.color = couleurTxt[cat.nom] || '#333'; e.currentTarget.style.border = 'none' } }}
-                            onMouseLeave={e => { if (categorieActive !== cat.slug) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#666'; e.currentTarget.style.border = '1px solid var(--bordure)' } }}
-                        >
-                            {cat.nom}
-                        </button>
-                    ))}
-                </div>
+  return (
+    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column' }}>
+      <Navbar />
 
-                {loading ? (
-                    <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa', fontSize: '15px' }}>Chargement...</div>
-                ) : livresFiltres.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '80px 0' }}>
-                        <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
-                        <p style={{ fontSize: '16px', color: '#aaa' }}>Aucun résultat trouvé</p>
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                        {livresFiltres.map(l => {
-                            const cat = categories.find(c => c.id === l.categorie_id)
-                            const nbVersions = livresAvecNb[l.id] || 0
-                            return (
-                                <Link key={l.id} href={coursSerieUniqueMap[l.id] ? `/audio/${coursSerieUniqueMap[l.id]}` : `/audio/livre/${l.id}`} style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '22px', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none', transition: 'border-color 0.15s, transform 0.15s' }}
-                                    onClick={() => sessionStorage.setItem('scroll:/audio', String(window.scrollY))}
-                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--bleu)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bordure)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                                >
-                                    <span style={{ fontSize: '11.1px', fontWeight: 600, padding: '3px 10px', borderRadius: '10px', background: couleurBg[cat?.nom || ''] || '#f0f0f0', color: couleurTxt[cat?.nom || ''] || '#666', display: 'inline-block', alignSelf: 'flex-start' }}>
-                                        {cat?.nom}
-                                    </span>
-                                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--texte)', lineHeight: 1.4, flex: 1 }}>{l.titre}</h3>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        {l.titre_arabe ? (
-                                            <span style={{
-                                                fontSize: '11.1px',
-                                                fontWeight: 500,
-                                                padding: '3px 10px',
-                                                borderRadius: '10px',
-                                                background: '#f0f0f0',
-                                                color: '#888',
-                                                fontFamily: "'IBM Plex Sans Arabic', sans-serif",
-                                                direction: 'rtl',
-                                                display: 'inline-block',
-                                            }}>
-                                                {l.titre_arabe}
-                                            </span>
-                                        ) : (
-                                            <span />
-                                        )}
-                                        <span style={{ fontSize: '13px', color: 'var(--texte)', fontWeight: 500 }}>Voir →</span>
-                                    </div>
-                                </Link>
-                            )
-                        })}
-                    </div>
-                )}
+      {/* ── Héros ── */}
+      <HeroDetail>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '5px 13px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase', lineHeight: 1 }}>Médiathèque</span>
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Cours audio</h1>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: W10, border: `1px solid ${W14}`, borderRadius: 999, padding: '10px 16px', width: '100%' }}>
+            <Search size={17} color={W55} strokeWidth={2} style={{ flexShrink: 0 }} />
+            <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher..."
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', color: '#fff' }} />
+            {recherche && (
+              <button onClick={() => setRecherche('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                <X size={15} color={W70} strokeWidth={2} />
+              </button>
+            )}
+          </div>
+        </div>
+      </HeroDetail>
+
+      {/* ── Chips catégories ── */}
+      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
+        {[{ key: 'toutes', label: 'Tous', bg: BLEU, txt: '#fff' },
+        ...categories.map(c => ({ key: c.slug, label: c.nom, bg: couleurBg[c.nom] || BLEU, txt: couleurTxt[c.nom] || '#fff' }))].map(c => {
+          const estActif = catActive === c.key
+          return (
+            <button
+              key={c.key}
+              onClick={() => { setCatActive(c.key); sessionStorage.setItem('categorie:/audio', c.key) }}
+              style={{
+                flexShrink: 0, padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
+                background: estActif ? c.bg : '#fff',
+                border: `1px solid ${estActif ? c.txt : '#e2e7ee'}`,
+                color: estActif ? c.txt : '#6b7686',
+                fontFamily: 'inherit', fontSize: 12, fontWeight: estActif ? 600 : 500, whiteSpace: 'nowrap',
+              }}
+            >
+              {c.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Liste des livres / cours ── */}
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '12px 24px 80px', flex: 1, width: '100%' }}>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Array.from({ length: 5 }).map((_, i) => <div key={i} className="squelette" style={{ height: 86, borderRadius: 18 }} />)}
+          </div>
+        ) : livresFiltres.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '56px 0' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 32, background: '#e4ebf3', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Search size={26} color="#9aa8b8" strokeWidth={2} />
             </div>
-            <Footer />
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--texte-muted)' }}>Aucun résultat trouvé</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {livresFiltres.map((l, i) => {
+              const cat = categories.find(c => c.id === l.categorie_id)
+              const nomCat = cat?.nom ?? ''
+              const accent = couleurTxt[nomCat] ?? BLEU
+              return (
+                <Link
+                  key={l.id}
+                  href={coursSerieUniqueMap[l.id] ? `/audio/${coursSerieUniqueMap[l.id]}` : `/audio/livre/${l.id}`}
+                  onClick={() => sessionStorage.setItem('scroll:/audio', String(window.scrollY))}
+                  className="carte-piste appear"
+                  style={{
+                    position: 'relative', display: 'flex', flexDirection: 'column', gap: 6,
+                    background: '#fff', borderRadius: 18, padding: '12px 16px 12px 20px',
+                    boxShadow: '0 4px 10px rgba(58,74,92,0.06)', overflow: 'hidden', textDecoration: 'none',
+                    animationDelay: `${Math.min(i, 8) * 45}ms`,
+                  }}
+                >
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: accent, opacity: 0.85 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    {nomCat ? (
+                      <span style={{ background: couleurBg[nomCat] ?? '#f0f0f0', color: accent, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999 }}>{nomCat}</span>
+                    ) : <span />}
+                    {l.titre_arabe ? (
+                      <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", direction: 'rtl', fontSize: 12, color: '#9aa4b2', maxWidth: '50%', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{l.titre_arabe}</span>
+                    ) : null}
+                  </div>
+                  <TitreDefilant texte={l.titre} style={{ fontSize: 15, fontWeight: 700, color: 'var(--texte)' }} />
+                  {l.sheikh ? (
+                    <p style={{ fontSize: 12, color: 'var(--texte-muted)', margin: 0 }}>{l.sheikh}</p>
+                  ) : null}
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
-        </main>
-    )
+      <Footer />
+
+      <style>{`
+        .chips-scroll::-webkit-scrollbar { display: none; }
+        .chips-scroll { scrollbar-width: none; }
+        .carte-piste { transition: box-shadow 0.15s, transform 0.1s; }
+        .carte-piste:hover { box-shadow: 0 6px 18px rgba(58,74,92,0.10); transform: translateY(-1px); }
+        .appear { animation: appearUp 0.35s ease both; }
+        @keyframes appearUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .squelette { background: #dde3ea; animation: sqPulse 1.4s ease-in-out infinite; }
+        @keyframes sqPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.65; } }
+        input::placeholder { color: ${W55}; }
+      `}</style>
+    </main>
+  )
 }

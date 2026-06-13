@@ -1,38 +1,79 @@
 'use client'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
+import MiniEgaliseur from '@/components/MiniEgaliseur'
 import { useAudio } from '@/contexts/AudioContext'
 import { supabase } from '@/lib/supabase'
+import { ListFilter, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 type Fatwa = { id: string; question: string; sheikh: string; categorie: string; url_audio: string; duree: string }
+type Categorie = { nom: string; couleur: string; epingle: boolean }
 
-function formaterTemps(s: number) {
-  if (!s || isNaN(s)) return '0:00'
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = Math.floor(s % 60)
-  if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0')
-  return m + ':' + sec.toString().padStart(2, '0')
+// ─── palette identique à l'app ───────────────────────────────
+const BLEU = '#2d578c'
+const OR = '#d6ad3a'
+const BG_TOP = '#3d6ba3'
+const BG_MID = '#2d578c'
+const BG_BOT = '#234a7a'
+const W14 = 'rgba(255,255,255,0.14)'
+const W55 = 'rgba(255,255,255,0.55)'
+const W70 = 'rgba(255,255,255,0.70)'
+const W10 = 'rgba(255,255,255,0.10)'
+
+function normaliser(t: string) {
+  return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+// ─── Pastille play / pause / égaliseur ───────────────────────
+function PastillePlay({ actif, enLecture, taille = 34 }: { actif: boolean, enLecture: boolean, taille?: number }) {
+  return (
+    <div style={{
+      width: taille, height: taille, borderRadius: taille / 2, flexShrink: 0,
+      background: actif ? BLEU : '#edf2f8',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: actif ? '0 3px 6px rgba(45,87,140,0.30)' : 'none',
+    }}>
+      {actif && enLecture ? (
+        <MiniEgaliseur />
+      ) : (
+        <svg width="15" height="15" viewBox="0 -960 960 960">
+          <path d="M320-200v-560l440 280-440 280Z" fill={actif ? 'white' : BLEU} />
+        </svg>
+      )}
+    </div>
+  )
+}
+
+// ─── Squelette de chargement ──────────────────────────────────
+function Squelettes({ n = 4 }: { n?: number }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {Array.from({ length: n }).map((_, i) => (
+        <div key={i} className="squelette" style={{ height: 92, borderRadius: 18 }} />
+      ))}
+    </div>
+  )
 }
 
 export default function Fatwas() {
   const [fatwas, setFatwas] = useState<Fatwa[]>([])
-  const [categories, setCategories] = useState<{ nom: string; couleur: string; epingle: boolean }[]>([])
+  const [categories, setCategories] = useState<Categorie[]>([])
   const [sheikhs, setSheikhs] = useState<string[]>([])
-  const [categorieActive, setCategorieActive] = useState('toutes')
-  const [sheikhActif, setSheikhActif] = useState('tous')
+  const [catActive, setCatActive] = useState('toutes')
+  const [sheikhsActifs, setSheikhsActifs] = useState<string[]>([])
+  const [showSheikhPicker, setShowSheikhPicker] = useState(false)
   const [recherche, setRecherche] = useState('')
   const [loading, setLoading] = useState(true)
-  const [sheikhsActifs, setSheikhsActifs] = useState<string[]>([])
-  const [dropdownOuvert, setDropdownOuvert] = useState(false)
-  const { jouer, piste, enLecture, progression, dureeTotal, toggleLecture, reculer, avancer, seeker } = useAudio()
+  const { jouer, piste, enLecture, toggleLecture } = useAudio()
 
   useEffect(() => {
     async function charger() {
-      const { data: fatwasData } = await supabase.from('fatwas').select('*').order('categorie').order('created_at')
-      const { data: catsData } = await supabase.from('fatwas_categories').select('nom, couleur, epingle').order('nom')
-      const { data: sheikhsData } = await supabase.from('fatwas_sheikhs').select('nom').order('nom')
+      const [{ data: fatwasData }, { data: catsData }, { data: sheikhsData }] = await Promise.all([
+        supabase.from('fatwas').select('*').order('categorie').order('created_at'),
+        supabase.from('fatwas_categories').select('nom, couleur, epingle').order('nom'),
+        supabase.from('fatwas_sheikhs').select('nom').order('nom'),
+      ])
       if (fatwasData) setFatwas(fatwasData)
       if (catsData) {
         const triees = [...catsData].sort((a, b) => {
@@ -41,201 +82,261 @@ export default function Fatwas() {
           return 0
         })
         setCategories(triees)
-      } if (sheikhsData) setSheikhs(sheikhsData.map(s => s.nom))
+      }
+      if (sheikhsData) setSheikhs(sheikhsData.map(s => s.nom))
       setLoading(false)
     }
     charger()
   }, [])
 
-  useEffect(() => {
-    function fermerDropdown(e: MouseEvent) {
-      const target = e.target as HTMLElement
-      if (!target.closest('[data-dropdown]')) setDropdownOuvert(false)
-    }
-    document.addEventListener('click', fermerDropdown)
-    return () => document.removeEventListener('click', fermerDropdown)
-  }, [])
-
-  const tempsActuel = (progression / 100) * dureeTotal
-
   const filtres = fatwas.filter(f => {
-    const matchCat = categorieActive === 'toutes' || f.categorie === categorieActive
+    const matchCat = catActive === 'toutes' || f.categorie === catActive
     const matchSheikh = sheikhsActifs.length === 0 || sheikhsActifs.includes(f.sheikh)
-    const matchRecherche = recherche === '' || f.question.toLowerCase().includes(recherche.toLowerCase()) || f.sheikh.toLowerCase().includes(recherche.toLowerCase())
+    const matchRecherche = recherche === '' ||
+      normaliser(f.question).includes(normaliser(recherche)) ||
+      normaliser(f.sheikh).includes(normaliser(recherche))
     return matchCat && matchSheikh && matchRecherche
   })
 
-  // Grouper par catégorie
+  // Groupes par catégorie (épinglées en premier)
   const groupes: Record<string, Fatwa[]> = {}
   filtres.forEach(f => {
     if (!groupes[f.categorie]) groupes[f.categorie] = []
     groupes[f.categorie].push(f)
   })
+  const groupesTries = Object.entries(groupes).sort(([a], [b]) => {
+    const catA = categories.find(c => c.nom === a)
+    const catB = categories.find(c => c.nom === b)
+    if (catA?.epingle && !catB?.epingle) return -1
+    if (!catA?.epingle && catB?.epingle) return 1
+    return 0
+  })
+
+  const onPiste = (f: Fatwa) => {
+    if (piste?.id === f.id) { toggleLecture(); return }
+    jouer({ id: f.id, titre: f.question, sheikh: f.sheikh, url: f.url_audio, duree: f.duree, href: '/fatwas' })
+  }
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <section style={{ background: 'var(--bleu)', padding: '48px 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', color: 'var(--or)', textTransform: 'uppercase', marginBottom: '8px' }}>Bibliothèque</p>
-        <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Fatwas</h1>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto 24px' }}>Questions & réponses par les savants sunnites</p>
-        <div style={{ maxWidth: '500px', margin: '0 auto', position: 'relative' }}>
-          <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher une fatwa..." style={{ width: '100%', padding: '12px 20px 12px 44px', borderRadius: '50px', border: 'none', fontSize: '16px', fontFamily: 'inherit', outline: 'none', background: 'rgba(255,255,255,0.15)', color: 'white', boxSizing: 'border-box' }} />
-          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', opacity: 0.6 }}>🔍</span>
-        </div>
-      </section>
+      {/* ── Héros ── */}
+      <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
+        <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(140,180,230,0.12)', top: -140, right: -100 }} />
+        <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(214,173,58,0.06)', bottom: -80, left: -70 }} />
 
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '28px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '5px 13px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase', lineHeight: 1 }}>Médiathèque</span>
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Fatwas</h1>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px', flex: 1, width: '100%' }}>
-
-        {/* Filtres */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '32px' }}>
-
-          {/* Bouton sheikh dropdown */}
-          <div data-dropdown="" style={{ position: 'relative', display: 'inline-block' }}>
-            <button
-              onClick={() => setDropdownOuvert(!dropdownOuvert)}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: sheikhsActifs.length > 0 ? 'none' : '1px solid var(--bordure)', background: sheikhsActifs.length > 0 ? 'var(--or)' : 'white', color: sheikhsActifs.length > 0 ? 'white' : '#666', fontFamily: 'inherit' }}>
-              <img src="/icons/list.svg" width="18" height="18" />
-              {sheikhsActifs.length > 0 && (
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'white', color: 'var(--or)', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {sheikhsActifs.length}
-                </span>
-              )}
-            </button>
-            {dropdownOuvert && (
-              <div style={{ position: 'absolute', top: '110%', left: 0, background: 'white', border: '1px solid var(--bordure)', borderRadius: '14px', padding: '8px', zIndex: 50, minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-                {sheikhs.map(s => (
-                  <div key={s} onClick={() => setSheikhsActifs(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
-                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', background: sheikhsActifs.includes(s) ? '#faf3dc' : 'transparent' }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '4px', border: '2px solid ' + (sheikhsActifs.includes(s) ? 'var(--or)' : '#ccc'), background: sheikhsActifs.includes(s) ? 'var(--or)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {sheikhsActifs.includes(s) && <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>}
-                    </div>
-                    <span style={{ fontSize: '13px', color: 'var(--texte)', fontWeight: sheikhsActifs.includes(s) ? 600 : 400, whiteSpace: 'nowrap' }}>{s}</span>                  </div>
-                ))}
-                {sheikhsActifs.length > 0 && (
-                  <button onClick={() => setSheikhsActifs([])} style={{ width: '100%', marginTop: '6px', padding: '6px', borderRadius: '8px', border: 'none', background: '#f0f0f0', color: '#888', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    Effacer la sélection
-                  </button>
-                )}
-              </div>
+          {/* barre de recherche en verre */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: W10, border: `1px solid ${W14}`, borderRadius: 999, padding: '10px 16px', width: '100%' }}>
+            <Search size={17} color={W55} strokeWidth={2} style={{ flexShrink: 0 }} />
+            <input
+              value={recherche}
+              onChange={e => setRecherche(e.target.value)}
+              placeholder="Rechercher..."
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', color: '#fff' }}
+            />
+            {recherche && (
+              <button onClick={() => setRecherche('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                <X size={15} color={W70} strokeWidth={2} />
+              </button>
             )}
           </div>
-
-          {/* Bouton Toutes */}
-          <button onClick={() => setCategorieActive('toutes')} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: categorieActive === 'toutes' ? 'none' : '1px solid var(--bordure)', background: categorieActive === 'toutes' ? 'var(--bleu)' : 'white', color: categorieActive === 'toutes' ? 'white' : '#666', fontFamily: 'inherit' }}>
-            Toutes
-          </button>
-
-          {/* Catégories */}
-          {categories.map(cat => (
-            <button key={cat.nom} onClick={() => setCategorieActive(cat.nom)} style={{ padding: '7px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', border: 'none', background: categorieActive === cat.nom ? cat.couleur + '22' : 'white', color: categorieActive === cat.nom ? cat.couleur : '#666', fontFamily: 'inherit', boxShadow: categorieActive === cat.nom ? 'none' : '0 0 0 1px var(--bordure)' }}>
-              {cat.nom}
-            </button>
-          ))}
-
         </div>
+      </div>
 
-        {/* Lecteur en cours */}
-        {piste && fatwas.some(f => f.id === piste.id) && (
-          <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '28px' }}>
-            <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>En cours d'écoute</p>
-            <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--texte)', marginBottom: '4px' }}>{piste.titre}</h2>
-            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>{piste.sheikh}</p>
-            <div onClick={e => { const rect = e.currentTarget.getBoundingClientRect(); seeker(((e.clientX - rect.left) / rect.width) * 100) }} style={{ height: '4px', background: '#eee', borderRadius: '2px', cursor: 'pointer', marginBottom: '6px' }}>
-              <div style={{ width: progression + '%', height: '100%', background: 'var(--bleu)', borderRadius: '2px', transition: 'width 0.1s' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#aaa', marginBottom: '14px' }}>
-              <span>{formaterTemps(tempsActuel)}</span>
-              <span>{formaterTemps(dureeTotal)}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <button onClick={() => {
-                const idx = fatwas.findIndex(f => f.id === piste?.id)
-                if (idx > 0) jouer({ id: fatwas[idx - 1].id, titre: fatwas[idx - 1].question, sheikh: fatwas[idx - 1].sheikh, url: fatwas[idx - 1].url_audio, duree: fatwas[idx - 1].duree, href: '/fatwas' })
-              }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: fatwas.findIndex(f => f.id === piste?.id) > 0 ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
-              </button>
-              <button onClick={reculer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <img src="/icons/replay_10.svg" width="26" height="26" />
-              </button>
-              <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--bleu)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {enLecture ? <div style={{ display: 'flex', gap: '4px' }}><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /><div style={{ width: '3px', height: '16px', background: 'white', borderRadius: '2px' }} /></div> : <div style={{ width: 0, height: 0, borderTop: '9px solid transparent', borderBottom: '9px solid transparent', borderLeft: '16px solid white', marginLeft: '3px' }} />}
-              </button>
-              <button onClick={avancer} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <img src="/icons/forward_10.svg" width="26" height="26" />
-              </button>
-              <button onClick={() => {
-                const idx = fatwas.findIndex(f => f.id === piste?.id)
-                if (idx < fatwas.length - 1) jouer({ id: fatwas[idx + 1].id, titre: fatwas[idx + 1].question, sheikh: fatwas[idx + 1].sheikh, url: fatwas[idx + 1].url_audio, duree: fatwas[idx + 1].duree, href: '/fatwas' })
-              }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--texte)', opacity: fatwas.findIndex(f => f.id === piste?.id) < fatwas.length - 1 ? 1 : 0.3 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6v6h2V6h-2v6z" /></svg>
-              </button>
-            </div>
-          </div>
-        )}
+      {/* ── Chips de filtres ── */}
+      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
+        {/* bouton sheikh */}
+        <button
+          onClick={() => setShowSheikhPicker(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+            padding: '8px 12px', borderRadius: 999, cursor: 'pointer',
+            background: sheikhsActifs.length > 0 ? OR : '#fff',
+            border: `1px solid ${sheikhsActifs.length > 0 ? OR : '#e2e7ee'}`,
+            color: sheikhsActifs.length > 0 ? '#fff' : '#6b7686',
+            fontFamily: 'inherit', fontSize: 12, fontWeight: 500,
+          }}
+        >
+          <ListFilter size={15} color={sheikhsActifs.length > 0 ? '#fff' : '#6b7686'} strokeWidth={2} />
+          Sheikh{sheikhsActifs.length > 0 ? ` · ${sheikhsActifs.length}` : ''}
+        </button>
 
+        {/* Toutes + catégories */}
+        {[{ key: 'toutes', label: 'Toutes', bg: BLEU, txt: '#fff' },
+        ...categories.map(c => ({ key: c.nom, label: c.nom, bg: c.couleur + '22', txt: c.couleur }))].map(c => {
+          const estActif = catActive === c.key
+          return (
+            <button
+              key={c.key}
+              onClick={() => setCatActive(c.key)}
+              style={{
+                flexShrink: 0, padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
+                background: estActif ? c.bg : '#fff',
+                border: `1px solid ${estActif ? c.txt : '#e2e7ee'}`,
+                color: estActif ? c.txt : '#6b7686',
+                fontFamily: 'inherit', fontSize: 12, fontWeight: estActif ? 600 : 500,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {c.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Contenu ── */}
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '12px 24px 80px', flex: 1, width: '100%' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>Chargement...</div>
+          <Squelettes />
         ) : filtres.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '16px', color: '#aaa' }}>Aucune fatwa trouvée</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '56px 0' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 32, background: '#e4ebf3', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Search size={26} color="#9aa8b8" strokeWidth={2} />
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--texte-muted)', textAlign: 'center' }}>Aucune fatwa trouvée</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {Object.entries(groupes).sort(([a], [b]) => {
-              const catA = categories.find(c => c.nom === a)
-              const catB = categories.find(c => c.nom === b)
-              if (catA?.epingle && !catB?.epingle) return -1
-              if (!catA?.epingle && catB?.epingle) return 1
-              return 0
-            }).map(([categorie, items]) => (<div key={categorie}>
-              {/* En-tête catégorie */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
-                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 14px', borderRadius: '20px', background: (categories.find(c => c.nom === categorie)?.couleur || '#f0f0f0') + '22', color: categories.find(c => c.nom === categorie)?.couleur || '#666', border: '1px solid ' + ((categories.find(c => c.nom === categorie)?.couleur || '#ccc') + '44') }}>
-                  {categorie}
-                </span>
-                <div style={{ height: '1px', background: 'var(--bordure)', flex: 1 }} />
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {groupesTries.map(([categorie, items]) => {
+              const accent = categories.find(c => c.nom === categorie)?.couleur ?? '#6b7686'
+              return (
+                <div key={categorie}>
+                  {/* en-tête de groupe */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, paddingLeft: 2 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: 4, background: accent }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: accent }}>{categorie}</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: '#aab4c0' }}>{items.length}</span>
+                    <div style={{ flex: 1, height: 1, background: '#e6eaf0' }} />
+                  </div>
 
-              {/* Fatwas de cette catégorie */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {items.map(f => {
-                  const actif = piste?.id === f.id
-                  return (
-                    <div key={f.id} style={{ background: actif ? '#e8f0f8' : 'white', border: `1px solid ${actif ? 'var(--bleu)' : 'var(--bordure)'}`, borderRadius: '14px', padding: '18px 20px', cursor: 'pointer', transition: 'all 0.15s' }}
-                      onMouseEnter={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bleu)' }}
-                      onMouseLeave={e => { if (!actif) e.currentTarget.style.borderColor = 'var(--bordure)' }}
-                      onClick={() => jouer({ id: f.id, titre: f.question, sheikh: f.sheikh, url: f.url_audio, duree: f.duree, href: '/fatwas' })}
-                    >
-                      {/* Question */}
-                      <p style={{ fontSize: '15px', fontWeight: 600, color: actif ? 'var(--bleu)' : 'var(--texte)', lineHeight: 1.5, marginBottom: '12px' }}>
-                        {f.question}
-                      </p>
-                      {/* Bas de carte */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: actif ? 'var(--bleu)' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {actif && enLecture
-                            ? <div style={{ display: 'flex', gap: '2px' }}><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /><div style={{ width: '2px', height: '10px', background: 'white', borderRadius: '1px' }} /></div>
-                            : <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '8px solid ' + (actif ? 'white' : '#aaa'), marginLeft: '2px' }} />}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {items.map((f, i) => {
+                      const actif = piste?.id === f.id
+                      return (
+                        <div
+                          key={f.id}
+                          onClick={() => onPiste(f)}
+                          className="carte-piste fatwa-item"
+                          style={{
+                            background: actif ? '#f5f9fe' : '#fff',
+                            borderRadius: 18, padding: 12,
+                            border: actif ? `1.5px solid ${BLEU}` : '1.5px solid transparent',
+                            boxShadow: '0 4px 10px rgba(58,74,92,0.06)',
+                            cursor: 'pointer',
+                            animationDelay: `${Math.min(i, 8) * 45}ms`,
+                          }}
+                        >
+                          <p style={{
+                            fontSize: 14, fontWeight: 600, lineHeight: 1.55, margin: '0 0 8px',
+                            color: actif ? BLEU : 'var(--texte)',
+                          }}>
+                            {f.question}
+                          </p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <PastillePlay actif={actif} enLecture={enLecture} taille={34} />
+                            <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: actif ? BLEU : '#8a94a2' }}>{f.sheikh}</span>
+                          </div>
                         </div>
-                        <span style={{ fontSize: '13px', color: actif ? 'var(--bleu)' : '#888', fontWeight: 500 }}>{f.sheikh}</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-            ))}
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
 
       <Footer />
+
+      {/* ── Modale filtre sheikh (bottom-sheet, comme l'app) ── */}
+      {showSheikhPicker && (
+        <div
+          onClick={() => setShowSheikhPicker(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(13,27,46,0.45)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="sheet-sheikh"
+            style={{
+              background: '#fff', width: '100%', maxWidth: 520,
+              borderTopLeftRadius: 28, borderTopRightRadius: 28,
+              padding: '24px 24px 40px',
+            }}
+          >
+            <div style={{ width: 40, height: 4.5, borderRadius: 3, background: '#dde3ea', margin: '0 auto 24px' }} />
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--texte)', margin: '0 0 2px' }}>Filtrer par sheikh</h2>
+            <p style={{ fontSize: 12, color: 'var(--texte-muted)', margin: '0 0 16px' }}>Sélectionnez un ou plusieurs intervenants</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {sheikhs.map(s => {
+                const actif = sheikhsActifs.includes(s)
+                return (
+                  <div
+                    key={s}
+                    onClick={() => setSheikhsActifs(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+                      padding: 12, borderRadius: 16,
+                      background: actif ? '#faf3dc' : '#f5f6f8',
+                      border: `1px solid ${actif ? OR : 'transparent'}`,
+                    }}
+                  >
+                    <div style={{
+                      width: 22, height: 22, borderRadius: 7, flexShrink: 0,
+                      border: `2px solid ${actif ? OR : '#c4ccd6'}`,
+                      background: actif ? OR : '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {actif && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
+                      )}
+                    </div>
+                    <span style={{ flex: 1, fontSize: 14, fontWeight: actif ? 600 : 400, color: 'var(--texte)' }}>{s}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {sheikhsActifs.length > 0 && (
+              <button
+                onClick={() => setSheikhsActifs([])}
+                style={{ width: '100%', marginTop: 12, padding: 10, borderRadius: 14, border: 'none', background: '#f0f2f5', color: '#6b7686', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Effacer la sélection
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .chips-scroll::-webkit-scrollbar { display: none; }
+        .chips-scroll { scrollbar-width: none; }
+        .carte-piste { transition: box-shadow 0.15s, transform 0.1s; }
+        .carte-piste:hover { box-shadow: 0 6px 18px rgba(58,74,92,0.10); transform: translateY(-1px); }
+        .fatwa-item { animation: fatwaFadeUp 0.35s ease both; }
+        @keyframes fatwaFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .sheet-sheikh { animation: sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) both; }
+        @keyframes sheetUp {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+        .squelette { background: #dde3ea; animation: sqPulse 1.4s ease-in-out infinite; }
+        @keyframes sqPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.65; } }
+        input::placeholder { color: ${W55}; }
+      `}</style>
     </main>
   )
 }
