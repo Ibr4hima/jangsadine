@@ -34,9 +34,9 @@ export default function LecteurSticky({ titre, sheikh, url, onFermer }: Props) {
     audioRef.current.currentTime = ratio * audioRef.current.duration
   }
   return (
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1a1a2e', borderTop: '2px solid #d9ac2a', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: '20px', zIndex: 200 }}>
+    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1a1a2e', borderTop: '2px solid #d6ad3a', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: '20px', zIndex: 200 }}>
       <audio ref={audioRef} src={url} onEnded={() => setEnLecture(false)} />
-      <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#d9ac2a', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <button onClick={toggleLecture} style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#d6ad3a', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {enLecture
           ? <div style={{ display: 'flex', gap: '3px' }}><div style={{ width: '3px', height: '14px', background: '#1a1a2e', borderRadius: '2px' }} /><div style={{ width: '3px', height: '14px', background: '#1a1a2e', borderRadius: '2px' }} /></div>
           : <div style={{ width: 0, height: 0, borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '14px solid #1a1a2e', marginLeft: '3px' }} />
@@ -48,7 +48,7 @@ export default function LecteurSticky({ titre, sheikh, url, onFermer }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', minWidth: '36px' }}>{formaterTemps(dureeActuelle)}</span>
           <div onClick={seekTo} style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', cursor: 'pointer', position: 'relative' }}>
-            <div style={{ width: progression + '%', height: '100%', background: '#d9ac2a', borderRadius: '2px' }} />
+            <div style={{ width: progression + '%', height: '100%', background: '#d6ad3a', borderRadius: '2px' }} />
           </div>
           <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', minWidth: '36px', textAlign: 'right' }}>{formaterTemps(dureeTotal)}</span>
         </div>

@@ -35,7 +35,7 @@ export default function BanniereReprise() {
       background: 'var(--bleu)', borderRadius: '16px', padding: '14px 20px',
       display: 'flex', alignItems: 'center', gap: '14px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.25)', zIndex: 150,
-      maxWidth: '90vw', width: '480px', border: '1px solid rgba(217,172,42,0.3)'
+      maxWidth: '90vw', width: '480px', border: '1px solid rgba(214,173,58,0.3)'
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: '11px', color: 'var(--or)', fontWeight: 700, marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '1px' }}>Reprendre l'écoute</p>

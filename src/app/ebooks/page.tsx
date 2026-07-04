@@ -50,7 +50,7 @@ export default function Ebooks() {
         <h1 style={{ fontSize: '40px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>Ebooks</h1>
         <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', maxWidth: '480px', margin: '0 auto' }}>Consultez, téléchargez et partagez gratuitement !</p>
       </section>
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d6ad3a 30%, #d6ad3a 70%, transparent)' }} />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#aaa' }}>Chargement...</div>

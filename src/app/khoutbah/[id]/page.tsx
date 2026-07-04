@@ -70,14 +70,14 @@ export default function PageKhoutbah() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>{khoutbah.sheikh}</p>
             {khoutbah.serie && (
-              <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: 'rgba(217,172,42,0.2)', color: '#d9ac2a' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: 'rgba(214,173,58,0.2)', color: '#d6ad3a' }}>
                 {khoutbah.serie}{khoutbah.numero_serie ? ' · ' + khoutbah.numero_serie : ''}
               </span>
             )}
           </div>
         </div>
       </section>
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d6ad3a 30%, #d6ad3a 70%, transparent)' }} />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px' }}>
         <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '28px' }}>
