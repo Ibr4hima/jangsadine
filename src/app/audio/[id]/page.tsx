@@ -51,8 +51,8 @@ export default function PageCours() {
     charger()
   }, [id])
 
-  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Chargement…</div></main>
-  if (!cours) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Cours introuvable</div></main>
+  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Chargement…</div></main>
+  if (!cours) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Cours introuvable</div></main>
 
   const nomCat = (cours.categories as { nom: string } | null)?.nom ?? ''
   const urlPdf = (cours.livres as { url_pdf: string | null } | null)?.url_pdf
@@ -80,7 +80,7 @@ export default function PageCours() {
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase' }}>{nomCat}</span>
             </div>
           )}
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>{cours.titre}</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>{cours.titre}</h1>
           <p style={{ fontSize: 13, color: W70, margin: '6px 0 0' }}>
             {cours.sheikh}{cours.nb_episodes ? ` · ${cours.nb_episodes} épisode${cours.nb_episodes > 1 ? 's' : ''}` : ''}
           </p>
@@ -114,7 +114,7 @@ export default function PageCours() {
       </HeroDetail>
 
       {/* ── Contenu ── */}
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 80px', flex: 1, width: '100%' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 24px 72px', flex: 1, width: '100%' }}>
         <LecteurInline episodes={episodes} onJouerEp={jouerEpisode} />
 
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.6px', color: OR, textTransform: 'uppercase', margin: '0 0 12px' }}>Épisodes</p>

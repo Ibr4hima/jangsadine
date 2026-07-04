@@ -1,5 +1,5 @@
 'use client'
-import Navbar from '@/components/Navbar'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 // ─── palette bleu logo — la même que le héros ─────────────────
@@ -162,12 +162,25 @@ export default function QiblaPage() {
   const [dialRot, setDialRot] = useState(0)
   const [needleRot, setNeedleRot] = useState(0)
 
-  // taille du cadran selon l'écran
+  // taille du cadran : contrainte par la largeur et la hauteur (écran fixe sans scroll)
   useEffect(() => {
-    const maj = () => setDial(Math.min(360, Math.floor(window.innerWidth * 0.84)))
+    const maj = () => setDial(Math.min(340, Math.floor(window.innerWidth * 0.82), Math.floor(window.innerHeight * 0.42)))
     maj()
     window.addEventListener('resize', maj)
     return () => window.removeEventListener('resize', maj)
+  }, [])
+
+  // Plein écran comme une app : tentative au premier geste (Android le
+  // permet ; iOS Safari l'ignore silencieusement), sortie en quittant.
+  useEffect(() => {
+    const plein = () => {
+      document.documentElement.requestFullscreen?.({ navigationUI: 'hide' } as FullscreenOptions).catch(() => { })
+    }
+    window.addEventListener('pointerdown', plein, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', plein)
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => { })
+    }
   }, [])
 
   // GPS
@@ -265,31 +278,50 @@ export default function QiblaPage() {
   const capteurActif = capteur === 'actif'
   const target = qiblaAngle !== null ? norm(qiblaAngle - boussole) : 0
   const aligne = capteurActif && (target < 4 || target > 356)
+
+  // Vibration quand on fait face à la Qibla (Android ; iOS ne supporte pas vibrate)
+  const derniereVibration = useRef(0)
+  useEffect(() => {
+    if (!aligne) return
+    const now = Date.now()
+    if (now - derniereVibration.current > 2200) {
+      derniereVibration.current = now
+      try { navigator.vibrate?.([60, 40, 60]) } catch { }
+    }
+  }, [aligne])
   const ecart = (() => { let d = target; if (d > 180) d -= 360; return d })()
   const cardinalActuel = CARDINAUX[Math.round(boussole / 45) % 8]
   const DIAL_R = dial / 2
 
   return (
-    <main style={{ minHeight: '100vh', background: BG_BOT, display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
+    <main style={{
+      position: 'fixed', inset: 0, zIndex: 500,
+      height: '100dvh', overflow: 'hidden',
+      background: `linear-gradient(168deg, ${BG_TOP} 0%, ${BG_MID} 50%, ${BG_BOT} 100%)`,
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 20px calc(env(safe-area-inset-bottom, 0px) + 16px)',
+    }}>
+      <Aurore />
 
-      <div style={{
-        position: 'relative', overflow: 'hidden', flex: 1,
-        background: `linear-gradient(168deg, ${BG_TOP} 0%, ${BG_MID} 50%, ${BG_BOT} 100%)`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '22px 24px 28px',
-      }}>
-        <Aurore />
-
-        {/* ── En-tête ── */}
-        <div style={{ position: 'relative', textAlign: 'center', marginBottom: 8 }}>
-          <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '4px 12px', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase' }}>
+      {/* ── En-tête : retour + badge + titre ── */}
+      <div style={{ position: 'relative', width: '100%', maxWidth: 480, display: 'flex', alignItems: 'flex-start' }}>
+        <Link href="/" aria-label="Retour" style={{
+          width: 38, height: 38, borderRadius: 19, flexShrink: 0,
+          background: W07, border: `1px solid ${W30}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="20" height="20" viewBox="0 -960 960 960"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" fill="#fff" /></svg>
+        </Link>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '3px 11px', marginBottom: 4 }}>
+            <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase' }}>
               Direction de La Mecque
             </span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0 }}>Qibla</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0 }}>Qibla</h1>
         </div>
+        <div style={{ width: 38, flexShrink: 0 }} />
+      </div>
 
         {perm === 'denied' ? (
           /* ── Localisation refusée ── */
@@ -313,16 +345,16 @@ export default function QiblaPage() {
           <>
             {/* ── Cap actuel ── */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-              <span style={{ fontSize: 46, fontWeight: 700, color: aligne ? OR : W90, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>
+              <span style={{ fontSize: 40, fontWeight: 700, color: aligne ? OR : W90, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>
                 {capteurActif ? `${Math.round(boussole)}°` : `${Math.round(qiblaAngle)}°`}
               </span>
-              <span style={{ fontSize: 19, fontWeight: 700, color: aligne ? OR : W60 }}>
+              <span style={{ fontSize: 17, fontWeight: 700, color: aligne ? OR : W60 }}>
                 {capteurActif ? cardinalActuel : CARDINAUX[Math.round(qiblaAngle / 45) % 8]}
               </span>
             </div>
 
             {/* ── Boussole ── */}
-            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px 0' }}>
+            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0' }}>
               <div className={aligne ? 'qibla-pulse' : undefined} style={{ width: dial, height: dial, position: 'relative' }}>
 
                 {/* Halo doré quand aligné */}
@@ -371,7 +403,7 @@ export default function QiblaPage() {
             </div>
 
             {/* ── Guidage ── */}
-            <div style={{ position: 'relative', minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <div style={{ position: 'relative', minHeight: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
               {capteur === 'a-autoriser' ? (
                 <button onClick={activerBoussole} style={{
                   background: OR, border: 'none', borderRadius: 999,
@@ -419,7 +451,6 @@ export default function QiblaPage() {
             </div>
           </>
         )}
-      </div>
 
       <style>{`
         .aurore { position: absolute; border-radius: 50%; filter: blur(18px); pointer-events: none; will-change: transform, opacity; }

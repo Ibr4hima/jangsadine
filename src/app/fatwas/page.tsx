@@ -127,11 +127,11 @@ export default function Fatwas() {
         <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(140,180,230,0.12)', top: -140, right: -100 }} />
         <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(214,173,58,0.06)', bottom: -80, left: -70 }} />
 
-        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '28px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '22px 24px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '5px 13px' }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase', lineHeight: 1 }}>Médiathèque</span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Fatwas</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Fatwas</h1>
 
           {/* barre de recherche en verre */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: W10, border: `1px solid ${W14}`, borderRadius: 999, padding: '10px 16px', width: '100%' }}>
@@ -152,7 +152,7 @@ export default function Fatwas() {
       </div>
 
       {/* ── Chips de filtres ── */}
-      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
+      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
         {/* bouton sheikh */}
         <button
           onClick={() => setShowSheikhPicker(true)}

@@ -57,8 +57,8 @@ export default function PageConference() {
   const precedente = idx > 0 ? toutes[idx - 1] : null
   const suivante = idx < toutes.length - 1 ? toutes[idx + 1] : null
 
-  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Chargement...</div></main>
-  if (!conference) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Introuvable</div></main>
+  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Chargement...</div></main>
+  if (!conference) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Introuvable</div></main>
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}>
