@@ -66,15 +66,15 @@ function Aurore() {
 // Clin d'œil au rub-el-hizb du Mushaf : discret, fin, élégant.
 function BadgeNumero({ n }: { n: number }) {
   return (
-    <div style={{ width: 48, height: 48, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <svg width={48} height={48} viewBox="0 0 48 48" style={{ position: 'absolute', inset: 0 }}>
+    <div style={{ width: 44, height: 44, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <svg width={44} height={44} viewBox="0 0 48 48" style={{ position: 'absolute', inset: 0 }}>
         <rect x={9.5} y={9.5} width={29} height={29} rx={8}
           fill="rgba(39,76,122,0.05)" stroke="rgba(39,76,122,0.30)" strokeWidth={1.1} />
         <rect x={9.5} y={9.5} width={29} height={29} rx={8}
           fill="rgba(39,76,122,0.03)" stroke="rgba(39,76,122,0.30)" strokeWidth={1.1}
           transform="rotate(45 24 24)" />
       </svg>
-      <span style={{ fontSize: 12, fontWeight: 700, color: BG_MID, position: 'relative' }}>{n}</span>
+      <span style={{ fontSize: 11.5, fontWeight: 700, color: BG_MID, position: 'relative' }}>{n}</span>
     </div>
   )
 }
@@ -111,46 +111,46 @@ export default function Coran() {
   }, [])
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column' }}>
+    <main style={{ position: 'fixed', inset: 0, zIndex: 500, height: '100dvh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ─── héros bleu ─────────────────────────────────────── */}
       <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
         <Aurore />
 
-        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '16px 24px 18px' }}>
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 14px' }}>
           {/* calligraphie القرآن الكريم — flanc droit */}
           <img
             src={QURAN_ICON_URI}
             alt=""
             aria-hidden
-            style={{ position: 'absolute', top: 12, right: 24, width: 88, height: 88, objectFit: 'contain', opacity: 0.95, pointerEvents: 'none' }}
+            style={{ position: 'absolute', top: 8, right: 20, width: 72, height: 72, objectFit: 'contain', opacity: 0.95, pointerEvents: 'none' }}
           />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {/* retour à l'accueil — pastille de verre */}
             <Link href="/" aria-label="Accueil" className="coran-retour" style={{
-              width: 44, height: 44, borderRadius: 22, flexShrink: 0,
+              width: 40, height: 40, borderRadius: 20, flexShrink: 0,
               background: W12, border: '1px solid rgba(255,255,255,0.28)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg width={21} height={21} viewBox="0 -960 960 960">
+              <svg width={19} height={19} viewBox="0 -960 960 960">
                 <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" fill="#fff" />
               </svg>
             </Link>
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2px', color: OR, textTransform: 'uppercase', margin: '0 0 3px' }}>Lecture</p>
-              <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0 }}>Coran</h1>
+              <h1 style={{ fontSize: 19, fontWeight: 700, color: '#fff', margin: 0 }}>Coran</h1>
             </div>
           </div>
 
           {/* sélecteur de riwaya */}
-          <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '14px -24px 0', padding: '0 24px' }}>
+          <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '12px -20px 0', padding: '0 20px' }}>
             {RIWAYAS.map(r => {
               const active = r.id === riwaya
               return (
                 <button key={r.id} onClick={() => choisirRiwaya(r.id)} className="coran-chip" style={{
-                  flexShrink: 0, padding: '6px 13px', borderRadius: 999, cursor: 'pointer',
+                  flexShrink: 0, padding: '5px 12px', borderRadius: 999, cursor: 'pointer',
                   background: active ? '#fff' : W12,
                   border: 'none', fontFamily: 'inherit',
                   fontSize: 12, fontWeight: 600,
@@ -169,7 +169,7 @@ export default function Coran() {
               className="coran-chip"
               style={{
                 display: 'inline-block', background: OR, borderRadius: 999,
-                padding: '6px 12px', marginTop: 12,
+                padding: '5px 11px', marginTop: 10,
                 fontSize: 12, fontWeight: 600, color: '#1c3d66',
               }}
             >
@@ -179,41 +179,43 @@ export default function Coran() {
         </div>
       </div>
 
-      {/* ─── saut rapide par juz ────────────────────────────── */}
-      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
+      {/* ─── saut rapide par juz (fixe) ─────────────────────── */}
+      <div className="chips-scroll" style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '10px 20px 8px', maxWidth: 688, margin: '0 auto', width: '100%', flexShrink: 0 }}>
         {juzs.map(j => (
-          <Link key={j.n} href={`/coran/${j.sora}?riwaya=${riwaya}&verset=${j.aya}`} className="coran-chip" style={{
-            flexShrink: 0, height: 32, padding: '0 15px', borderRadius: 999,
+          <Link key={j.n} href={`/coran/${j.sora}?riwaya=${riwaya}&juz=${j.n}`} className="coran-chip" style={{
+            flexShrink: 0, height: 29, padding: '0 13px', borderRadius: 999,
             background: '#fff', border: '1px solid var(--bordure)',
             display: 'flex', alignItems: 'center',
-            fontSize: 12, fontWeight: 600, color: BG_MID, whiteSpace: 'nowrap',
+            fontSize: 11.5, fontWeight: 600, color: BG_MID, whiteSpace: 'nowrap',
           }}>
             Juz {j.n}
           </Link>
         ))}
       </div>
 
-      {/* ─── liste des sourates ─────────────────────────────── */}
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '10px 24px 72px', width: '100%' }}>
+      {/* ─── liste des sourates (seule zone qui défile) ─────── */}
+      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' as const }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: '2px 20px calc(env(safe-area-inset-bottom, 0px) + 24px)', width: '100%' }}>
         {sourates.map(s => (
           <Link key={s.index} href={`/coran/${s.index}?riwaya=${riwaya}`} className="carte-sourate" style={{
             display: 'flex', alignItems: 'center',
-            background: '#fff', borderRadius: 22,
-            padding: '12px 16px 12px 8px', marginBottom: 10,
+            background: '#fff', borderRadius: 18,
+            padding: '8px 14px 8px 6px', marginBottom: 8,
             boxShadow: '0 4px 12px rgba(42,59,82,0.06)',
             textDecoration: 'none',
           }}>
             <BadgeNumero n={s.index} />
             <div style={{ flex: 1, minWidth: 0, marginLeft: 4 }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--texte)', margin: 0 }}>{s.nom}</p>
-              <p style={{ fontSize: 11, color: 'var(--texte-muted)', margin: '2px 0 0' }}>{s.versets} versets · Page {s.page}</p>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--texte)', margin: 0 }}>{s.nom}</p>
+              <p style={{ fontSize: 10.5, color: 'var(--texte-muted)', margin: '2px 0 0' }}>{s.versets} versets · Page {s.page}</p>
             </div>
             {/* Nom calligraphique (ligature SuraNames par identifiant) */}
-            <span style={{ fontFamily: 'SuraNames', fontSize: 26, color: BG_MID, marginLeft: 8, direction: 'ltr' }}>
+            <span style={{ fontFamily: 'SuraNames', fontSize: 23, color: BG_MID, marginLeft: 8, direction: 'ltr' }}>
               {String(s.index).padStart(3, '0')}
             </span>
           </Link>
         ))}
+        </div>
       </div>
 
       <style>{`
