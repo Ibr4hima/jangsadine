@@ -70,7 +70,7 @@ export default function PageConference() {
           <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>{conference.sheikh}</p>
         </div>
       </section>
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d9ac2a 30%, #d9ac2a 70%, transparent)' }} />
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, #d6ad3a 30%, #d6ad3a 70%, transparent)' }} />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px' }}>
         <div style={{ background: 'white', border: '1px solid var(--bordure)', borderRadius: '16px', padding: '24px', marginBottom: '28px' }}>
