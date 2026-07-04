@@ -38,6 +38,19 @@ const IcoFleche = (p: IcoProps) => <Svg {...p} d="M647-440H160v-80h487L423-744l5
 const IcoNote = (p: IcoProps) => <Svg {...p} d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-460v-380h240v120H560v400q0 66-47 113t-113 47Z" />
 const IcoQuote = (p: IcoProps) => <Svg {...p} d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92Z" />
 
+// ─── fond « aurore » : trois nappes bleues qui dérivent ──────
+// Réplique du FondAurore de l'app (17 s / 23 s / 29 s, aller-retour) :
+// le fond vit sans distraire.
+function Aurore() {
+  return (
+    <>
+      <div className="aurore aurore-1" style={{ width: 380, height: 380, background: 'rgb(120,165,220)', top: -160, right: -120 }} />
+      <div className="aurore aurore-2" style={{ width: 300, height: 300, background: 'rgb(90,140,200)', bottom: -120, left: -90 }} />
+      <div className="aurore aurore-3" style={{ width: 340, height: 340, background: 'rgb(30,64,106)', bottom: -170, right: -80 }} />
+    </>
+  )
+}
+
 // ─── motif géométrique islamique (étoiles à 8 branches) ──────
 function Motif({ opacite = 0.05 }: { opacite?: number }) {
   const id = useId()
@@ -95,7 +108,7 @@ function EnTete({ eyebrow, titre, lien }: { eyebrow: string; titre: string; lien
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2.2px', color: OR, textTransform: 'uppercase', margin: 0 }}>{eyebrow}</p>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <h2 style={{ fontSize: 'clamp(22px, 3.4vw, 28px)', fontWeight: 700, color: 'var(--texte)', margin: 0, letterSpacing: '-0.4px' }}>{titre}</h2>
+        <h2 style={{ fontSize: 'clamp(20px, 3vw, 25px)', fontWeight: 700, color: 'var(--texte)', margin: 0, letterSpacing: '-0.4px' }}>{titre}</h2>
         {lien && (
           <Link href={lien.href} className="lien-voir-tout" style={{ fontSize: 13, fontWeight: 600, color: BLEU, display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
             {lien.label}
@@ -193,61 +206,59 @@ function Hero() {
 
   return (
     <div style={{ position: 'relative', borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: 'hidden' }}>
-      {/* fond : dégradé + motif + brume */}
+      {/* fond : dégradé + aurore animée */}
       <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(168deg, ${BG_TOP} 0%, ${BG_MID} 52%, ${BG_BOT} 100%)` }} />
-      <Motif opacite={0.055} />
-      <div style={{ position: 'absolute', width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(140,180,230,0.20) 0%, transparent 65%)', top: -200, right: -140 }} />
-      <div style={{ position: 'absolute', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(140,180,230,0.12) 0%, transparent 65%)', bottom: -150, left: -110 }} />
+      <Aurore />
 
-      <div style={{ position: 'relative', maxWidth: 660, margin: '0 auto', padding: '34px 24px 58px' }}>
+      <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '26px 24px 50px' }}>
         {/* date */}
-        <div className="hero-in" style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 'clamp(21px, 3.6vw, 26px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.4px', margin: 0, lineHeight: 1.2 }}>{dateFr}</p>
-          {dateHijri && <p style={{ fontSize: 13, color: W55, margin: '4px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
+        <div className="hero-in" style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-0.2px', margin: 0, lineHeight: 1.25 }}>{dateFr}</p>
+          {dateHijri && <p style={{ fontSize: 12, color: W55, margin: '3px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
         </div>
 
         {/* carte prière */}
         <Link href="/prieres" className="hero-in carte-priere-hero" style={{
           display: 'block', textDecoration: 'none', position: 'relative',
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.07))',
-          borderRadius: 24, border: '1px solid rgba(255,255,255,0.18)',
-          padding: '20px 20px 18px', overflow: 'hidden',
+          background: 'rgba(255,255,255,0.10)',
+          borderRadius: 20, border: '1px solid rgba(255,255,255,0.18)',
+          padding: 16, overflow: 'hidden',
           animationDelay: '90ms',
         }}>
           {/* reflet subtil */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent)' }} />
           {prochaine ? (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: W55, letterSpacing: '1.6px', textTransform: 'uppercase', margin: 0 }}>
-                    Prochaine prière{ville ? ` · ${ville}` : ''}
+                  <p style={{ fontSize: 11, fontWeight: 600, color: W55, letterSpacing: '1.2px', textTransform: 'uppercase', margin: 0 }}>
+                    Prochaine prière{ville ? `  ·  ${ville}` : ''}
                   </p>
-                  <p style={{ fontSize: 34, fontWeight: 800, color: '#fff', margin: '6px 0 0', letterSpacing: '-0.5px', lineHeight: 1 }}>{prochaine.nom}</p>
+                  <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', margin: '4px 0 0', lineHeight: 1.1 }}>{prochaine.nom}</p>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{prochaine.heure}</p>
-                  <span style={{ display: 'inline-block', background: '#fff', borderRadius: 999, padding: '4px 11px', marginTop: 8, fontSize: 11, fontWeight: 700, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
+                  <p style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{prochaine.heure}</p>
+                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '4px 10px', marginTop: 6, fontSize: 11, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
                     dans {tempsRestant(prochaine.heure)}
                   </span>
                 </div>
               </div>
 
-              <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.16)', marginTop: 18, overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, rgba(255,255,255,0.75), #fff)', width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
+              <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.18)', marginTop: 16, overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 3, background: OR, width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 13 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 12 }}>
                 {prieres.map(p => {
                   const actif = p.nom === prochaine.nom
                   return (
                     <div key={p.nom} style={{
                       flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                      padding: '7px 2px', borderRadius: 12,
-                      background: actif ? 'rgba(255,255,255,0.14)' : 'transparent',
+                      padding: '7px 2px', borderRadius: 14,
+                      background: actif ? 'rgba(214,173,58,0.16)' : 'transparent',
                     }}>
-                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 500, color: actif ? '#fff' : W55 }}>{p.nom}</span>
-                      <span style={{ fontSize: 12.5, fontWeight: actif ? 700 : 400, color: actif ? '#fff' : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
+                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
+                      <span style={{ fontSize: 12, fontWeight: actif ? 700 : 400, color: actif ? OR : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
                     </div>
                   )
                 })}
@@ -277,7 +288,7 @@ function CarteReprendre() {
         className="carte-reprendre"
         style={{
           display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer',
-          borderRadius: 20, overflow: 'hidden', padding: 16, position: 'relative',
+          borderRadius: 18, overflow: 'hidden', padding: 14, position: 'relative',
           background: `linear-gradient(135deg, ${BG_MID}, ${NUIT})`,
         }}
       >
@@ -287,7 +298,7 @@ function CarteReprendre() {
           aria-label={enLecture ? 'Pause' : 'Lecture'}
           className="btn-or"
           style={{
-            width: 52, height: 52, borderRadius: 26, flexShrink: 0, border: 'none', cursor: 'pointer',
+            width: 48, height: 48, borderRadius: 24, flexShrink: 0, border: 'none', cursor: 'pointer',
             background: `linear-gradient(135deg, ${OR}, ${OR_CLAIR})`,
             display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
             boxShadow: '0 4px 14px rgba(214,173,58,0.35)',
@@ -320,7 +331,7 @@ const MODULES = [
 
 function Explorer() {
   return (
-    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '52px 24px 0', width: '100%' }}>
+    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '44px 24px 0', width: '100%' }}>
       <Reveal>
         <EnTete eyebrow="La plateforme" titre="Tout ce dont tu as besoin" />
       </Reveal>
@@ -328,8 +339,8 @@ function Explorer() {
         {MODULES.map(({ label, href, Icon }, i) => (
           <Reveal key={href} delay={i * 90}>
             <Link href={href} className="carte-module" style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 15, height: '100%',
-              background: '#fff', borderRadius: 24, padding: '30px 16px 26px', textDecoration: 'none',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 13, height: '100%',
+              background: '#fff', borderRadius: 22, padding: '24px 14px 22px', textDecoration: 'none',
               border: '1px solid #edf1f7', position: 'relative', overflow: 'hidden',
               boxShadow: '0 10px 30px rgba(45,87,140,0.06)',
             }}>
@@ -340,13 +351,13 @@ function Explorer() {
                 top: -50, right: -40, transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
               }} />
               <div className="module-tile" style={{
-                width: 62, height: 62, borderRadius: 20,
+                width: 56, height: 56, borderRadius: 18,
                 background: `linear-gradient(135deg, ${BG_TOP}, ${BG_BOT})`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 8px 18px rgba(45,87,140,0.28)', position: 'relative',
                 transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
               }}>
-                <Icon size={28} color="#fff" />
+                <Icon size={26} color="#fff" />
               </div>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--texte)', margin: 0, letterSpacing: '-0.2px', textAlign: 'center', lineHeight: 1.3 }}>{label}</h3>
               {/* liseré or au survol */}
@@ -384,7 +395,7 @@ function Dourous() {
   }
 
   return (
-    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '52px 24px 0', width: '100%' }}>
+    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '44px 24px 0', width: '100%' }}>
       <Reveal>
         <EnTete eyebrow="Bibliothèque" titre="Derniers dourous" lien={{ label: 'Tout voir', href: '/audio' }} />
       </Reveal>
@@ -418,18 +429,18 @@ function Dourous() {
             <Reveal key={c.id} delay={i * 70}>
               <Link href={`/audio/${c.id}`} className="carte-cours" style={{
                 display: 'flex', alignItems: 'center', gap: 15,
-                background: '#fff', borderRadius: 20, padding: '14px 18px 14px 14px',
+                background: '#fff', borderRadius: 18, padding: '12px 16px 12px 13px',
                 boxShadow: '0 4px 12px rgba(58,74,92,0.06)', textDecoration: 'none',
                 border: '1px solid transparent', position: 'relative', overflow: 'hidden',
               }}>
                 {/* filet coloré catégorie */}
                 <div style={{ position: 'absolute', left: 0, top: 10, bottom: 10, width: 3.5, borderRadius: '0 4px 4px 0', background: accent, opacity: 0.85 }} />
                 <div className="cours-pastille" style={{
-                  width: 48, height: 48, borderRadius: 16, flexShrink: 0,
+                  width: 44, height: 44, borderRadius: 15, flexShrink: 0,
                   background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'transform 0.25s cubic-bezier(0.22,1,0.36,1)',
                 }}>
-                  <IcoNote size={22} color={accent} />
+                  <IcoNote size={20} color={accent} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <TitreDefilant texte={c.titre} style={{ fontSize: 15, fontWeight: 600, color: 'var(--texte)' }} />
@@ -472,12 +483,12 @@ function HadithDuJour() {
   }, [])
   if (!hadith) return <div style={{ height: 120 }} />
   return (
-    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '56px 24px 0', width: '100%' }}>
+    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '46px 24px 0', width: '100%' }}>
       <Reveal>
         <div style={{
           position: 'relative', overflow: 'hidden', borderRadius: 28,
           background: `linear-gradient(150deg, ${NUIT} 0%, #16294a 100%)`,
-          padding: 'clamp(28px, 5vw, 44px)',
+          padding: 'clamp(24px, 4vw, 36px)',
         }}>
           <Motif opacite={0.05} />
           <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(214,173,58,0.13) 0%, transparent 65%)', top: -120, right: -80 }} />
@@ -523,6 +534,15 @@ export default function Accueil() {
         .hero-in { animation: heroIn 0.7s cubic-bezier(0.22,1,0.36,1) both; }
         @keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* fond aurore : trois nappes qui dérivent lentement */
+        .aurore { position: absolute; border-radius: 50%; filter: blur(26px); pointer-events: none; will-change: transform, opacity; }
+        .aurore-1 { animation: aurore1 17s ease-in-out infinite alternate; }
+        .aurore-2 { animation: aurore2 23s ease-in-out infinite alternate; }
+        .aurore-3 { animation: aurore3 29s ease-in-out infinite alternate; }
+        @keyframes aurore1 { from { opacity: 0.09; transform: none; } to { opacity: 0.16; transform: translate(55px, 38px) scale(1.12); } }
+        @keyframes aurore2 { from { opacity: 0.07; transform: none; } to { opacity: 0.14; transform: translate(-48px, -30px) scale(1.10); } }
+        @keyframes aurore3 { from { opacity: 0.22; transform: none; } to { opacity: 0.36; transform: translateX(34px) scale(1.08); } }
+
         .chips-scroll::-webkit-scrollbar { display: none; }
         .chips-scroll { scrollbar-width: none; }
         .chip-cat { transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.18s; }
@@ -541,7 +561,6 @@ export default function Accueil() {
         .carte-module:hover { transform: translateY(-5px); box-shadow: 0 22px 48px rgba(45,87,140,0.14); border-color: #e2eaf4; }
         .carte-module:hover .module-lisere { transform: scaleX(1); }
         .carte-module:hover .module-halo { transform: scale(1.35); }
-        .carte-module:hover .module-tile { transform: scale(1.08) rotate(-3deg); box-shadow: 0 12px 24px rgba(45,87,140,0.36); }
 
         .lien-voir-tout:hover .lien-fleche { transform: translateX(3px); }
 
@@ -552,6 +571,7 @@ export default function Accueil() {
 
         @media (prefers-reduced-motion: reduce) {
           .hero-in { animation: none; }
+          .aurore-1, .aurore-2, .aurore-3 { animation: none; }
         }
       `}</style>
     </main>
