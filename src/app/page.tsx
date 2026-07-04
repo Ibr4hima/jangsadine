@@ -197,16 +197,11 @@ function Hero() {
       <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(168deg, ${BG_TOP} 0%, ${BG_MID} 52%, ${BG_BOT} 100%)` }} />
       <Motif opacite={0.055} />
       <div style={{ position: 'absolute', width: 460, height: 460, borderRadius: '50%', background: 'radial-gradient(circle, rgba(140,180,230,0.20) 0%, transparent 65%)', top: -200, right: -140 }} />
-      <div style={{ position: 'absolute', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(214,173,58,0.14) 0%, transparent 65%)', bottom: -150, left: -110 }} />
-      {/* fine ligne or en haut */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${OR} 30%, ${OR_CLAIR} 50%, ${OR} 70%, transparent)` , opacity: 0.8 }} />
+      <div style={{ position: 'absolute', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(140,180,230,0.12) 0%, transparent 65%)', bottom: -150, left: -110 }} />
 
       <div style={{ position: 'relative', maxWidth: 660, margin: '0 auto', padding: '34px 24px 58px' }}>
-        {/* salutation + date */}
-        <div className="hero-in" style={{ marginBottom: 22 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: OR_CLAIR, letterSpacing: '2.5px', textTransform: 'uppercase', margin: '0 0 10px' }}>
-            السلام عليكم ورحمة الله
-          </p>
+        {/* date */}
+        <div className="hero-in" style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 'clamp(21px, 3.6vw, 26px)', fontWeight: 700, color: '#fff', letterSpacing: '-0.4px', margin: 0, lineHeight: 1.2 }}>{dateFr}</p>
           {dateHijri && <p style={{ fontSize: 13, color: W55, margin: '4px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
         </div>
@@ -232,22 +227,26 @@ function Hero() {
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <p style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{prochaine.heure}</p>
-                  <span style={{ display: 'inline-block', background: `linear-gradient(135deg, ${OR}, ${OR_CLAIR})`, borderRadius: 999, padding: '4px 11px', marginTop: 8, fontSize: 11, fontWeight: 700, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ display: 'inline-block', background: '#fff', borderRadius: 999, padding: '4px 11px', marginTop: 8, fontSize: 11, fontWeight: 700, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
                     dans {tempsRestant(prochaine.heure)}
                   </span>
                 </div>
               </div>
 
               <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.16)', marginTop: 18, overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 3, background: `linear-gradient(90deg, ${OR}, ${OR_CLAIR})`, width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
+                <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, rgba(255,255,255,0.75), #fff)', width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 13 }}>
                 {prieres.map(p => {
                   const actif = p.nom === prochaine.nom
                   return (
-                    <div key={p.nom} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 500, color: actif ? OR_CLAIR : W55 }}>{p.nom}</span>
+                    <div key={p.nom} style={{
+                      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                      padding: '7px 2px', borderRadius: 12,
+                      background: actif ? 'rgba(255,255,255,0.14)' : 'transparent',
+                    }}>
+                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 500, color: actif ? '#fff' : W55 }}>{p.nom}</span>
                       <span style={{ fontSize: 12.5, fontWeight: actif ? 700 : 400, color: actif ? '#fff' : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
                     </div>
                   )
@@ -313,10 +312,10 @@ function CarteReprendre() {
 
 // ─── Explorer : les 4 espaces ─────────────────────────────────
 const MODULES = [
-  { label: 'Cours audio', desc: 'Dourous complets, de la ʿaqīdah au fiqh', href: '/audio', Icon: IcoHeadphones },
-  { label: 'Conférences', desc: 'Causeries en wolof par nos savants', href: '/conferences', Icon: IcoMic },
-  { label: 'Khoutbah', desc: 'Les sermons du vendredi', href: '/khoutbah', Icon: IcoMosqueBat },
-  { label: 'Heures de prières', desc: 'Horaires précis, où que tu sois', href: '/prieres', Icon: IcoMosque },
+  { label: 'Cours audio', href: '/audio', Icon: IcoHeadphones },
+  { label: 'Conférences', href: '/conferences', Icon: IcoMic },
+  { label: 'Khoutbah', href: '/khoutbah', Icon: IcoMosqueBat },
+  { label: 'Heures de prières', href: '/prieres', Icon: IcoMosque },
 ]
 
 function Explorer() {
@@ -325,12 +324,12 @@ function Explorer() {
       <Reveal>
         <EnTete eyebrow="La plateforme" titre="Tout ce dont tu as besoin" />
       </Reveal>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(225px, 1fr))', gap: 16 }}>
-        {MODULES.map(({ label, desc, href, Icon }, i) => (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
+        {MODULES.map(({ label, href, Icon }, i) => (
           <Reveal key={href} delay={i * 90}>
             <Link href={href} className="carte-module" style={{
-              display: 'flex', flexDirection: 'column', gap: 0, height: '100%',
-              background: '#fff', borderRadius: 24, padding: '26px 22px 22px', textDecoration: 'none',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 15, height: '100%',
+              background: '#fff', borderRadius: 24, padding: '30px 16px 26px', textDecoration: 'none',
               border: '1px solid #edf1f7', position: 'relative', overflow: 'hidden',
               boxShadow: '0 10px 30px rgba(45,87,140,0.06)',
             }}>
@@ -341,26 +340,20 @@ function Explorer() {
                 top: -50, right: -40, transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
               }} />
               <div className="module-tile" style={{
-                width: 58, height: 58, borderRadius: 19, marginBottom: 16,
+                width: 62, height: 62, borderRadius: 20,
                 background: `linear-gradient(135deg, ${BG_TOP}, ${BG_BOT})`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 8px 18px rgba(45,87,140,0.28)', position: 'relative',
+                transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
               }}>
-                <Icon size={27} color="#fff" />
+                <Icon size={28} color="#fff" />
               </div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--texte)', margin: '0 0 5px', letterSpacing: '-0.2px' }}>{label}</h3>
-              <p style={{ fontSize: 12.5, color: 'var(--texte-muted)', margin: 0, lineHeight: 1.5, flex: 1 }}>{desc}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 16 }}>
-                <span className="module-cta" style={{ fontSize: 12.5, fontWeight: 700, color: BLEU, transition: 'color 0.2s' }}>Explorer</span>
-                <span className="module-fleche" style={{ display: 'inline-flex', transition: 'transform 0.25s cubic-bezier(0.22,1,0.36,1)' }}>
-                  <IcoFleche size={14} color={OR} />
-                </span>
-              </div>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--texte)', margin: 0, letterSpacing: '-0.2px', textAlign: 'center', lineHeight: 1.3 }}>{label}</h3>
               {/* liseré or au survol */}
               <div className="module-lisere" style={{
                 position: 'absolute', left: 0, right: 0, bottom: 0, height: 3,
                 background: `linear-gradient(90deg, ${OR}, ${OR_CLAIR})`,
-                transform: 'scaleX(0)', transformOrigin: 'left', transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
+                transform: 'scaleX(0)', transformOrigin: 'center', transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
               }} />
             </Link>
           </Reveal>
@@ -504,45 +497,6 @@ function HadithDuJour() {
   )
 }
 
-// ─── Sadaqah jāriyah ──────────────────────────────────────────
-function BandeauSadaqah() {
-  return (
-    <section style={{ maxWidth: 1040, margin: '0 auto', padding: '20px 24px 0', width: '100%' }}>
-      <Reveal>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18, flexWrap: 'wrap',
-          background: '#fff', borderRadius: 24, padding: '24px 26px',
-          border: '1px solid rgba(214,173,58,0.35)',
-          boxShadow: '0 10px 30px rgba(184,145,31,0.08)',
-          position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${OR}, ${OR_CLAIR})` }} />
-          <div style={{ minWidth: 0, flex: '1 1 320px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2.2px', color: OR, textTransform: 'uppercase', margin: '0 0 6px' }}>Sadaqah jāriyah</p>
-            <p style={{ fontSize: 15, color: 'var(--texte)', margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
-              Ce site est une aumône continue : chaque cours écouté grâce à ton partage compte dans ta balance.
-            </p>
-          </div>
-          <a
-            href="https://t.me/janggsadine"
-            target="_blank" rel="noopener noreferrer"
-            className="btn-partager"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8, flexShrink: 0,
-              background: `linear-gradient(135deg, ${BG_TOP}, ${BG_BOT})`, color: '#fff',
-              borderRadius: 999, padding: '12px 24px', fontSize: 14, fontWeight: 600, textDecoration: 'none',
-              boxShadow: '0 6px 18px rgba(45,87,140,0.30)',
-            }}
-          >
-            Rejoindre le canal
-            <IcoFleche size={16} color="#fff" />
-          </a>
-        </div>
-      </Reveal>
-    </section>
-  )
-}
-
 // ─── page ─────────────────────────────────────────────────────
 export default function Accueil() {
   return (
@@ -560,7 +514,6 @@ export default function Accueil() {
       <Explorer />
       <Dourous />
       <HadithDuJour />
-      <BandeauSadaqah />
 
       <div style={{ height: 64 }} />
       <Footer />
@@ -587,8 +540,8 @@ export default function Accueil() {
         .carte-module { transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, border-color 0.25s; }
         .carte-module:hover { transform: translateY(-5px); box-shadow: 0 22px 48px rgba(45,87,140,0.14); border-color: #e2eaf4; }
         .carte-module:hover .module-lisere { transform: scaleX(1); }
-        .carte-module:hover .module-fleche { transform: translateX(4px); }
         .carte-module:hover .module-halo { transform: scale(1.35); }
+        .carte-module:hover .module-tile { transform: scale(1.08) rotate(-3deg); box-shadow: 0 12px 24px rgba(45,87,140,0.36); }
 
         .lien-voir-tout:hover .lien-fleche { transform: translateX(3px); }
 
@@ -596,9 +549,6 @@ export default function Accueil() {
         .carte-cours:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(58,74,92,0.11); border-color: #e6ecf3; }
         .carte-cours:hover .cours-fleche { opacity: 1; transform: translateX(3px); }
         .carte-cours:hover .cours-pastille { transform: scale(1.07); }
-
-        .btn-partager { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s; }
-        .btn-partager:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(45,87,140,0.38); }
 
         @media (prefers-reduced-motion: reduce) {
           .hero-in { animation: none; }
