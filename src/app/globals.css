@@ -110,29 +110,6 @@ img {
   display: block;
 }
 
-/* Ornement de héros : rotation imperceptible */
-.ornement-hero {
-  animation: ornement-spin 150s linear infinite;
-  transform-origin: center;
-}
-
-.ornement-hero-inverse {
-  animation-direction: reverse;
-  animation-duration: 210s;
-}
-
-@keyframes ornement-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ornement-hero {
-    animation: none;
-  }
-}
-
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));

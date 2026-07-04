@@ -456,8 +456,8 @@ function Lecteur() {
             <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', margin: 0 }}>{RIWAYA_LABELS[riw]}</p>
           </div>
 
-          {/* centre : nom de la sourate — ramène à la liste */}
-          <Link href="/coran" onClick={e => e.stopPropagation()} style={{ flex: 1, textAlign: 'center', minWidth: 0, textDecoration: 'none' }}>
+          {/* centre : nom de la sourate */}
+          <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
             <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '2px 11px', marginBottom: 1 }}>
               <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '1.7px', color: OR_CHIP, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 {infoActive?.nom}
@@ -466,7 +466,7 @@ function Lecteur() {
             <div style={{ fontFamily: 'SuraNames', fontSize: 19, color: '#fff', lineHeight: '27px', direction: 'ltr', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               {nomSourate(sourateActive)}
             </div>
-          </Link>
+          </div>
 
           {/* Progression dans le juz */}
           <div style={{ width: 74, textAlign: 'center' }}>

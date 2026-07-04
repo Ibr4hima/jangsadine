@@ -2,7 +2,7 @@
 import Footer from '@/components/Footer'
 import MiniEgaliseur from '@/components/MiniEgaliseur'
 import Navbar from '@/components/Navbar'
-import OrnementHero from '@/components/OrnementHero'
+import Quadrillage from '@/components/Quadrillage'
 import RechercheLive from '@/components/RechercheLive'
 import TitreDefilant from '@/components/TitreDefilant'
 import { useAudio } from '@/contexts/AudioContext'
@@ -209,22 +209,21 @@ function Hero() {
       <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(163deg, #45719f 0%, ${BG_MID} 46%, #1a3a63 100%)` }} />
       <Aurore />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.16), transparent 58%)' }} />
-      <OrnementHero taille={250} opacite={0.10} style={{ top: -78, right: -66 }} />
-      <OrnementHero taille={150} opacite={0.06} inverse style={{ bottom: -52, left: -40 }} />
+      <Quadrillage coin="82% -8%" />
 
-      <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '13px 22px 32px' }}>
+      <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '20px 24px 42px' }}>
         {/* date */}
-        <div className="hero-in" style={{ marginBottom: 12 }}>
-          <p style={{ fontSize: 16.5, fontWeight: 700, color: '#fff', letterSpacing: '-0.2px', margin: 0, lineHeight: 1.25 }}>{dateFr}</p>
-          {dateHijri && <p style={{ fontSize: 11, color: W55, margin: '2px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
+        <div className="hero-in" style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.2px', margin: 0, lineHeight: 1.25 }}>{dateFr}</p>
+          {dateHijri && <p style={{ fontSize: 11.5, color: W55, margin: '3px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
         </div>
 
         {/* carte prière */}
         <Link href="/prieres" className="hero-in carte-priere-hero" style={{
           display: 'block', textDecoration: 'none', position: 'relative',
-          background: 'linear-gradient(150deg, rgba(255,255,255,0.13), rgba(255,255,255,0.08))',
-          borderRadius: 17, border: '1px solid rgba(255,255,255,0.20)',
-          padding: 12, overflow: 'hidden',
+          background: 'rgba(255,255,255,0.10)',
+          borderRadius: 18, border: '1px solid rgba(255,255,255,0.18)',
+          padding: 14, overflow: 'hidden',
           animationDelay: '90ms',
         }}>
           {/* reflet subtil */}
@@ -236,31 +235,31 @@ function Hero() {
                   <p style={{ fontSize: 11, fontWeight: 600, color: W55, letterSpacing: '1.2px', textTransform: 'uppercase', margin: 0 }}>
                     Prochaine prière{ville ? `  ·  ${ville}` : ''}
                   </p>
-                  <p style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '3px 0 0', lineHeight: 1.1 }}>{prochaine.nom}</p>
+                  <p style={{ fontSize: 27, fontWeight: 700, color: '#fff', margin: '4px 0 0', lineHeight: 1.1 }}>{prochaine.nom}</p>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{prochaine.heure}</p>
-                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '3px 9px', marginTop: 5, fontSize: 10, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
+                  <p style={{ fontSize: 23, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{prochaine.heure}</p>
+                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '3px 9px', marginTop: 6, fontSize: 10.5, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
                     dans {tempsRestant(prochaine.heure)}
                   </span>
                 </div>
               </div>
 
-              <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', marginTop: 12, overflow: 'hidden' }}>
+              <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', marginTop: 14, overflow: 'hidden' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: OR, width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 12 }}>
                 {prieres.map(p => {
                   const actif = p.nom === prochaine.nom
                   return (
                     <div key={p.nom} style={{
                       flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                      padding: '5px 2px', borderRadius: 11,
+                      padding: '6px 2px', borderRadius: 12,
                       background: actif ? 'rgba(214,173,58,0.16)' : 'transparent',
                     }}>
-                      <span style={{ fontSize: 10, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
-                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 400, color: actif ? OR : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
+                      <span style={{ fontSize: 10.5, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
+                      <span style={{ fontSize: 11.5, fontWeight: actif ? 700 : 400, color: actif ? OR : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
                     </div>
                   )
                 })}
