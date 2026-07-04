@@ -120,60 +120,49 @@ function Hero() {
   return (
     <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 90% at 50% -20%, rgba(255,255,255,0.12), transparent 55%)' }} />
-      <div style={{ position: 'absolute', width: 380, height: 380, borderRadius: '50%', background: 'rgba(140,180,230,0.14)', top: -160, right: -120 }} />
-      <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'rgba(214,173,58,0.09)', bottom: -120, left: -90 }} />
+      <div style={{ position: 'absolute', width: 380, height: 380, borderRadius: '50%', background: 'rgba(140,180,230,0.13)', top: -160, right: -120 }} />
+      <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'rgba(214,173,58,0.08)', bottom: -120, left: -90 }} />
 
       <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '26px 24px 52px' }}>
         <div style={{ marginBottom: 18 }}>
           <p style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px', margin: 0 }}>{dateFr}</p>
-          {dateHijri && <p style={{ fontSize: 12.5, color: 'rgba(214,173,58,0.85)', margin: '3px 0 0', letterSpacing: '0.2px' }}>{dateHijri}</p>}
+          {dateHijri && <p style={{ fontSize: 12.5, color: W55, margin: '3px 0 0', letterSpacing: '0.3px' }}>{dateHijri}</p>}
         </div>
 
         <Link href="/prieres" className="carte-priere-hero" style={{
           display: 'block', textDecoration: 'none',
-          background: 'rgba(255,255,255,0.09)',
-          backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-          borderRadius: 24, border: '1px solid rgba(255,255,255,0.16)',
-          padding: 20,
-          boxShadow: '0 16px 40px rgba(10,25,50,0.28), inset 0 1px 0 rgba(255,255,255,0.18)',
+          background: 'rgba(255,255,255,0.10)',
+          borderRadius: 20, border: '1px solid rgba(255,255,255,0.18)',
+          padding: 16,
         }}>
           {prochaine ? (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: 3, background: OR, boxShadow: `0 0 8px ${OR}`, flexShrink: 0 }} />
-                    <p style={{ fontSize: 11, fontWeight: 600, color: W70, letterSpacing: '1.4px', textTransform: 'uppercase', margin: 0 }}>
-                      Prochaine prière{ville ? ` · ${ville}` : ''}
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 36, fontWeight: 800, color: '#fff', margin: '8px 0 0', letterSpacing: '-0.5px', lineHeight: 1 }}>{prochaine.nom}</p>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: W55, letterSpacing: '1.2px', textTransform: 'uppercase', margin: 0 }}>
+                    Prochaine prière{ville ? `  ·  ${ville}` : ''}
+                  </p>
+                  <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', margin: '4px 0 0', lineHeight: 1.15 }}>{prochaine.nom}</p>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{prochaine.heure}</p>
-                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '4px 11px', marginTop: 10, fontSize: 11, fontWeight: 700, color: NUIT, fontVariantNumeric: 'tabular-nums', boxShadow: '0 4px 14px rgba(214,173,58,0.45)' }}>
+                  <p style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>{prochaine.heure}</p>
+                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '4px 10px', marginTop: 6, fontSize: 11, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
                     dans {tempsRestant(prochaine.heure)}
                   </span>
                 </div>
               </div>
 
-              <div style={{ height: 6, borderRadius: 4, background: 'rgba(255,255,255,0.16)', marginTop: 18, overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 4, background: `linear-gradient(90deg, ${OR}, #f0cd6e)`, width: `${prog * 100}%`, transition: 'width 0.6s ease', boxShadow: '0 0 12px rgba(214,173,58,0.6)' }} />
+              <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.18)', marginTop: 16, overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 3, background: OR, width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 12 }}>
                 {prieres.map(p => {
                   const actif = p.nom === prochaine.nom
                   return (
-                    <div key={p.nom} style={{
-                      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                      padding: '7px 2px', borderRadius: 12,
-                      background: actif ? 'rgba(214,173,58,0.16)' : 'transparent',
-                      border: `1px solid ${actif ? 'rgba(214,173,58,0.35)' : 'transparent'}`,
-                    }}>
+                    <div key={p.nom} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
-                      <span style={{ fontSize: 12.5, fontWeight: actif ? 700 : 500, color: actif ? '#fff' : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
+                      <span style={{ fontSize: 12, fontWeight: actif ? 700 : 400, color: actif ? '#fff' : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
                     </div>
                   )
                 })}
@@ -357,8 +346,8 @@ export default function Accueil() {
         .chips-scroll { scrollbar-width: none; }
         .chip-neutre { transition: border-color 0.15s, color 0.15s, background 0.15s; }
         .chip-neutre:hover { border-color: #2d578c; color: #2d578c; background: #f5f9fe; }
-        .carte-priere-hero { transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
-        .carte-priere-hero:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.28); box-shadow: 0 22px 50px rgba(10,25,50,0.34), inset 0 1px 0 rgba(255,255,255,0.22); }
+        .carte-priere-hero { transition: transform 0.2s, background 0.2s; }
+        .carte-priere-hero:hover { transform: scale(0.99); background: rgba(255,255,255,0.13); }
         .appear { animation: appearUp 0.5s ease both; }
         @keyframes appearUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .carte-module { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s; }
