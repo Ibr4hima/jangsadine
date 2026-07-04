@@ -83,7 +83,7 @@ export default function Audio() {
           <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '5px 13px' }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase', lineHeight: 1 }}>Médiathèque</span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Cours audio</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center' }}>Cours audio</h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: W10, border: `1px solid ${W14}`, borderRadius: 999, padding: '10px 16px', width: '100%' }}>
             <Search size={17} color={W55} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -99,7 +99,7 @@ export default function Audio() {
       </HeroDetail>
 
       {/* ── Chips catégories ── */}
-      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
+      <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 24px 4px', maxWidth: 688, margin: '0 auto', width: '100%' }}>
         {[{ key: 'toutes', label: 'Tous', bg: BLEU, txt: '#fff' },
         ...categories.map(c => ({ key: c.slug, label: c.nom, bg: couleurBg[c.nom] || BLEU, txt: couleurTxt[c.nom] || '#fff' }))].map(c => {
           const estActif = catActive === c.key

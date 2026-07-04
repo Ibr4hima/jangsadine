@@ -44,8 +44,8 @@ export default function PageLivre() {
     charger()
   }, [id])
 
-  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Chargement…</div></main>
-  if (!livre) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '100px 24px', color: '#aaa' }}>Livre introuvable</div></main>
+  if (loading) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Chargement…</div></main>
+  if (!livre) return <main style={{ minHeight: '100vh', background: 'var(--fond-creme)' }}><Navbar /><div style={{ textAlign: 'center', padding: '80px 24px', color: '#aaa' }}>Livre introuvable</div></main>
 
   const categorie = (livre.categories as { nom: string } | null)?.nom ?? ''
   const livreEnLecture = enLectureLivre && livreAudio?.url === livre.url_audio
@@ -66,7 +66,7 @@ export default function PageLivre() {
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', color: OR, textTransform: 'uppercase' }}>{categorie}</span>
             </div>
           )}
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>{livre.titre}</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>{livre.titre}</h1>
           {livre.titre_arabe && (
             <p style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", direction: 'rtl', fontSize: 15, color: W70, margin: '6px 0 0' }}>{livre.titre_arabe}</p>
           )}
@@ -104,7 +104,7 @@ export default function PageLivre() {
       </HeroDetail>
 
       {/* ── Contenu ── */}
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 80px', flex: 1, width: '100%' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 24px 72px', flex: 1, width: '100%' }}>
         {livre.type === 'chapitres' ? (
           <>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.6px', color: OR, textTransform: 'uppercase', margin: '0 0 4px' }}>Table des matières</p>
