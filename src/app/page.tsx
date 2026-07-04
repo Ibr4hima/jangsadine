@@ -34,7 +34,6 @@ const IcoCoran = (_p: IcoProps) => <img src={QURAN_ICON_URI} alt="" style={{ wid
 const IcoMosqueBat = (p: IcoProps) => <Svg {...p} d="M40-120v-509q-18-11-29-27T0-692.13q0-20.12 20.5-49Q41-770 70-798q29 28 49.5 56.87 20.5 28.88 20.5 49Q140-672 129-656q-11 16-29 27v189h110v-102q0-24 18.5-43t47.5-19q-13-22-19.5-43t-6.5-40.62q0-37.38 17.5-69.88Q285-790 316-810l164-110 164 110q31 20 48.5 52.5t17.5 69.88q0 19.62-6.5 40.62-6.5 21-19.5 43 29 0 47.5 19t18.5 43v102h110v-189q-18-11-29-27t-11-36.13q0-20.12 20.5-49Q861-770 890-798q29 28 49.5 56.87 20.5 28.88 20.5 49Q960-672 949-656q-11 16-29 27.39V-120H530v-160q0-21.25-14.32-35.63Q501.35-330 480.18-330q-21.18 0-35.68 14.37Q430-301.25 430-280v160H40Zm356-482h168q36.21 0 61.11-24.75Q650-651.5 650-687.5q0-22.5-10.5-41.5t-27.29-30.58L480-848l-132.21 88.42Q331-748 320.5-729T310-687.5q0 36 24.89 60.75Q359.79-602 396-602ZM100-180h270v-100q0-45.83 32.12-77.92 32.12-32.08 78-32.08T558-357.92q32 32.09 32 77.92v100h270v-200H690v-162H270v162H100v200Zm380-362Zm0-60Zm0-2Z" />
 const IcoMosque = (p: IcoProps) => <Svg {...p} d="m521-500 59-43 58 43-23-68 59-43h-72l-22-69-22 69h-73l59 43-23 68Zm-41 220q83 0 141.5-58T680-480q0-8-.5-16t-2.5-16q-11 47-49 77.5T539-404q-60 0-101-41t-41-101q0-46 26-82.5t68-51.5h-11q-84 0-142 58.5T280-480q0 84 58 142t142 58Zm0 252L346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z" />
 const IcoChevron = (p: IcoProps) => <Svg {...p} d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-const IcoFleche = (p: IcoProps) => <Svg {...p} d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" />
 const IcoQuote = (p: IcoProps) => <Svg {...p} d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92Z" />
 
 // ─── fond « aurore » : trois nappes bleues qui dérivent ──────
@@ -94,27 +93,6 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
       transition: `opacity 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
     }}>
       {children}
-    </div>
-  )
-}
-
-// ─── en-tête de section ───────────────────────────────────────
-function EnTete({ eyebrow, titre, lien }: { eyebrow: string; titre: string; lien?: { label: string; href: string } }) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <span style={{ display: 'block', width: 26, height: 2, borderRadius: 2, background: `linear-gradient(90deg, ${OR}, ${OR_CLAIR})` }} />
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2.2px', color: OR, textTransform: 'uppercase', margin: 0 }}>{eyebrow}</p>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-        <h2 style={{ fontSize: 'clamp(18px, 2.6vw, 22px)', fontWeight: 700, color: 'var(--texte)', margin: 0, letterSpacing: '-0.4px' }}>{titre}</h2>
-        {lien && (
-          <Link href={lien.href} className="lien-voir-tout" style={{ fontSize: 13, fontWeight: 600, color: BLEU, display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-            {lien.label}
-            <span className="lien-fleche" style={{ display: 'inline-flex', transition: 'transform 0.2s' }}><IcoFleche size={15} color={BLEU} /></span>
-          </Link>
-        )}
-      </div>
     </div>
   )
 }
@@ -206,10 +184,10 @@ function Hero() {
   return (
     <div style={{ position: 'relative', borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: 'hidden' }}>
       {/* fond : dégradé profond + aurore + voile lumineux + ornements géométriques */}
-      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(163deg, #45719f 0%, ${BG_MID} 46%, #1a3a63 100%)` }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(163deg, #3d6494 0%, #27507f 46%, #142e52 100%)' }} />
       <Aurore />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.16), transparent 58%)' }} />
-      <Quadrillage coin="82% -8%" />
+      <Quadrillage />
 
       <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '20px 24px 42px' }}>
         {/* date */}
@@ -222,8 +200,8 @@ function Hero() {
         <Link href="/prieres" className="hero-in carte-priere-hero" style={{
           display: 'block', textDecoration: 'none', position: 'relative',
           background: 'rgba(255,255,255,0.10)',
-          borderRadius: 18, border: '1px solid rgba(255,255,255,0.18)',
-          padding: 14, overflow: 'hidden',
+          borderRadius: 17, border: '1px solid rgba(255,255,255,0.18)',
+          padding: 12, overflow: 'hidden',
           animationDelay: '90ms',
         }}>
           {/* reflet subtil */}
@@ -232,24 +210,24 @@ function Hero() {
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: W55, letterSpacing: '1.2px', textTransform: 'uppercase', margin: 0 }}>
+                  <p style={{ fontSize: 10.5, fontWeight: 600, color: W55, letterSpacing: '1.2px', textTransform: 'uppercase', margin: 0 }}>
                     Prochaine prière{ville ? `  ·  ${ville}` : ''}
                   </p>
-                  <p style={{ fontSize: 27, fontWeight: 700, color: '#fff', margin: '4px 0 0', lineHeight: 1.1 }}>{prochaine.nom}</p>
+                  <p style={{ fontSize: 25, fontWeight: 700, color: '#fff', margin: '3px 0 0', lineHeight: 1.1 }}>{prochaine.nom}</p>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ fontSize: 23, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{prochaine.heure}</p>
-                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '3px 9px', marginTop: 6, fontSize: 10.5, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
+                  <p style={{ fontSize: 21, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{prochaine.heure}</p>
+                  <span style={{ display: 'inline-block', background: OR, borderRadius: 999, padding: '3px 9px', marginTop: 5, fontSize: 10, fontWeight: 600, color: NUIT, fontVariantNumeric: 'tabular-nums' }}>
                     dans {tempsRestant(prochaine.heure)}
                   </span>
                 </div>
               </div>
 
-              <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', marginTop: 14, overflow: 'hidden' }}>
+              <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.18)', marginTop: 12, overflow: 'hidden' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: OR, width: `${prog * 100}%`, transition: 'width 0.6s ease' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4, marginTop: 10 }}>
                 {prieres.map(p => {
                   const actif = p.nom === prochaine.nom
                   return (
@@ -258,8 +236,8 @@ function Hero() {
                       padding: '6px 2px', borderRadius: 12,
                       background: actif ? 'rgba(214,173,58,0.16)' : 'transparent',
                     }}>
-                      <span style={{ fontSize: 10.5, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
-                      <span style={{ fontSize: 11.5, fontWeight: actif ? 700 : 400, color: actif ? OR : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
+                      <span style={{ fontSize: 10, fontWeight: actif ? 700 : 500, color: actif ? OR : W55 }}>{p.nom}</span>
+                      <span style={{ fontSize: 11, fontWeight: actif ? 700 : 400, color: actif ? OR : W70, fontVariantNumeric: 'tabular-nums' }}>{p.heure}</span>
                     </div>
                   )
                 })}
@@ -334,7 +312,7 @@ function Explorer() {
   return (
     <section style={{ maxWidth: 1040, margin: '0 auto', padding: '36px 24px 0', width: '100%' }}>
       <Reveal>
-        <EnTete eyebrow="La plateforme" titre="Tout ce dont tu as besoin" />
+        <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--texte)', margin: '0 0 14px' }}>Accès rapide</h2>
       </Reveal>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
         {MODULES.map(({ label, href, Icon }, i) => (
@@ -400,12 +378,12 @@ function HadithDuJour() {
     <section style={{ maxWidth: 1040, margin: '0 auto', padding: '38px 24px 0', width: '100%' }}>
       <Reveal>
         <div style={{
-          position: 'relative', overflow: 'hidden', borderRadius: 28,
-          background: `linear-gradient(150deg, ${NUIT} 0%, #16294a 100%)`,
+          position: 'relative', overflow: 'hidden', borderRadius: 26,
+          background: 'linear-gradient(163deg, #3d6494 0%, #27507f 46%, #142e52 100%)',
           padding: 'clamp(20px, 3.5vw, 30px)',
         }}>
-          <Motif opacite={0.05} />
-          <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(214,173,58,0.13) 0%, transparent 65%)', top: -120, right: -80 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.14), transparent 58%)' }} />
+          <Quadrillage />
           <div style={{ position: 'relative', maxWidth: 620, margin: '0 auto', textAlign: 'center' }}>
             <div style={{ display: 'inline-flex', marginBottom: 14 }}>
               <IcoQuote size={30} color={OR} />
@@ -469,8 +447,6 @@ export default function Accueil() {
         .carte-module:hover { transform: translateY(-5px); box-shadow: 0 22px 48px rgba(45,87,140,0.14); border-color: #e2eaf4; }
         .carte-module:hover .module-lisere { transform: scaleX(1); }
         .carte-module:hover .module-halo { transform: scale(1.35); }
-
-        .lien-voir-tout:hover .lien-fleche { transform: translateX(3px); }
 
         @media (prefers-reduced-motion: reduce) {
           .hero-in { animation: none; }

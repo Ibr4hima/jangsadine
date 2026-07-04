@@ -1,4 +1,5 @@
 'use client'
+import Quadrillage from '@/components/Quadrillage'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
