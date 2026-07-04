@@ -18,7 +18,7 @@ const HERO_MID = '#2d578c'
 const HERO_BOT = '#234a7a'
 
 // Taille de lecture fixe : compacte et régulière, comme un Mushaf imprimé.
-const TAILLE_LECTURE = 28
+const TAILLE_LECTURE = 30
 
 type Riwaya = 'hafs' | 'warsh' | 'qaloon'
 function versRiwaya(v?: string | null): Riwaya {
@@ -126,21 +126,16 @@ function BlocTexte({ item, taille, divisions, police }: {
 }
 
 // ─── Bouton de fin de lecture (cartouche doré, style Mushaf) ─
-function BoutonFin({ href, direction, label, sousLabel }: {
-  href: string; direction: 'prec' | 'suiv'; label: string; sousLabel?: string
-}) {
+function BoutonFin({ href, label }: { href: string; label: string }) {
   return (
     <Link href={href} className="coran-fin-btn" style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       flex: '1 1 130px', maxWidth: 210,
       border: '1px solid rgba(184,147,42,0.55)', borderRadius: 16,
       padding: '12px 14px', background: 'rgba(184,147,42,0.06)',
       textDecoration: 'none', textAlign: 'center',
     }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: OR }}>
-        {direction === 'prec' ? `‹  ${label}` : `${label}  ›`}
-      </span>
-      {sousLabel && <span style={{ fontSize: 11, color: 'rgba(46,44,40,0.55)' }}>{sousLabel}</span>}
+      <span style={{ fontSize: 13, fontWeight: 700, color: OR }}>{label}</span>
     </Link>
   )
 }
@@ -266,7 +261,7 @@ function Lecteur() {
       if (cle) {
         const el = document.querySelector(`[data-cle="${cle}"]`)
         if (el) {
-          const y = (el as HTMLElement).offsetTop - 96
+          const y = (el as HTMLElement).offsetTop - 78
           conteneurRef.current?.scrollTo({ top: Math.max(0, y) })
         }
       }
@@ -365,8 +360,8 @@ function Lecteur() {
       const suiv = bornesJuz.find(b => b.n === juzParam + 1)
       return (
         <>
-          {prec && <BoutonFin href={`/coran/${prec.so}?riwaya=${riw}&juz=${prec.n}`} direction="prec" label={`Juz ${prec.n}`} />}
-          {suiv && <BoutonFin href={`/coran/${suiv.so}?riwaya=${riw}&juz=${suiv.n}`} direction="suiv" label={`Juz ${suiv.n}`} />}
+          {prec && <BoutonFin href={`/coran/${prec.so}?riwaya=${riw}&juz=${prec.n}`} label={`Juz ${prec.n}`} />}
+          {suiv && <BoutonFin href={`/coran/${suiv.so}?riwaya=${riw}&juz=${suiv.n}`} label={`Juz ${suiv.n}`} />}
         </>
       )
     }
@@ -374,8 +369,8 @@ function Lecteur() {
     const suiv = index < 114 ? infos[index] : null
     return (
       <>
-        {prec && <BoutonFin href={`/coran/${prec.index}?riwaya=${riw}`} direction="prec" label="Sourate précédente" sousLabel={prec.nom} />}
-        {suiv && <BoutonFin href={`/coran/${suiv.index}?riwaya=${riw}`} direction="suiv" label="Sourate suivante" sousLabel={suiv.nom} />}
+        {prec && <BoutonFin href={`/coran/${prec.index}?riwaya=${riw}`} label={`${prec.index}. ${prec.nom}`} />}
+        {suiv && <BoutonFin href={`/coran/${suiv.index}?riwaya=${riw}`} label={`${suiv.index}. ${suiv.nom}`} />}
       </>
     )
   })()
@@ -390,7 +385,7 @@ function Lecteur() {
         onClick={basculerChrome}
         style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '0 20px', WebkitOverflowScrolling: 'touch' }}
       >
-        <div style={{ maxWidth: 640, margin: '0 auto', paddingTop: 96 }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', paddingTop: 78 }}>
           {items.map(item => {
             if (item.type === 'entete') {
               return (
@@ -447,46 +442,38 @@ function Lecteur() {
       {/* Chrome flottant — héros bleu en dégradé */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
-        borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden',
+        borderBottomLeftRadius: 22, borderBottomRightRadius: 22, overflow: 'hidden',
         background: `linear-gradient(180deg, ${HERO_TOP} 0%, ${HERO_MID} 60%, ${HERO_BOT} 100%)`,
         opacity: chromeVisible ? 1 : 0,
         transform: chromeVisible ? 'none' : 'translateY(-18px)',
         transition: `opacity ${chromeVisible ? 280 : 650}ms ease, transform ${chromeVisible ? 280 : 650}ms ease`,
         pointerEvents: chromeVisible ? 'auto' : 'none',
       }}>
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '10px 16px 12px', display: 'flex', alignItems: 'center' }}>
-          {/* retour + riwaya */}
-          <div style={{ width: 92, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Link href="/coran" aria-label="Retour" onClick={e => e.stopPropagation()} style={{
-              width: 34, height: 34, borderRadius: 17, flexShrink: 0,
-              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.28)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none',
-            }}>
-              <svg width={17} height={17} viewBox="0 -960 960 960"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" fill="#fff" /></svg>
-            </Link>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.6px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>RIWAYAH</p>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0 }}>{RIWAYA_LABELS[riw]}</p>
-            </div>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: '7px 16px 9px', display: 'flex', alignItems: 'center' }}>
+          {/* riwaya */}
+          <div style={{ width: 74, textAlign: 'center' }}>
+            <p style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>RIWAYAH</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', margin: 0 }}>{RIWAYA_LABELS[riw]}</p>
           </div>
 
-          <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
-            <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '3px 12px', marginBottom: 2 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1.8px', color: OR_CHIP, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+          {/* centre : nom de la sourate — ramène à la liste */}
+          <Link href="/coran" onClick={e => e.stopPropagation()} style={{ flex: 1, textAlign: 'center', minWidth: 0, textDecoration: 'none' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '2px 11px', marginBottom: 1 }}>
+              <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '1.7px', color: OR_CHIP, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 {infoActive?.nom}
               </span>
             </div>
-            <div style={{ fontFamily: 'SuraNames', fontSize: 21, color: '#fff', lineHeight: '30px', direction: 'ltr', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            <div style={{ fontFamily: 'SuraNames', fontSize: 19, color: '#fff', lineHeight: '27px', direction: 'ltr', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               {nomSourate(sourateActive)}
             </div>
-          </div>
+          </Link>
 
           {/* Progression dans le juz */}
-          <div style={{ width: 92, textAlign: 'center' }}>
+          <div style={{ width: 74, textAlign: 'center' }}>
             {infoDivision && (
               <>
-                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.6px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>JUZ {infoDivision.n}</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{infoDivision.pct}%</p>
+                <p style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>JUZ {infoDivision.n}</p>
+                <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{infoDivision.pct}%</p>
               </>
             )}
           </div>
