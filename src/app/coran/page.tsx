@@ -1,5 +1,5 @@
 'use client'
-import OrnementHero from '@/components/OrnementHero'
+import Quadrillage from '@/components/Quadrillage'
 import { QURAN_ICON_URI } from '@/lib/quranIcon'
 import divisionsHafs from '@/data/quran/divisions.json'
 import divisionsQaloon from '@/data/quran/qaloon_divisions.json'
@@ -118,27 +118,24 @@ export default function Coran() {
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(163deg, #45719f 0%, ${BG_MID} 46%, #1a3a63 100%)` }} />
         <Aurore />
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.16), transparent 58%)' }} />
-        <OrnementHero taille={190} opacite={0.10} style={{ top: -58, right: -52 }} />
-        <OrnementHero taille={120} opacite={0.06} inverse style={{ bottom: -44, left: -34 }} />
-        {/* fine ligne lumineuse en pied de héros */}
-        <div style={{ position: 'absolute', bottom: 0, left: '12%', right: '12%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }} />
+        <Quadrillage coin="84% -10%" />
 
-        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 10px) 20px 12px' }}>
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 14px' }}>
           {/* calligraphie القرآن الكريم — flanc droit */}
           <img
             src={QURAN_ICON_URI}
             alt=""
             aria-hidden
-            style={{ position: 'absolute', top: 2, right: 18, width: 62, height: 62, objectFit: 'contain', opacity: 0.95, pointerEvents: 'none' }}
+            style={{ position: 'absolute', top: 8, right: 20, width: 72, height: 72, objectFit: 'contain', opacity: 0.95, pointerEvents: 'none' }}
           />
 
           <div>
-            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '2.2px', color: OR, textTransform: 'uppercase', margin: '0 0 2px' }}>Lecture</p>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Coran</h1>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2px', color: OR, textTransform: 'uppercase', margin: '0 0 3px' }}>Lecture</p>
+            <h1 style={{ fontSize: 19, fontWeight: 700, color: '#fff', margin: 0 }}>Coran</h1>
           </div>
 
-          {/* riwayas + reprise sur une seule rangée */}
-          <div className="chips-scroll" style={{ display: 'flex', alignItems: 'center', gap: 7, overflowX: 'auto', margin: '10px -20px 0', padding: '0 20px' }}>
+          {/* sélecteur de riwaya */}
+          <div className="chips-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '12px -20px 0', padding: '0 20px' }}>
             {RIWAYAS.map(r => {
               const active = r.id === riwaya
               return (
@@ -146,27 +143,29 @@ export default function Coran() {
                   flexShrink: 0, padding: '5px 12px', borderRadius: 999, cursor: 'pointer',
                   background: active ? '#fff' : W12,
                   border: 'none', fontFamily: 'inherit',
-                  fontSize: 11.5, fontWeight: 600,
+                  fontSize: 12, fontWeight: 600,
                   color: active ? BG_BOT : '#fff',
                 }}>
                   {r.nom}
                 </button>
               )
             })}
-            {reprise && (
-              <Link
-                href={`/coran/${reprise.sourate.index}?riwaya=${reprise.riwaya}${reprise.cle ? `&cle=${reprise.cle}` : ''}`}
-                className="coran-chip"
-                style={{
-                  flexShrink: 0, background: OR, borderRadius: 999,
-                  padding: '5px 11px', marginLeft: 2,
-                  fontSize: 11.5, fontWeight: 600, color: '#1c3d66', whiteSpace: 'nowrap',
-                }}
-              >
-                Reprendre · {reprise.sourate.nom}  ›
-              </Link>
-            )}
           </div>
+
+          {/* puce « Reprendre » — rouvre pile où on s'était arrêté */}
+          {reprise && (
+            <Link
+              href={`/coran/${reprise.sourate.index}?riwaya=${reprise.riwaya}${reprise.cle ? `&cle=${reprise.cle}` : ''}`}
+              className="coran-chip"
+              style={{
+                display: 'inline-block', background: OR, borderRadius: 999,
+                padding: '5px 11px', marginTop: 10,
+                fontSize: 12, fontWeight: 600, color: '#1c3d66',
+              }}
+            >
+              Reprendre · {reprise.sourate.nom}  ›
+            </Link>
+          )}
         </div>
       </div>
 
