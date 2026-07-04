@@ -115,10 +115,10 @@ export default function Coran() {
 
       {/* ─── héros bleu ─────────────────────────────────────── */}
       <div style={{ position: 'relative', borderBottomLeftRadius: 26, borderBottomRightRadius: 26, overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(163deg, #45719f 0%, ${BG_MID} 46%, #1a3a63 100%)` }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(163deg, #3d6494 0%, #27507f 46%, #142e52 100%)' }} />
         <Aurore />
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.16), transparent 58%)' }} />
-        <Quadrillage coin="84% -10%" />
+        <Quadrillage />
 
         <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 14px' }}>
           {/* calligraphie القرآن الكريم — flanc droit */}
