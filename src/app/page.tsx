@@ -45,7 +45,7 @@ const IcoQuote = ({ size = 26, color = OR }: IcoProps) => <Svg size={size} color
 const IcoShare = ({ size = 16, color = BLEU }: IcoProps) => <Svg size={size} color={color} d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm480-280q17 0 28.5-11.5T720-760q0-17-11.5-28.5T680-800q-17 0-28.5 11.5T640-760q0 17 11.5 28.5T680-720Z" />
 // Taille de la calligraphie dans sa tuile : plus grande que les glyphes en
 // trait (29) car une calligraphie détaillée devient illisible à 29px.
-const CORAN_ICON = 48
+const CORAN_ICON = 40
 const IcoCoran = (_p: IcoProps) => <img src={QURAN_ICON_URI} alt="" style={{ width: CORAN_ICON, height: CORAN_ICON, objectFit: 'contain' }} />
 
 // ─── fond « aurore » : réplique EXACTE du FondAurore compact ──
@@ -356,8 +356,8 @@ function AccesRapide() {
             <Reveal key={s.label} delay={140 + i * 70}>
               <Link href={s.href} className="carte-acces" style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
-                background: '#fff', borderRadius: 26,
-                padding: '24px 12px',
+                background: '#fff', borderRadius: 22,
+                padding: '20px 12px 18px',
                 position: 'relative', overflow: 'hidden', textDecoration: 'none',
                 boxShadow: '0 10px 22px rgba(42,59,82,0.10)',
               }}>
@@ -367,16 +367,16 @@ function AccesRapide() {
 
                 {/* tuile icône en dégradé + halo coloré */}
                 <div style={{
-                  width: 60, height: 60, borderRadius: 20, overflow: 'hidden',
+                  width: 50, height: 50, borderRadius: 16, overflow: 'hidden',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 12,
+                  marginBottom: 10,
                   background: `linear-gradient(135deg, ${TUILE_G1}, ${TUILE_G2})`,
                   boxShadow: `0 7px 12px rgba(35,74,122,0.34)`,
                 }}>
-                  <Icon size={29} color="#fff" />
+                  <Icon size={24} color="#fff" />
                 </div>
 
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--texte)', textAlign: 'center' }}>{s.label}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--texte)', textAlign: 'center' }}>{s.label}</span>
               </Link>
             </Reveal>
           )
