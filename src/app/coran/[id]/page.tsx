@@ -1,5 +1,6 @@
 'use client'
 import Bismillah from '@/components/Bismillah'
+import FondAurore from '@/components/FondAurore'
 import souratesHafs from '@/data/quran/sourates.json'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
@@ -17,8 +18,10 @@ const HERO_TOP = '#3d6ba3'
 const HERO_MID = '#2d578c'
 const HERO_BOT = '#234a7a'
 
-// Taille de lecture fixe : compacte et régulière, comme un Mushaf imprimé.
-const TAILLE_LECTURE = 30
+// Taille de lecture fixe : confortable et régulière, comme un Mushaf
+// imprimé (le zoom est volontairement désactivé pour préserver la mise
+// en page).
+const TAILLE_LECTURE = 35
 
 type Riwaya = 'hafs' | 'warsh' | 'qaloon'
 function versRiwaya(v?: string | null): Riwaya {
@@ -111,7 +114,7 @@ function BlocTexte({ item, taille, divisions, police }: {
               <span style={{ whiteSpace: 'nowrap' }}>
                 {' '}
                 <span style={{ fontSize: taille * 0.88, color: '#000' }}>۞</span>
-                <sup style={{ fontFamily: police, fontSize: taille * 0.42, color: '#80838A' }}>{badge}</sup>
+                <sup style={{ fontFamily: police, fontSize: taille * 0.44, color: '#80838A', paddingLeft: taille * 0.14 }}>{badge}</sup>
                 {'  '}
               </span>
             )}
@@ -128,14 +131,14 @@ function BlocTexte({ item, taille, divisions, police }: {
 // ─── Bouton de fin de lecture (cartouche doré, style Mushaf) ─
 function BoutonFin({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="coran-fin-btn" style={{
+    <Link href={href} replace className="coran-fin-btn" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flex: '1 1 130px', maxWidth: 210,
-      border: '1px solid rgba(184,147,42,0.55)', borderRadius: 16,
-      padding: '12px 14px', background: 'rgba(184,147,42,0.06)',
-      textDecoration: 'none', textAlign: 'center',
+      flex: 1, height: 56, borderRadius: 28,
+      border: '1.2px solid rgba(184,147,42,0.5)',
+      background: 'rgba(184,147,42,0.06)',
+      textDecoration: 'none', textAlign: 'center', minWidth: 0,
     }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: OR }}>{label}</span>
+      <span style={{ fontSize: 15, fontWeight: 700, color: OR, padding: '0 12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
     </Link>
   )
 }
@@ -155,6 +158,15 @@ function Lecteur() {
   const [chromeVisible, setChromeVisible] = useState(true)
   const [voile, setVoile] = useState(true)
   const [infoDivision, setInfoDivision] = useState<{ n: number; pct: number } | null>(null)
+
+  // Basmala plafonnée à ~68 % de la largeur utile, comme l'app
+  const [bismillahMax, setBismillahMax] = useState(340)
+  useEffect(() => {
+    const maj = () => setBismillahMax((Math.min(window.innerWidth, 640) - 44) * 0.68)
+    maj()
+    window.addEventListener('resize', maj)
+    return () => window.removeEventListener('resize', maj)
+  }, [])
 
   const [pageEnds, setPageEnds] = useState<Record<string, number> | null>(null)
   const [divisions, setDivisions] = useState<Divisions | null>(null)
@@ -261,7 +273,7 @@ function Lecteur() {
       if (cle) {
         const el = document.querySelector(`[data-cle="${cle}"]`)
         if (el) {
-          const y = (el as HTMLElement).offsetTop - 78
+          const y = (el as HTMLElement).offsetTop - 92
           conteneurRef.current?.scrollTo({ top: Math.max(0, y) })
         }
       }
@@ -383,25 +395,28 @@ function Lecteur() {
         ref={conteneurRef}
         onScroll={onScroll}
         onClick={basculerChrome}
-        style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '0 20px', WebkitOverflowScrolling: 'touch' }}
+        style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '0 22px', WebkitOverflowScrolling: 'touch' }}
       >
-        <div style={{ maxWidth: 640, margin: '0 auto', paddingTop: 78 }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          {/* Un juz qui commence en pleine sourate démarre sur un bloc :
+              on dégage le héros avec un en-tête d'espacement */}
+          {items[0]?.type === 'bloc' && <div style={{ height: 'calc(env(safe-area-inset-top, 0px) + 100px)' }} />}
           {items.map(item => {
             if (item.type === 'entete') {
               return (
                 <div key={item.cle} data-cle={item.cle} data-sourate={item.sourate} data-verset="1"
-                  style={{ paddingTop: taille * 0.7, paddingBottom: Math.round(taille * 0.5), textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'SuraNames', fontSize: taille * 1.6, lineHeight: 1.35, color: '#000', direction: 'ltr' }}>
+                  style={{ paddingTop: items.indexOf(item) === 0 ? 'calc(env(safe-area-inset-top, 0px) + 64px)' : taille * 1.2, paddingBottom: Math.round(taille * 0.5), textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'SuraNames', fontSize: taille * 1.6, lineHeight: 1.35, color: '#000000', direction: 'ltr' }}>
                     {nomSourate(item.sourate)}
                   </div>
                   {item.basmala && (
                     <div style={{ marginTop: taille * 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: taille * 0.4 }}>
                       {item.sourate === 1 && BASMALA_VERSET_UN.includes(riw) && (
-                        <span style={{ fontFamily: policeCoran, fontSize: taille * 1.1, color: TEXTE, transform: `translateY(${taille * 0.22}px)`, display: 'inline-block' }}>
+                        <span style={{ fontFamily: policeCoran, fontSize: taille * 1.1, color: TEXTE, lineHeight: `${taille * 1.5}px`, transform: `translateY(${taille * 0.28}px)`, display: 'inline-block' }}>
                           {chiffresArabes(1)}
                         </span>
                       )}
-                      <Bismillah width={Math.min(taille * 8.1, 500)} color={TEXTE} />
+                      <Bismillah width={Math.min(taille * 8.1, bismillahMax)} color={TEXTE} />
                     </div>
                   )}
                 </div>
@@ -410,10 +425,10 @@ function Lecteur() {
             if (item.type === 'page') {
               return (
                 <div key={item.cle} data-cle={item.cle} data-sourate={item.sourate}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `${Math.round(taille * 0.6)}px 0` }}>
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `${Math.round(taille * 0.7)}px 0` }}>
                   <div style={{ flex: 1, height: 1, background: 'rgba(184,147,42,0.35)' }} />
-                  <div style={{ border: '1px solid rgba(184,147,42,0.55)', borderRadius: 999, padding: '2px 13px', background: 'rgba(184,147,42,0.06)' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: OR, letterSpacing: '1px' }}>{item.page}</span>
+                  <div style={{ border: '1px solid rgba(184,147,42,0.55)', borderRadius: 999, padding: '3px 14px', background: 'rgba(184,147,42,0.06)' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: OR, letterSpacing: '1px' }}>{item.page}</span>
                   </div>
                   <div style={{ flex: 1, height: 1, background: 'rgba(184,147,42,0.35)' }} />
                 </div>
@@ -428,7 +443,7 @@ function Lecteur() {
 
           {/* Fin de lecture : sourate/juz précédent et suivant */}
           {items.length > 0 && (
-            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', padding: '26px 0 44px' }}>
+            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: 14, marginTop: Math.round(taille * 0.9), paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}>
               {finNavigation}
             </div>
           )}
@@ -442,38 +457,40 @@ function Lecteur() {
       {/* Chrome flottant — héros bleu en dégradé */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
-        borderBottomLeftRadius: 22, borderBottomRightRadius: 22, overflow: 'hidden',
+        borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden',
         background: `linear-gradient(180deg, ${HERO_TOP} 0%, ${HERO_MID} 60%, ${HERO_BOT} 100%)`,
         opacity: chromeVisible ? 1 : 0,
         transform: chromeVisible ? 'none' : 'translateY(-18px)',
         transition: `opacity ${chromeVisible ? 280 : 650}ms ease, transform ${chromeVisible ? 280 : 650}ms ease`,
         pointerEvents: chromeVisible ? 'auto' : 'none',
       }}>
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '7px 16px 9px', display: 'flex', alignItems: 'center' }}>
-          {/* riwaya */}
-          <div style={{ width: 74, textAlign: 'center' }}>
-            <p style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>RIWAYAH</p>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', margin: 0 }}>{RIWAYA_LABELS[riw]}</p>
+        {/* fond « aurore » : nappes bleues en dérive lente */}
+        <FondAurore />
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 6px) 20px 14px', display: 'flex', alignItems: 'center' }}>
+          {/* Riwaya — simple indicateur (le choix se fait depuis la liste des sourates) */}
+          <div style={{ width: 84, textAlign: 'center' }}>
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.6px', color: 'rgba(255,255,255,0.55)', margin: '0 0 2px' }}>RIWAYAH</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0 }}>{RIWAYA_LABELS[riw]}</p>
           </div>
 
-          {/* centre : nom de la sourate */}
+          {/* centre : chip doré (nom FR) + nom calligraphié */}
           <div style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
-            <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '2px 11px', marginBottom: 1 }}>
-              <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '1.7px', color: OR_CHIP, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(214,173,58,0.16)', borderRadius: 999, padding: '4px 12px', marginBottom: 3 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1.8px', color: OR_CHIP, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 {infoActive?.nom}
               </span>
             </div>
-            <div style={{ fontFamily: 'SuraNames', fontSize: 19, color: '#fff', lineHeight: '27px', direction: 'ltr', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            <div style={{ fontFamily: 'SuraNames', fontSize: 22, color: '#fff', lineHeight: '32px', direction: 'ltr', whiteSpace: 'nowrap', overflow: 'hidden' }}>
               {nomSourate(sourateActive)}
             </div>
           </div>
 
-          {/* Progression dans le juz */}
-          <div style={{ width: 74, textAlign: 'center' }}>
+          {/* Progression dans le hizb/juz */}
+          <div style={{ width: 84, textAlign: 'center' }}>
             {infoDivision && (
               <>
-                <p style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>JUZ {infoDivision.n}</p>
-                <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{infoDivision.pct}%</p>
+                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.6px', color: 'rgba(255,255,255,0.55)', margin: '0 0 2px' }}>JUZ {infoDivision.n}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{infoDivision.pct}%</p>
               </>
             )}
           </div>
