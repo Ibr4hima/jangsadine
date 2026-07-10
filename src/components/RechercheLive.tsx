@@ -104,7 +104,7 @@ export default function RechercheLive() {
     <div ref={wrapRef} style={{ position: 'relative' }}>
       <form
         onSubmit={e => { e.preventDefault(); const v = q.trim(); router.push(v ? `/recherche?q=${encodeURIComponent(v)}` : '/recherche') }}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 999, padding: '12px 18px', boxShadow: '0 10px 22px rgba(28,61,102,0.14)' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', borderRadius: 999, padding: '15px 20px', boxShadow: '0 10px 22px rgba(28,61,102,0.14)' }}
       >
         <Search size={19} color={BLEU} strokeWidth={2} style={{ flexShrink: 0 }} />
         <input
@@ -112,7 +112,7 @@ export default function RechercheLive() {
           onChange={e => { setQ(e.target.value); setOuvert(true); charger() }}
           onFocus={() => { setOuvert(true); charger() }}
           placeholder="Rechercher..."
-          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 13.5, fontFamily: 'inherit', color: 'var(--texte)' }}
+          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 14, fontFamily: 'inherit', color: 'var(--texte)' }}
         />
         {q && (
           <button type="button" onClick={() => setQ('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
