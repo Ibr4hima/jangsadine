@@ -1,4 +1,5 @@
 'use client'
+import FondAurore from '@/components/FondAurore'
 import Footer from '@/components/Footer'
 import MiniEgaliseur from '@/components/MiniEgaliseur'
 import Navbar from '@/components/Navbar'

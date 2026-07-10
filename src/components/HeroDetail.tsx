@@ -1,4 +1,5 @@
 'use client'
+import FondAurore from '@/components/FondAurore'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
@@ -10,10 +11,9 @@ const BG_BOT = '#234a7a'
 
 export default function HeroDetail({ children, maxWidth = 640, retour }: { children: ReactNode; maxWidth?: number; retour?: string }) {
   return (
-    <div style={{ position: 'relative', borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 60%, ${BG_BOT} 100%)` }} />
-      <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(140,180,230,0.12)', top: -140, right: -100 }} />
-      <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(214,173,58,0.06)', bottom: -80, left: -70 }} />
+    <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
+        <FondAurore />
 
       <div style={{ position: 'relative', maxWidth, margin: '0 auto', padding: '16px 24px 22px' }}>
         {retour && (

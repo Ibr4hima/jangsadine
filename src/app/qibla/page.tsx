@@ -453,19 +453,12 @@ export default function QiblaPage() {
         )}
 
       <style>{`
-        .aurore { position: absolute; border-radius: 50%; filter: blur(18px); pointer-events: none; will-change: transform, opacity; }
-        .aurore-1 { animation: aurore1 17s ease-in-out infinite alternate; }
-        .aurore-2 { animation: aurore2 23s ease-in-out infinite alternate; }
-        .aurore-3 { animation: aurore3 29s ease-in-out infinite alternate; }
-        @keyframes aurore1 { from { opacity: 0.18; transform: none; } to { opacity: 0.30; transform: translate(55px, 38px) scale(1.12); } }
-        @keyframes aurore2 { from { opacity: 0.14; transform: none; } to { opacity: 0.26; transform: translate(-48px, -30px) scale(1.10); } }
-        @keyframes aurore3 { from { opacity: 0.30; transform: none; } to { opacity: 0.46; transform: translateX(34px) scale(1.08); } }
         .qibla-spinner { animation: qiblaSpin 0.9s linear infinite; }
         @keyframes qiblaSpin { to { transform: rotate(360deg); } }
         .qibla-pulse { animation: qiblaPulse 1.4s ease-in-out infinite alternate; }
         @keyframes qiblaPulse { from { transform: scale(1); } to { transform: scale(1.018); } }
         @media (prefers-reduced-motion: reduce) {
-          .aurore-1, .aurore-2, .aurore-3, .qibla-pulse { animation: none; }
+          .qibla-pulse { animation: none; }
         }
       `}</style>
     </main>

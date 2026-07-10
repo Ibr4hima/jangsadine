@@ -1,5 +1,5 @@
 'use client'
-import Quadrillage from '@/components/Quadrillage'
+import FondAurore from '@/components/FondAurore'
 import { QURAN_ICON_URI } from '@/lib/quranIcon'
 import divisionsHafs from '@/data/quran/divisions.json'
 import divisionsQaloon from '@/data/quran/qaloon_divisions.json'
@@ -49,17 +49,6 @@ function construireJuzs(divisions: Divisions) {
       return { n, sora, aya }
     })
     .sort((a, b) => a.n - b.n)
-}
-
-// ─── fond aurore ──────────────────────────────────────────────
-function Aurore() {
-  return (
-    <>
-      <div className="aurore aurore-1" style={{ width: 380, height: 380, background: 'rgb(120,165,220)', top: -160, right: -120 }} />
-      <div className="aurore aurore-2" style={{ width: 300, height: 300, background: 'rgb(90,140,200)', bottom: -120, left: -90 }} />
-      <div className="aurore aurore-3" style={{ width: 340, height: 340, background: 'rgb(30,64,106)', bottom: -170, right: -80 }} />
-    </>
-  )
 }
 
 // ─── badge octogramme ۞ (deux carrés superposés à 45°) ───────
@@ -114,11 +103,9 @@ export default function Coran() {
     <main style={{ position: 'fixed', inset: 0, zIndex: 500, height: '100dvh', background: 'var(--fond-creme)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ─── héros bleu ─────────────────────────────────────── */}
-      <div style={{ position: 'relative', borderBottomLeftRadius: 26, borderBottomRightRadius: 26, overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(163deg, #3d6494 0%, #27507f 46%, #142e52 100%)' }} />
-        <Aurore />
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(105% 70% at 18% -12%, rgba(190,215,245,0.16), transparent 58%)' }} />
-        <Quadrillage />
+      <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
+        <FondAurore />
 
         <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 20px 14px' }}>
           {/* calligraphie القرآن الكريم — flanc droit */}
@@ -209,13 +196,6 @@ export default function Coran() {
       </div>
 
       <style>{`
-        .aurore { position: absolute; border-radius: 50%; filter: blur(18px); pointer-events: none; will-change: transform, opacity; }
-        .aurore-1 { animation: aurore1 17s ease-in-out infinite alternate; }
-        .aurore-2 { animation: aurore2 23s ease-in-out infinite alternate; }
-        .aurore-3 { animation: aurore3 29s ease-in-out infinite alternate; }
-        @keyframes aurore1 { from { opacity: 0.18; transform: none; } to { opacity: 0.30; transform: translate(55px, 38px) scale(1.12); } }
-        @keyframes aurore2 { from { opacity: 0.14; transform: none; } to { opacity: 0.26; transform: translate(-48px, -30px) scale(1.10); } }
-        @keyframes aurore3 { from { opacity: 0.30; transform: none; } to { opacity: 0.46; transform: translateX(34px) scale(1.08); } }
         .chips-scroll::-webkit-scrollbar { display: none; }
         .chips-scroll { scrollbar-width: none; }
         .coran-chip { transition: transform 0.15s; }
@@ -223,9 +203,6 @@ export default function Coran() {
         .carte-sourate { transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.18s; }
         .carte-sourate:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(42,59,82,0.10); }
         .carte-sourate:active { transform: scale(0.97); }
-        @media (prefers-reduced-motion: reduce) {
-          .aurore-1, .aurore-2, .aurore-3 { animation: none; }
-        }
       `}</style>
     </main>
   )
