@@ -1,4 +1,5 @@
 'use client'
+import FondAurore from '@/components/FondAurore'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import * as adhan from 'adhan'
@@ -212,8 +213,7 @@ export default function Prieres() {
       {/* ── Héros ── */}
       <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
-        <div style={{ position: 'absolute', width: 380, height: 380, borderRadius: '50%', background: 'rgba(140,180,230,0.13)', top: -160, right: -120 }} />
-        <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'rgba(214,173,58,0.07)', bottom: -100, left: -90 }} />
+        <FondAurore />
 
         <div style={{ position: 'relative', maxWidth: 520, margin: '0 auto', padding: '28px 24px 32px' }}>
           {/* badge titre (style Médiathèque) */}

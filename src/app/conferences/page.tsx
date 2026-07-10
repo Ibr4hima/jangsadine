@@ -1,4 +1,5 @@
 'use client'
+import FondAurore from '@/components/FondAurore'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import TitreDefilant from '@/components/TitreDefilant'
@@ -113,8 +114,7 @@ export default function Conferences() {
       {/* ── Héros ── */}
       <div style={{ position: 'relative', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${BG_TOP} 0%, ${BG_MID} 55%, ${BG_BOT} 100%)` }} />
-        <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(140,180,230,0.12)', top: -140, right: -100 }} />
-        <div style={{ position: 'absolute', width: 220, height: 220, borderRadius: '50%', background: 'rgba(214,173,58,0.06)', bottom: -80, left: -70 }} />
+        <FondAurore />
 
         <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto', padding: '22px 24px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
           {/* eyebrow + titre */}

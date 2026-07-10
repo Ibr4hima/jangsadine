@@ -110,6 +110,37 @@ img {
   display: block;
 }
 
+/* ── Fond « aurore » (réplique exacte du FondAurore compact de l'app) ── */
+.aurore {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.aurore-1 { animation: aurore1 17s ease-in-out infinite alternate; }
+.aurore-2 { animation: aurore2 23s ease-in-out infinite alternate; }
+.aurore-3 { animation: aurore3 29s ease-in-out infinite alternate; }
+
+@keyframes aurore1 {
+  from { opacity: 0.09; transform: none; }
+  to { opacity: 0.16; transform: translate(55px, 38px) scale(1.12); }
+}
+
+@keyframes aurore2 {
+  from { opacity: 0.07; transform: none; }
+  to { opacity: 0.14; transform: translate(-48px, -30px) scale(1.10); }
+}
+
+@keyframes aurore3 {
+  from { opacity: 0.22; transform: none; }
+  to { opacity: 0.36; transform: translateX(34px) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurore-1, .aurore-2, .aurore-3 { animation: none; opacity: 0.12; }
+}
+
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));

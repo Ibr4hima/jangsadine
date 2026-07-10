@@ -1,5 +1,6 @@
 'use client'
 import Footer from '@/components/Footer'
+import FondAurore from '@/components/FondAurore'
 import MiniEgaliseur from '@/components/MiniEgaliseur'
 import Navbar from '@/components/Navbar'
 import RechercheLive from '@/components/RechercheLive'
@@ -47,19 +48,6 @@ const IcoShare = ({ size = 16, color = BLEU }: IcoProps) => <Svg size={size} col
 // trait (29) car une calligraphie détaillée devient illisible à 29px.
 const CORAN_ICON = 40
 const IcoCoran = (_p: IcoProps) => <img src={QURAN_ICON_URI} alt="" style={{ width: CORAN_ICON, height: CORAN_ICON, objectFit: 'contain' }} />
-
-// ─── fond « aurore » : réplique EXACTE du FondAurore compact ──
-// Trois nappes bleues qui dérivent très lentement (17 s / 23 s / 29 s,
-// aller-retour). Transforms + opacité uniquement.
-function FondAurore() {
-  return (
-    <>
-      <div className="aurore aurore-1" style={{ width: 380, height: 380, background: 'rgb(120,165,220)', top: -160, right: -120 }} />
-      <div className="aurore aurore-2" style={{ width: 300, height: 300, background: 'rgb(90,140,200)', bottom: -120, left: -90 }} />
-      <div className="aurore aurore-3" style={{ width: 340, height: 340, background: 'rgb(30,64,106)', bottom: -170, right: -80 }} />
-    </>
-  )
-}
 
 // ─── apparition (équivalent FadeInDown) ───────────────────────
 function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
@@ -491,15 +479,6 @@ export default function Accueil() {
         .hero-in { animation: heroIn 0.5s ease both; }
         @keyframes heroIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* fond aurore — valeurs EXACTES du FondAurore compact de l'app */
-        .aurore { position: absolute; border-radius: 50%; pointer-events: none; will-change: transform, opacity; }
-        .aurore-1 { animation: aurore1 17s ease-in-out infinite alternate; }
-        .aurore-2 { animation: aurore2 23s ease-in-out infinite alternate; }
-        .aurore-3 { animation: aurore3 29s ease-in-out infinite alternate; }
-        @keyframes aurore1 { from { opacity: 0.09; transform: none; } to { opacity: 0.16; transform: translate(55px, 38px) scale(1.12); } }
-        @keyframes aurore2 { from { opacity: 0.07; transform: none; } to { opacity: 0.14; transform: translate(-48px, -30px) scale(1.10); } }
-        @keyframes aurore3 { from { opacity: 0.22; transform: none; } to { opacity: 0.36; transform: translateX(34px) scale(1.08); } }
-
         /* équivalents PressableScale */
         .carte-priere { transition: transform 0.15s ease; }
         .carte-priere:active { transform: scale(0.96); }
@@ -518,7 +497,6 @@ export default function Accueil() {
 
         @media (prefers-reduced-motion: reduce) {
           .hero-in { animation: none; }
-          .aurore-1, .aurore-2, .aurore-3 { animation: none; }
         }
       `}</style>
     </main>
